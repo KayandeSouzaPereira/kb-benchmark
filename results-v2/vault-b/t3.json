@@ -1,0 +1,51 @@
+{
+  "task": "t3",
+  "title": "Reenviar convite",
+  "case": "vault-b",
+  "model": "qwen3:8b",
+  "score": 0.0,
+  "passed": 0,
+  "total": 5,
+  "compiled": false,
+  "repairs": 2,
+  "error": "sem relatorio surefire (compilacao?)\nsrc/main/java/com/bench/api/ResendInvitationResource.java:[44,36] cannot find symbol\n  symbol:   variable Status\n  location: class com.bench.api.ResendInvitationResource\n[ERROR] /work/vault-b/t3/src/main/java/com/bench/api/ResendInvitationResource.java:[49,36] cannot find symbol\n  symbol:   variable Status\n  location: class com.bench.api.ResendInvitationResource\n[ERROR] /work/vault-b/t3/src/main/java/com/bench/api/ResendInvitationResource.java:[58,36] cannot find symbol\n  symbol:   variable Status\n  location: class com.bench.api.ResendInvitationResource\n[ERROR] /work/vault-b/t3/src/main/java/com/bench/api/ResendInvitationResource.java:[63,36] cannot find symbol\n  symbol:   variable Status\n  location: class com.bench.api.ResendInvitationResource\n[INFO] 6 errors \n[INFO] -------------------------------------------------------------\n[INFO] ------------------------------------------------------------------------\n[INFO] BUILD FAILURE\n[INFO] ------------------------------------------------------------------------\n[INFO] Total time:  2.430 s\n[INFO] Finished at: 2026-07-19T15:33:30Z\n[INFO] ------------------------------------------------------------------------\n[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.15.0:compile (default-compile) on project saas-users: Compilation failure: Compilation failure: \n[ERROR] /work/vault-b/t3/src/main/java/com/bench/api/ResendInvitationResource.java:[28,36] cannot find symbol\n[ERROR]   symbol:   variable Status\n[ERROR]   location: class com.bench.api.ResendInvitationResource\n[ERROR] /work/vault-b/t3/src/main/java/com/bench/api/ResendInvitationResource.java:[37,36] cannot find symbol\n[ERROR]   symbol:   variable Status\n[ERROR]   location: class com.bench.api.ResendInvitationResource\n[ERROR] /work/vault-b/t3/src/main/java/com/bench/api/ResendInvitationResource.java:[44,36] cannot find symbol\n[ERROR]   symbol:   variable Status\n[ERROR]   location: class com.bench.api.ResendInvitationResource\n[ERROR] /work/vault-b/t3/src/main/java/com/bench/api/ResendInvitationResource.java:[49,36] cannot find symbol\n[ERROR]   symbol:   variable Status\n[ERROR]   location: class com.bench.api.ResendInvitationResource\n[ERROR] /work/vault-b/t3/src/main/java/com/bench/api/ResendInvitationResource.java:[58,36] cannot find symbol\n[ERROR]   symbol:   variable Status\n[ERROR]   location: class com.bench.api.ResendInvitationResource\n[ERROR] /work/vault-b/t3/src/main/java/com/bench/api/ResendInvitationResource.java:[63,36] cannot find symbol\n[ERROR]   symbol:   variable Status\n[ERROR]   location: class com.bench.api.ResendInvitationResource\n[ERROR] -> [Help 1]\n[ERROR] \n[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.\n[ERROR] Re-run Maven using the -X switch to enable full debug logging.\n[ERROR] \n[ERROR] For more information about the errors and possible solutions, please read the following articles:\n[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException\n",
+  "tests": [],
+  "files_written": [
+    "src/main/java/com/bench/api/ResendInvitationResource.java"
+  ],
+  "retrieval": {
+    "actions": [
+      "ls .",
+      "read 202602041130-reenvio-de-convites.md",
+      "read 202601201300-auditoria-de-mutacoes.md",
+      "read 202602041100-expiracao-de-convites-72h.md",
+      "read 202601051030-papeis-do-tenant.md",
+      "read 202601201330-codigos-de-erro-da-api.md",
+      "read 202602151100-isolamento-de-tenant-404.md",
+      "read 202602101415-protecao-do-owner.md"
+    ],
+    "notes_read": [
+      "202601051030-papeis-do-tenant.md",
+      "202601201300-auditoria-de-mutacoes.md",
+      "202601201330-codigos-de-erro-da-api.md",
+      "202602041100-expiracao-de-convites-72h.md",
+      "202602041130-reenvio-de-convites.md",
+      "202602101415-protecao-do-owner.md",
+      "202602151100-isolamento-de-tenant-404.md"
+    ],
+    "gold_notes": [
+      "202601201330-codigos-de-erro-da-api.md",
+      "202602041130-reenvio-de-convites.md"
+    ],
+    "gold_hits": [
+      "202601201330-codigos-de-erro-da-api.md",
+      "202602041130-reenvio-de-convites.md"
+    ],
+    "gold_hit_rate": 1.0
+  },
+  "tokens": {
+    "prompt_tokens": 31373,
+    "completion_tokens": 2546
+  },
+  "duration_s": 185.8
+}

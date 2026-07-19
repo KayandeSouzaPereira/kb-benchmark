@@ -1,0 +1,77 @@
+{
+  "task": "t2",
+  "title": "Excluir usuário (soft-delete)",
+  "case": "vault-a",
+  "model": "qwen3:8b",
+  "score": 0.143,
+  "passed": 1,
+  "total": 7,
+  "compiled": true,
+  "repairs": 0,
+  "error": null,
+  "tests": [
+    {
+      "name": "adminNaoPodeDeletarOwner",
+      "passed": false
+    },
+    {
+      "name": "purgeAtEm30Dias",
+      "passed": false
+    },
+    {
+      "name": "memberNaoPodeDeletar",
+      "passed": false
+    },
+    {
+      "name": "auditoriaRegistraSoftDelete",
+      "passed": false
+    },
+    {
+      "name": "atorDeOutroTenantRecebe404",
+      "passed": true
+    },
+    {
+      "name": "ninguemDeletaASiMesmo",
+      "passed": false
+    },
+    {
+      "name": "adminFazSoftDelete",
+      "passed": false
+    }
+  ],
+  "files_written": [
+    "src/main/java/com/bench/api/UserResource.java"
+  ],
+  "retrieval": {
+    "actions": [
+      "ls .",
+      "ls produto",
+      "read produto/planos-e-precos.md",
+      "ls dominio",
+      "read exclusao-de-usuarios.md",
+      "ls dominio",
+      "read dominio/exclusao-de-usuarios.md",
+      "read dominio/papeis-e-permissoes.md"
+    ],
+    "notes_read": [
+      "dominio/exclusao-de-usuarios.md",
+      "dominio/papeis-e-permissoes.md",
+      "produto/planos-e-precos.md"
+    ],
+    "gold_notes": [
+      "dominio/exclusao-de-usuarios.md",
+      "dominio/papeis-e-permissoes.md",
+      "padroes-codigo/formato-de-erros-api.md"
+    ],
+    "gold_hits": [
+      "dominio/exclusao-de-usuarios.md",
+      "dominio/papeis-e-permissoes.md"
+    ],
+    "gold_hit_rate": 0.667
+  },
+  "tokens": {
+    "prompt_tokens": 12456,
+    "completion_tokens": 616
+  },
+  "duration_s": 50.0
+}

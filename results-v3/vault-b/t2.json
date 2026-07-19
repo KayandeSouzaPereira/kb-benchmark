@@ -1,0 +1,79 @@
+{
+  "task": "t2",
+  "title": "Excluir usuário (soft-delete)",
+  "case": "vault-b",
+  "model": "qwen3:8b",
+  "score": 0.143,
+  "passed": 1,
+  "total": 7,
+  "compiled": true,
+  "repairs": 0,
+  "error": null,
+  "tests": [
+    {
+      "name": "adminNaoPodeDeletarOwner",
+      "passed": false
+    },
+    {
+      "name": "purgeAtEm30Dias",
+      "passed": false
+    },
+    {
+      "name": "memberNaoPodeDeletar",
+      "passed": false
+    },
+    {
+      "name": "auditoriaRegistraSoftDelete",
+      "passed": false
+    },
+    {
+      "name": "atorDeOutroTenantRecebe404",
+      "passed": true
+    },
+    {
+      "name": "ninguemDeletaASiMesmo",
+      "passed": false
+    },
+    {
+      "name": "adminFazSoftDelete",
+      "passed": false
+    }
+  ],
+  "files_written": [
+    "src/main/java/com/bench/api/UserResource.java"
+  ],
+  "retrieval": {
+    "actions": [
+      "ls .",
+      "grep 'excluir usuário'",
+      "read 202601051030-papeis-do-tenant.md",
+      "read 202603150930-quem-pode-deletar.md",
+      "read 202603150900-soft-delete-30-dias.md",
+      "read 202601201300-auditoria-de-mutacoes.md",
+      "read 202601201330-codigos-de-erro-da-api.md"
+    ],
+    "notes_read": [
+      "202601051030-papeis-do-tenant.md",
+      "202601201300-auditoria-de-mutacoes.md",
+      "202601201330-codigos-de-erro-da-api.md",
+      "202603150900-soft-delete-30-dias.md",
+      "202603150930-quem-pode-deletar.md"
+    ],
+    "gold_notes": [
+      "202601201330-codigos-de-erro-da-api.md",
+      "202603150900-soft-delete-30-dias.md",
+      "202603150930-quem-pode-deletar.md"
+    ],
+    "gold_hits": [
+      "202601201330-codigos-de-erro-da-api.md",
+      "202603150900-soft-delete-30-dias.md",
+      "202603150930-quem-pode-deletar.md"
+    ],
+    "gold_hit_rate": 1.0
+  },
+  "tokens": {
+    "prompt_tokens": 15374,
+    "completion_tokens": 841
+  },
+  "duration_s": 63.6
+}

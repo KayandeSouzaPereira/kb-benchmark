@@ -1,0 +1,74 @@
+{
+  "task": "t5",
+  "title": "Listagem com badges (Angular)",
+  "case": "vault-b",
+  "model": "qwen3:8b",
+  "score": 0.286,
+  "passed": 2,
+  "total": 7,
+  "compiled": true,
+  "repairs": 0,
+  "error": null,
+  "tests": [
+    {
+      "name": "arquivo src/app/user-list.component.ts existe",
+      "passed": true
+    },
+    {
+      "name": "type-check (tsc --noEmit) passa",
+      "passed": true
+    },
+    {
+      "name": "ACTIVE: classe badge-success + rotulo 'Ativo'",
+      "passed": false
+    },
+    {
+      "name": "INVITED: classe badge-warning + rotulo 'Convite pendente'",
+      "passed": false
+    },
+    {
+      "name": "SUSPENDED: classe badge-muted + rotulo 'Suspenso'",
+      "passed": false
+    },
+    {
+      "name": "DELETED: classe badge-danger + rotulo 'Excluído'",
+      "passed": false
+    },
+    {
+      "name": "DELETED: exibe purgeAt no formato dd/MM/yyyy",
+      "passed": false
+    }
+  ],
+  "files_written": [
+    "src/app/user-list.component.ts"
+  ],
+  "retrieval": {
+    "actions": [
+      "read src/app/user.model.ts",
+      "ls src/app/",
+      "ls .",
+      "read 202604111600-badges-de-status-no-front.md",
+      "read 202603150900-soft-delete-30-dias.md",
+      "read 202603150930-quem-pode-deletar.md",
+      "read 202601201300-auditoria-de-mutacoes.md"
+    ],
+    "notes_read": [
+      "202601201300-auditoria-de-mutacoes.md",
+      "202603150900-soft-delete-30-dias.md",
+      "202603150930-quem-pode-deletar.md",
+      "202604111600-badges-de-status-no-front.md"
+    ],
+    "gold_notes": [
+      "202604111600-badges-de-status-no-front.md"
+    ],
+    "gold_hits": [
+      "202604111600-badges-de-status-no-front.md"
+    ],
+    "gold_hit_rate": 1.0
+  },
+  "tokens": {
+    "prompt_tokens": 9427,
+    "completion_tokens": 253
+  },
+  "duration_s": 19.2
+}

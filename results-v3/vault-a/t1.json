@@ -1,0 +1,47 @@
+{
+  "task": "t1",
+  "title": "Criar convite",
+  "case": "vault-a",
+  "model": "qwen3:8b",
+  "score": 0.0,
+  "passed": 0,
+  "total": 6,
+  "compiled": false,
+  "repairs": 3,
+  "error": "sem relatorio surefire (compilacao?)\nason: actual and formal argument lists differ in length\n[INFO] 9 errors \n[INFO] -------------------------------------------------------------\n[INFO] ------------------------------------------------------------------------\n[INFO] BUILD FAILURE\n[INFO] ------------------------------------------------------------------------\n[INFO] Total time:  2.510 s\n[INFO] Finished at: 2026-07-19T16:16:25Z\n[INFO] ------------------------------------------------------------------------\n[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.15.0:compile (default-compile) on project saas-users: Compilation failure: Compilation failure: \n[ERROR] /work/vault-a/t1/src/main/java/com/bench/api/InvitationsResource.java:[21,10] cannot find symbol\n[ERROR]   symbol:   class RequestBody\n[ERROR]   location: class com.bench.api.InvitationsResource\n[ERROR] /work/vault-a/t1/src/main/java/com/bench/api/InvitationsResource.java:[24,47] email has private access in com.bench.api.InvitationRequestBody\n[ERROR] /work/vault-a/t1/src/main/java/com/bench/api/InvitationsResource.java:[24,76] role has private access in com.bench.api.InvitationRequestBody\n[ERROR] /work/vault-a/t1/src/main/java/com/bench/api/InvitationsResource.java:[29,73] role has private access in com.bench.api.InvitationRequestBody\n[ERROR] /work/vault-a/t1/src/main/java/com/bench/api/InvitationsResource.java:[63,24] email has private access in com.bench.api.InvitationRequestBody\n[ERROR] /work/vault-a/t1/src/main/java/com/bench/api/InvitationsResource.java:[64,24] role has private access in com.bench.api.InvitationRequestBody\n[ERROR] /work/vault-a/t1/src/main/java/com/bench/api/InvitationsResource.java:[60,33] constructor Invitation in class com.bench.model.Invitation cannot be applied to given types;\n[ERROR]   required: no arguments\n[ERROR]   found:    java.lang.String,java.lang.String,java.lang.String,com.bench.model.Role,java.time.Instant,java.time.Instant,int,com.bench.model.InvitationStatus\n[ERROR]   reason: actual and formal argument lists differ in length\n[ERROR] /work/vault-a/t1/src/main/java/com/bench/api/InvitationsResource.java:[81,52] email has private access in com.bench.api.InvitationRequestBody\n[ERROR] /work/vault-a/t1/src/main/java/com/bench/api/InvitationsResource.java:[74,33] constructor AuditEntry in class com.bench.model.AuditEntry cannot be applied to given types;\n[ERROR]   required: no arguments\n[ERROR]   found:    java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.time.Instant,java.lang.String\n[ERROR]   reason: actual and formal argument lists differ in length\n[ERROR] -> [Help 1]\n[ERROR] \n[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.\n[ERROR] Re-run Maven using the -X switch to enable full debug logging.\n[ERROR] \n[ERROR] For more information about the errors and possible solutions, please read the following articles:\n[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException\n",
+  "tests": [],
+  "files_written": [
+    "src/main/java/com/bench/api/InvitationsResource.java"
+  ],
+  "retrieval": {
+    "actions": [
+      "ls .",
+      "ls produto",
+      "read produto/planos-e-precos.md",
+      "ls dominio",
+      "read dominio/convites.md",
+      "read dominio/papeis-e-permissoes.md",
+      "read dominio/auditoria.md"
+    ],
+    "notes_read": [
+      "dominio/auditoria.md",
+      "dominio/convites.md",
+      "dominio/papeis-e-permissoes.md",
+      "produto/planos-e-precos.md"
+    ],
+    "gold_notes": [
+      "dominio/convites.md",
+      "dominio/limites-de-plano.md",
+      "padroes-codigo/formato-de-erros-api.md"
+    ],
+    "gold_hits": [
+      "dominio/convites.md"
+    ],
+    "gold_hit_rate": 0.333
+  },
+  "tokens": {
+    "prompt_tokens": 30051,
+    "completion_tokens": 2293
+  },
+  "duration_s": 174.7
+}

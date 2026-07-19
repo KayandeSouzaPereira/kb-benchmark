@@ -1,0 +1,71 @@
+{
+  "task": "t4",
+  "title": "Alterar papel",
+  "case": "vault-a",
+  "model": "qwen3:8b",
+  "score": 0.833,
+  "passed": 5,
+  "total": 6,
+  "compiled": true,
+  "repairs": 0,
+  "error": null,
+  "tests": [
+    {
+      "name": "ultimoOwnerNaoPodeSerRebaixado",
+      "passed": false
+    },
+    {
+      "name": "adminNaoAlteraPapelDeOwner",
+      "passed": true
+    },
+    {
+      "name": "auditoriaRegistraMudancaDePapel",
+      "passed": true
+    },
+    {
+      "name": "memberNaoAlteraPapeis",
+      "passed": true
+    },
+    {
+      "name": "adminPromoveMember",
+      "passed": true
+    },
+    {
+      "name": "ownerPodeRebaixarOutroOwner",
+      "passed": true
+    }
+  ],
+  "files_written": [
+    "src/main/java/com/bench/api/RoleChangeResource.java"
+  ],
+  "retrieval": {
+    "actions": [
+      "ls .",
+      "ls produto",
+      "read produto/planos-e-precos.md",
+      "ls dominio",
+      "read dominio/papeis-e-permissoes.md",
+      "read dominio/limites-de-plano.md",
+      "read dominio/auditoria.md"
+    ],
+    "notes_read": [
+      "dominio/auditoria.md",
+      "dominio/limites-de-plano.md",
+      "dominio/papeis-e-permissoes.md",
+      "produto/planos-e-precos.md"
+    ],
+    "gold_notes": [
+      "dominio/papeis-e-permissoes.md",
+      "padroes-codigo/formato-de-erros-api.md"
+    ],
+    "gold_hits": [
+      "dominio/papeis-e-permissoes.md"
+    ],
+    "gold_hit_rate": 0.5
+  },
+  "tokens": {
+    "prompt_tokens": 12294,
+    "completion_tokens": 1048
+  },
+  "duration_s": 73.1
+}

@@ -1,0 +1,75 @@
+{
+  "task": "t4",
+  "title": "Alterar papel",
+  "case": "vault-b",
+  "model": "qwen3:8b",
+  "score": 0.833,
+  "passed": 5,
+  "total": 6,
+  "compiled": true,
+  "repairs": 0,
+  "error": null,
+  "tests": [
+    {
+      "name": "ultimoOwnerNaoPodeSerRebaixado",
+      "passed": false
+    },
+    {
+      "name": "adminNaoAlteraPapelDeOwner",
+      "passed": true
+    },
+    {
+      "name": "auditoriaRegistraMudancaDePapel",
+      "passed": true
+    },
+    {
+      "name": "memberNaoAlteraPapeis",
+      "passed": true
+    },
+    {
+      "name": "adminPromoveMember",
+      "passed": true
+    },
+    {
+      "name": "ownerPodeRebaixarOutroOwner",
+      "passed": true
+    }
+  ],
+  "files_written": [
+    "src/main/java/com/bench/api/RoleChangeResource.java"
+  ],
+  "retrieval": {
+    "actions": [
+      "ls .",
+      "grep papel",
+      "read 202601051030-papeis-do-tenant.md",
+      "read 202602101415-protecao-do-owner.md",
+      "read 202602101430-ultimo-owner.md",
+      "read 202601201300-auditoria-de-mutacoes.md",
+      "read 202601201330-codigos-de-erro-da-api.md"
+    ],
+    "notes_read": [
+      "202601051030-papeis-do-tenant.md",
+      "202601201300-auditoria-de-mutacoes.md",
+      "202601201330-codigos-de-erro-da-api.md",
+      "202602101415-protecao-do-owner.md",
+      "202602101430-ultimo-owner.md"
+    ],
+    "gold_notes": [
+      "202601201330-codigos-de-erro-da-api.md",
+      "202602101415-protecao-do-owner.md",
+      "202602101430-ultimo-owner.md"
+    ],
+    "gold_hits": [
+      "202601201330-codigos-de-erro-da-api.md",
+      "202602101415-protecao-do-owner.md",
+      "202602101430-ultimo-owner.md"
+    ],
+    "gold_hit_rate": 1.0
+  },
+  "tokens": {
+    "prompt_tokens": 15075,
+    "completion_tokens": 1085
+  },
+  "duration_s": 76.9
+}

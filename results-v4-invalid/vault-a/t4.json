@@ -1,0 +1,64 @@
+{
+  "task": "t4",
+  "title": "Alterar papel",
+  "case": "vault-a",
+  "model": "qwen3-coder:30b",
+  "score": 0.0,
+  "passed": 0,
+  "total": 6,
+  "compiled": true,
+  "repairs": 1,
+  "error": null,
+  "tests": [
+    {
+      "name": "ultimoOwnerNaoPodeSerRebaixado",
+      "passed": false
+    },
+    {
+      "name": "adminNaoAlteraPapelDeOwner",
+      "passed": false
+    },
+    {
+      "name": "auditoriaRegistraMudancaDePapel",
+      "passed": false
+    },
+    {
+      "name": "memberNaoAlteraPapeis",
+      "passed": false
+    },
+    {
+      "name": "adminPromoveMember",
+      "passed": false
+    },
+    {
+      "name": "ownerPodeRebaixarOutroOwner",
+      "passed": false
+    }
+  ],
+  "files_written": [
+    "src/main/java/com/bench/api/UserRoleResource.java"
+  ],
+  "retrieval": {
+    "actions": [
+      "ls .",
+      "read produto/regras-papeis.md",
+      "grep -r \"role\" produto/",
+      "grep -r \"papel\" produto/",
+      "read dominio/usuarios.md",
+      "read decisoes/autenticacao.md",
+      "read padroes-codigo/erros.md"
+    ],
+    "notes_read": [],
+    "gold_notes": [
+      "dominio/papeis-e-permissoes.md",
+      "padroes-codigo/formato-de-erros-api.md"
+    ],
+    "gold_hits": [],
+    "gold_hit_rate": 0.0
+  },
+  "tokens": {
+    "prompt_tokens": 11570,
+    "completion_tokens": 1857
+  },
+  "duration_s": 157.2
+}

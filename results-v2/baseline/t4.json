@@ -1,0 +1,53 @@
+{
+  "task": "t4",
+  "title": "Alterar papel",
+  "case": "baseline",
+  "model": "qwen3:8b",
+  "score": 0.0,
+  "passed": 0,
+  "total": 6,
+  "compiled": true,
+  "repairs": 0,
+  "error": null,
+  "tests": [
+    {
+      "name": "ultimoOwnerNaoPodeSerRebaixado",
+      "passed": false
+    },
+    {
+      "name": "adminNaoAlteraPapelDeOwner",
+      "passed": false
+    },
+    {
+      "name": "auditoriaRegistraMudancaDePapel",
+      "passed": false
+    },
+    {
+      "name": "memberNaoAlteraPapeis",
+      "passed": false
+    },
+    {
+      "name": "adminPromoveMember",
+      "passed": false
+    },
+    {
+      "name": "ownerPodeRebaixarOutroOwner",
+      "passed": false
+    }
+  ],
+  "files_written": [
+    "src/main/java/com/bench/api/RoleResource.java"
+  ],
+  "retrieval": {
+    "actions": [],
+    "notes_read": [],
+    "gold_notes": [],
+    "gold_hits": [],
+    "gold_hit_rate": null
+  },
+  "tokens": {
+    "prompt_tokens": 736,
+    "completion_tokens": 784
+  },
+  "duration_s": 49.5
+}

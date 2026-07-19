@@ -1,0 +1,59 @@
+{
+  "task": "t5",
+  "title": "Listagem com badges (Angular)",
+  "case": "baseline",
+  "model": "qwen3:8b",
+  "score": 0.286,
+  "passed": 2,
+  "total": 7,
+  "compiled": true,
+  "repairs": 0,
+  "error": null,
+  "tests": [
+    {
+      "name": "arquivo src/app/user-list.component.ts existe",
+      "passed": true
+    },
+    {
+      "name": "type-check (tsc --noEmit) passa",
+      "passed": true
+    },
+    {
+      "name": "ACTIVE: classe badge-success + rotulo 'Ativo'",
+      "passed": false
+    },
+    {
+      "name": "INVITED: classe badge-warning + rotulo 'Convite pendente'",
+      "passed": false
+    },
+    {
+      "name": "SUSPENDED: classe badge-muted + rotulo 'Suspenso'",
+      "passed": false
+    },
+    {
+      "name": "DELETED: classe badge-danger + rotulo 'Excluído'",
+      "passed": false
+    },
+    {
+      "name": "DELETED: exibe purgeAt no formato dd/MM/yyyy",
+      "passed": false
+    }
+  ],
+  "files_written": [
+    "src/app/user-list.component.ts",
+    "src/app/user-list.component.html",
+    "src/app/user-list.component.css"
+  ],
+  "retrieval": {
+    "actions": [],
+    "notes_read": [],
+    "gold_notes": [],
+    "gold_hits": [],
+    "gold_hit_rate": null
+  },
+  "tokens": {
+    "prompt_tokens": 372,
+    "completion_tokens": 417
+  },
+  "duration_s": 24.4
+}

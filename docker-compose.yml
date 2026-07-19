@@ -1,0 +1,40 @@
+services:
+  bench-a:
+    build: .
+    image: kb-bench
+    environment:
+      CASE: vault-a
+      MODEL: ${MODEL:-qwen3:8b}
+      OLLAMA_URL: http://host.docker.internal:11434
+      TASK_FILTER: ${TASK_FILTER:-}
+      SMOKE: ${SMOKE:-}
+    volumes:
+      - ./:/bench
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  bench-b:
+    image: kb-bench
+    environment:
+      CASE: vault-b
+      MODEL: ${MODEL:-qwen3:8b}
+      OLLAMA_URL: http://host.docker.internal:11434
+      TASK_FILTER: ${TASK_FILTER:-}
+      SMOKE: ${SMOKE:-}
+    volumes:
+      - ./:/bench
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  bench-c:
+    image: kb-bench
+    environment:
+      CASE: baseline
+      MODEL: ${MODEL:-qwen3:8b}
+      OLLAMA_URL: http://host.docker.internal:11434
+      TASK_FILTER: ${TASK_FILTER:-}
+      SMOKE: ${SMOKE:-}
+    volumes:
+      - ./:/bench
+    extra_hosts:
+      - "host.docker.internal:host-gateway"

@@ -1,0 +1,76 @@
+{
+  "task": "t2",
+  "title": "Excluir usuário (soft-delete)",
+  "case": "vault-b",
+  "model": "qwen3-coder:30b",
+  "score": 0.143,
+  "passed": 1,
+  "total": 7,
+  "compiled": true,
+  "repairs": 1,
+  "error": null,
+  "tests": [
+    {
+      "name": "adminNaoPodeDeletarOwner",
+      "passed": false,
+      "failure": "1 expectation failed.\nExpected status code <403> but was <404>.\n\njava.lang.AssertionError: \n1 expectation failed.\nExpected status code <403> but was <404>.\n\n\tat java.base/jdk.internal.reflect.DirectConstructorHandleAccessor.newInstance(DirectConstructorHandleAccessor.java:62)\n\tat java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Constructor.java:502)\n\tat java.base/java.lang.reflect.Constructor.newInstance(Constructor.java:486)\n\tat org.codehaus.groovy.reflection.CachedConstructor.invoke(CachedConstructor.java:73)\n\tat org.codehaus.groovy.runtime.callsite.ConstructorSite$ConstructorSi"
+    },
+    {
+      "name": "purgeAtEm30Dias",
+      "passed": false,
+      "failure": "1 expectation failed.\nExpected status code <204> but was <404>.\n\njava.lang.AssertionError: \n1 expectation failed.\nExpected status code <204> but was <404>.\n\n\tat java.base/jdk.internal.reflect.DirectConstructorHandleAccessor.newInstance(DirectConstructorHandleAccessor.java:62)\n\tat java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Constructor.java:502)\n\tat java.base/java.lang.reflect.Constructor.newInstance(Constructor.java:486)\n\tat org.codehaus.groovy.reflection.CachedConstructor.invoke(CachedConstructor.java:73)\n\tat org.codehaus.groovy.runtime.callsite.ConstructorSite$ConstructorSi"
+    },
+    {
+      "name": "memberNaoPodeDeletar",
+      "passed": false,
+      "failure": "1 expectation failed.\nExpected status code <403> but was <404>.\n\njava.lang.AssertionError: \n1 expectation failed.\nExpected status code <403> but was <404>.\n\n\tat java.base/jdk.internal.reflect.DirectConstructorHandleAccessor.newInstance(DirectConstructorHandleAccessor.java:62)\n\tat java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Constructor.java:502)\n\tat java.base/java.lang.reflect.Constructor.newInstance(Constructor.java:486)\n\tat org.codehaus.groovy.reflection.CachedConstructor.invoke(CachedConstructor.java:73)\n\tat org.codehaus.groovy.runtime.callsite.ConstructorSite$ConstructorSi"
+    },
+    {
+      "name": "auditoriaRegistraSoftDelete",
+      "passed": false,
+      "failure": "1 expectation failed.\nExpected status code <204> but was <404>.\n\njava.lang.AssertionError: \n1 expectation failed.\nExpected status code <204> but was <404>.\n\n\tat java.base/jdk.internal.reflect.DirectConstructorHandleAccessor.newInstance(DirectConstructorHandleAccessor.java:62)\n\tat java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Constructor.java:502)\n\tat java.base/java.lang.reflect.Constructor.newInstance(Constructor.java:486)\n\tat org.codehaus.groovy.reflection.CachedConstructor.invoke(CachedConstructor.java:73)\n\tat org.codehaus.groovy.runtime.callsite.ConstructorSite$ConstructorSi"
+    },
+    {
+      "name": "atorDeOutroTenantRecebe404",
+      "passed": true
+    },
+    {
+      "name": "ninguemDeletaASiMesmo",
+      "passed": false,
+      "failure": "1 expectation failed.\nExpected status code <422> but was <404>.\n\njava.lang.AssertionError: \n1 expectation failed.\nExpected status code <422> but was <404>.\n\n\tat java.base/jdk.internal.reflect.DirectConstructorHandleAccessor.newInstance(DirectConstructorHandleAccessor.java:62)\n\tat java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Constructor.java:502)\n\tat java.base/java.lang.reflect.Constructor.newInstance(Constructor.java:486)\n\tat org.codehaus.groovy.reflection.CachedConstructor.invoke(CachedConstructor.java:73)\n\tat org.codehaus.groovy.runtime.callsite.ConstructorSite$ConstructorSi"
+    },
+    {
+      "name": "adminFazSoftDelete",
+      "passed": false,
+      "failure": "1 expectation failed.\nExpected status code <204> but was <404>.\n\njava.lang.AssertionError: \n1 expectation failed.\nExpected status code <204> but was <404>.\n\n\tat java.base/jdk.internal.reflect.DirectConstructorHandleAccessor.newInstance(DirectConstructorHandleAccessor.java:62)\n\tat java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Constructor.java:502)\n\tat java.base/java.lang.reflect.Constructor.newInstance(Constructor.java:486)\n\tat org.codehaus.groovy.reflection.CachedConstructor.invoke(CachedConstructor.java:73)\n\tat org.codehaus.groovy.runtime.callsite.ConstructorSite$ConstructorSi"
+    }
+  ],
+  "files_written": [
+    "src/main/java/com/bench/api/BaseResource.java",
+    "src/main/java/com/bench/api/UsersResource.java"
+  ],
+  "retrieval": {
+    "actions": [
+      "ls .",
+      "grep -r \"DELETE.*user\\|user.*DELETE\" 202604010900-mapa-api-e-convencoes.md",
+      "grep -r \"DELETE\" 202604010900-mapa-api-e-convencoes.md",
+      "ls com/bench/api/",
+      "ls src/main/java/com/bench/api/",
+      "ls src/main/java/com/bench/",
+      "ls src/main/java/"
+    ],
+    "notes_read": [],
+    "gold_notes": [
+      "202601201330-codigos-de-erro-da-api.md",
+      "202603150900-soft-delete-30-dias.md",
+      "202603150930-quem-pode-deletar.md"
+    ],
+    "gold_hits": [],
+    "gold_hit_rate": 0.0
+  },
+  "tokens": {
+    "prompt_tokens": 24272,
+    "completion_tokens": 3707
+  },
+  "duration_s": 208.3
+}

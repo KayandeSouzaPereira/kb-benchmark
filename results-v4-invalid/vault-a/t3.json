@@ -1,0 +1,68 @@
+{
+  "task": "t3",
+  "title": "Reenviar convite",
+  "case": "vault-a",
+  "model": "qwen3-coder:30b",
+  "score": 0.0,
+  "passed": 0,
+  "total": 5,
+  "compiled": true,
+  "repairs": 0,
+  "error": null,
+  "tests": [
+    {
+      "name": "reenvioIncrementaContadorEResetaExpiracao",
+      "passed": false
+    },
+    {
+      "name": "maximoDe3Reenvios",
+      "passed": false
+    },
+    {
+      "name": "reenvioReativaConviteExpirado",
+      "passed": false
+    },
+    {
+      "name": "memberNaoPodeReenviar",
+      "passed": false
+    },
+    {
+      "name": "auditoriaRegistraReenvio",
+      "passed": false
+    }
+  ],
+  "files_written": [
+    "src/main/java/com/bench/api/InvitationResource.java"
+  ],
+  "retrieval": {
+    "actions": [
+      "ls .",
+      "read produto/convites.md",
+      "grep convite",
+      "read dominio/convites.md",
+      "read dominio/papeis-e-permissoes.md",
+      "read padroes-codigo/formato-de-erros-api.md",
+      "read dominio/auditoria.md"
+    ],
+    "notes_read": [
+      "dominio/auditoria.md",
+      "dominio/convites.md",
+      "dominio/papeis-e-permissoes.md",
+      "padroes-codigo/formato-de-erros-api.md"
+    ],
+    "gold_notes": [
+      "dominio/convites.md",
+      "padroes-codigo/formato-de-erros-api.md"
+    ],
+    "gold_hits": [
+      "dominio/convites.md",
+      "padroes-codigo/formato-de-erros-api.md"
+    ],
+    "gold_hit_rate": 1.0
+  },
+  "tokens": {
+    "prompt_tokens": 20154,
+    "completion_tokens": 887
+  },
+  "duration_s": 87.8
+}

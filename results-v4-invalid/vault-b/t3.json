@@ -1,0 +1,75 @@
+{
+  "task": "t3",
+  "title": "Reenviar convite",
+  "case": "vault-b",
+  "model": "qwen3-coder:30b",
+  "score": 0.0,
+  "passed": 0,
+  "total": 5,
+  "compiled": true,
+  "repairs": 0,
+  "error": null,
+  "tests": [
+    {
+      "name": "reenvioIncrementaContadorEResetaExpiracao",
+      "passed": false,
+      "failure": "1 expectation failed.\nExpected status code <200> but was <404>.\n\njava.lang.AssertionError: \n1 expectation failed.\nExpected status code <200> but was <404>.\n\n\tat java.base/jdk.internal.reflect.DirectConstructorHandleAccessor.newInstance(DirectConstructorHandleAccessor.java:62)\n\tat java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Constructor.java:502)\n\tat java.base/java.lang.reflect.Constructor.newInstance(Constructor.java:486)\n\tat org.codehaus.groovy.reflection.CachedConstructor.invoke(CachedConstructor.java:73)\n\tat org.codehaus.groovy.runtime.callsite.ConstructorSite$ConstructorSi"
+    },
+    {
+      "name": "maximoDe3Reenvios",
+      "passed": false,
+      "failure": "1 expectation failed.\nExpected status code <422> but was <404>.\n\njava.lang.AssertionError: \n1 expectation failed.\nExpected status code <422> but was <404>.\n\n\tat java.base/jdk.internal.reflect.DirectConstructorHandleAccessor.newInstance(DirectConstructorHandleAccessor.java:62)\n\tat java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Constructor.java:502)\n\tat java.base/java.lang.reflect.Constructor.newInstance(Constructor.java:486)\n\tat org.codehaus.groovy.reflection.CachedConstructor.invoke(CachedConstructor.java:73)\n\tat org.codehaus.groovy.runtime.callsite.ConstructorSite$ConstructorSi"
+    },
+    {
+      "name": "reenvioReativaConviteExpirado",
+      "passed": false,
+      "failure": "1 expectation failed.\nExpected status code <200> but was <404>.\n\njava.lang.AssertionError: \n1 expectation failed.\nExpected status code <200> but was <404>.\n\n\tat java.base/jdk.internal.reflect.DirectConstructorHandleAccessor.newInstance(DirectConstructorHandleAccessor.java:62)\n\tat java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Constructor.java:502)\n\tat java.base/java.lang.reflect.Constructor.newInstance(Constructor.java:486)\n\tat org.codehaus.groovy.reflection.CachedConstructor.invoke(CachedConstructor.java:73)\n\tat org.codehaus.groovy.runtime.callsite.ConstructorSite$ConstructorSi"
+    },
+    {
+      "name": "memberNaoPodeReenviar",
+      "passed": false,
+      "failure": "1 expectation failed.\nExpected status code <403> but was <404>.\n\njava.lang.AssertionError: \n1 expectation failed.\nExpected status code <403> but was <404>.\n\n\tat java.base/jdk.internal.reflect.DirectConstructorHandleAccessor.newInstance(DirectConstructorHandleAccessor.java:62)\n\tat java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Constructor.java:502)\n\tat java.base/java.lang.reflect.Constructor.newInstance(Constructor.java:486)\n\tat org.codehaus.groovy.reflection.CachedConstructor.invoke(CachedConstructor.java:73)\n\tat org.codehaus.groovy.runtime.callsite.ConstructorSite$ConstructorSi"
+    },
+    {
+      "name": "auditoriaRegistraReenvio",
+      "passed": false,
+      "failure": "1 expectation failed.\nExpected status code <200> but was <404>.\n\njava.lang.AssertionError: \n1 expectation failed.\nExpected status code <200> but was <404>.\n\n\tat java.base/jdk.internal.reflect.DirectConstructorHandleAccessor.newInstance(DirectConstructorHandleAccessor.java:62)\n\tat java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Constructor.java:502)\n\tat java.base/java.lang.reflect.Constructor.newInstance(Constructor.java:486)\n\tat org.codehaus.groovy.reflection.CachedConstructor.invoke(CachedConstructor.java:73)\n\tat org.codehaus.groovy.runtime.callsite.ConstructorSite$ConstructorSi"
+    }
+  ],
+  "files_written": [
+    "src/main/java/com/bench/api/InvitationResource.java"
+  ],
+  "retrieval": {
+    "actions": [
+      "ls .",
+      "read 202602041130-reenvio-de-convites.md",
+      "read 202602041100-expiracao-de-convites-72h.md",
+      "read 202601201300-auditoria-de-mutacoes.md",
+      "read 202601051030-papeis-do-tenant.md",
+      "read 202601201330-codigos-de-erro-da-api.md",
+      "read 202602151100-isolamento-de-tenant-404.md"
+    ],
+    "notes_read": [
+      "202601051030-papeis-do-tenant.md",
+      "202601201300-auditoria-de-mutacoes.md",
+      "202601201330-codigos-de-erro-da-api.md",
+      "202602041100-expiracao-de-convites-72h.md",
+      "202602041130-reenvio-de-convites.md",
+      "202602151100-isolamento-de-tenant-404.md"
+    ],
+    "gold_notes": [
+      "202601201330-codigos-de-erro-da-api.md",
+      "202602041130-reenvio-de-convites.md"
+    ],
+    "gold_hits": [
+      "202601201330-codigos-de-erro-da-api.md",
+      "202602041130-reenvio-de-convites.md"
+    ],
+    "gold_hit_rate": 1.0
+  },
+  "tokens": {
+    "prompt_tokens": 17475,
+    "completion_tokens": 859
+  },
+  "duration_s": 63.8
+}

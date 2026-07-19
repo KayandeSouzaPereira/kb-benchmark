@@ -1,0 +1,49 @@
+{
+  "task": "t3",
+  "title": "Reenviar convite",
+  "case": "baseline",
+  "model": "qwen3-coder:30b",
+  "score": 0.0,
+  "passed": 0,
+  "total": 5,
+  "compiled": true,
+  "repairs": 0,
+  "error": null,
+  "tests": [
+    {
+      "name": "reenvioIncrementaContadorEResetaExpiracao",
+      "passed": false
+    },
+    {
+      "name": "maximoDe3Reenvios",
+      "passed": false
+    },
+    {
+      "name": "reenvioReativaConviteExpirado",
+      "passed": false
+    },
+    {
+      "name": "memberNaoPodeReenviar",
+      "passed": false
+    },
+    {
+      "name": "auditoriaRegistraReenvio",
+      "passed": false
+    }
+  ],
+  "files_written": [
+    "src/main/java/com/bench/api/InvitationResource.java"
+  ],
+  "retrieval": {
+    "actions": [],
+    "notes_read": [],
+    "gold_notes": [],
+    "gold_hits": [],
+    "gold_hit_rate": null
+  },
+  "tokens": {
+    "prompt_tokens": 810,
+    "completion_tokens": 978
+  },
+  "duration_s": 73.0
+}

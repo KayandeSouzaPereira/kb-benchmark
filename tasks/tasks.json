@@ -1,0 +1,97 @@
+{
+  "tasks": [
+    {
+      "id": "t1",
+      "title": "Criar convite",
+      "type": "backend",
+      "prompt_file": "t1.md",
+      "eval_file": "T1InvitationCreateTest.java",
+      "expected_tests": 6,
+      "gold_notes": {
+        "vault-a": [
+          "dominio/convites.md",
+          "dominio/limites-de-plano.md",
+          "padroes-codigo/formato-de-erros-api.md"
+        ],
+        "vault-b": [
+          "202602041100-expiracao-de-convites-72h.md",
+          "202605021430-convites-pendentes-contam.md",
+          "202601201330-codigos-de-erro-da-api.md"
+        ]
+      }
+    },
+    {
+      "id": "t2",
+      "title": "Excluir usuário (soft-delete)",
+      "type": "backend",
+      "prompt_file": "t2.md",
+      "eval_file": "T2UserDeleteTest.java",
+      "expected_tests": 7,
+      "gold_notes": {
+        "vault-a": [
+          "dominio/exclusao-de-usuarios.md",
+          "dominio/papeis-e-permissoes.md",
+          "padroes-codigo/formato-de-erros-api.md"
+        ],
+        "vault-b": [
+          "202603150900-soft-delete-30-dias.md",
+          "202603150930-quem-pode-deletar.md",
+          "202601201330-codigos-de-erro-da-api.md"
+        ]
+      }
+    },
+    {
+      "id": "t3",
+      "title": "Reenviar convite",
+      "type": "backend",
+      "prompt_file": "t3.md",
+      "eval_file": "T3InvitationResendTest.java",
+      "expected_tests": 5,
+      "gold_notes": {
+        "vault-a": [
+          "dominio/convites.md",
+          "padroes-codigo/formato-de-erros-api.md"
+        ],
+        "vault-b": [
+          "202602041130-reenvio-de-convites.md",
+          "202601201330-codigos-de-erro-da-api.md"
+        ]
+      }
+    },
+    {
+      "id": "t4",
+      "title": "Alterar papel",
+      "type": "backend",
+      "prompt_file": "t4.md",
+      "eval_file": "T4RoleChangeTest.java",
+      "expected_tests": 6,
+      "gold_notes": {
+        "vault-a": [
+          "dominio/papeis-e-permissoes.md",
+          "padroes-codigo/formato-de-erros-api.md"
+        ],
+        "vault-b": [
+          "202602101415-protecao-do-owner.md",
+          "202602101430-ultimo-owner.md",
+          "202601201330-codigos-de-erro-da-api.md"
+        ]
+      }
+    },
+    {
+      "id": "t5",
+      "title": "Listagem com badges (Angular)",
+      "type": "frontend",
+      "prompt_file": "t5.md",
+      "eval_file": "check_frontend.mjs",
+      "expected_tests": 7,
+      "gold_notes": {
+        "vault-a": [
+          "padroes-codigo/badges-de-status-frontend.md"
+        ],
+        "vault-b": [
+          "202604111600-badges-de-status-no-front.md"
+        ]
+      }
+    }
+  ]
+}

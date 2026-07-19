@@ -1,0 +1,80 @@
+{
+  "task": "t1",
+  "title": "Criar convite",
+  "case": "vault-b",
+  "model": "qwen3-coder:30b",
+  "score": 0.0,
+  "passed": 0,
+  "total": 6,
+  "compiled": true,
+  "repairs": 0,
+  "error": null,
+  "tests": [
+    {
+      "name": "auditoriaRegistraUserInvited",
+      "passed": false,
+      "failure": "1 expectation failed.\nExpected status code <201> but was <401>.\n\njava.lang.AssertionError: \n1 expectation failed.\nExpected status code <201> but was <401>.\n\n\tat java.base/jdk.internal.reflect.DirectConstructorHandleAccessor.newInstance(DirectConstructorHandleAccessor.java:62)\n\tat java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Constructor.java:502)\n\tat java.base/java.lang.reflect.Constructor.newInstance(Constructor.java:486)\n\tat org.codehaus.groovy.reflection.CachedConstructor.invoke(CachedConstructor.java:73)\n\tat org.codehaus.groovy.runtime.callsite.ConstructorSite$ConstructorSi"
+    },
+    {
+      "name": "limiteDoPlanoFreeContaConvitesPendentes",
+      "passed": false,
+      "failure": "1 expectation failed.\nExpected status code <422> but was <401>.\n\njava.lang.AssertionError: \n1 expectation failed.\nExpected status code <422> but was <401>.\n\n\tat java.base/jdk.internal.reflect.DirectConstructorHandleAccessor.newInstance(DirectConstructorHandleAccessor.java:62)\n\tat java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Constructor.java:502)\n\tat java.base/java.lang.reflect.Constructor.newInstance(Constructor.java:486)\n\tat org.codehaus.groovy.reflection.CachedConstructor.invoke(CachedConstructor.java:73)\n\tat org.codehaus.groovy.runtime.callsite.ConstructorSite$ConstructorSi"
+    },
+    {
+      "name": "memberNaoPodeConvidar",
+      "passed": false,
+      "failure": "1 expectation failed.\nExpected status code <403> but was <401>.\n\njava.lang.AssertionError: \n1 expectation failed.\nExpected status code <403> but was <401>.\n\n\tat java.base/jdk.internal.reflect.DirectConstructorHandleAccessor.newInstance(DirectConstructorHandleAccessor.java:62)\n\tat java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Constructor.java:502)\n\tat java.base/java.lang.reflect.Constructor.newInstance(Constructor.java:486)\n\tat org.codehaus.groovy.reflection.CachedConstructor.invoke(CachedConstructor.java:73)\n\tat org.codehaus.groovy.runtime.callsite.ConstructorSite$ConstructorSi"
+    },
+    {
+      "name": "atorDeOutroTenantRecebe404",
+      "passed": false,
+      "failure": "1 expectation failed.\nExpected status code <404> but was <401>.\n\njava.lang.AssertionError: \n1 expectation failed.\nExpected status code <404> but was <401>.\n\n\tat java.base/jdk.internal.reflect.DirectConstructorHandleAccessor.newInstance(DirectConstructorHandleAccessor.java:62)\n\tat java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Constructor.java:502)\n\tat java.base/java.lang.reflect.Constructor.newInstance(Constructor.java:486)\n\tat org.codehaus.groovy.reflection.CachedConstructor.invoke(CachedConstructor.java:73)\n\tat org.codehaus.groovy.runtime.callsite.ConstructorSite$ConstructorSi"
+    },
+    {
+      "name": "conviteExpiraEm72Horas",
+      "passed": false,
+      "failure": "1 expectation failed.\nExpected status code <201> but was <401>.\n\njava.lang.AssertionError: \n1 expectation failed.\nExpected status code <201> but was <401>.\n\n\tat java.base/jdk.internal.reflect.DirectConstructorHandleAccessor.newInstance(DirectConstructorHandleAccessor.java:62)\n\tat java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Constructor.java:502)\n\tat java.base/java.lang.reflect.Constructor.newInstance(Constructor.java:486)\n\tat org.codehaus.groovy.reflection.CachedConstructor.invoke(CachedConstructor.java:73)\n\tat org.codehaus.groovy.runtime.callsite.ConstructorSite$ConstructorSi"
+    },
+    {
+      "name": "adminCriaConvitePersistido",
+      "passed": false,
+      "failure": "1 expectation failed.\nExpected status code <201> but was <401>.\n\njava.lang.AssertionError: \n1 expectation failed.\nExpected status code <201> but was <401>.\n\n\tat java.base/jdk.internal.reflect.DirectConstructorHandleAccessor.newInstance(DirectConstructorHandleAccessor.java:62)\n\tat java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Constructor.java:502)\n\tat java.base/java.lang.reflect.Constructor.newInstance(Constructor.java:486)\n\tat org.codehaus.groovy.reflection.CachedConstructor.invoke(CachedConstructor.java:73)\n\tat org.codehaus.groovy.runtime.callsite.ConstructorSite$ConstructorSi"
+    }
+  ],
+  "files_written": [
+    "src/main/java/com/bench/api/InvitationResource.java"
+  ],
+  "retrieval": {
+    "actions": [
+      "ls .",
+      "read 202601051030-papeis-do-tenant.md",
+      "read 202601201330-codigos-de-erro-da-api.md",
+      "read 202602101430-ultimo-owner.md",
+      "read 202603150900-soft-delete-30-dias.md",
+      "read 202601050900-mapa-dominio-usuarios.md",
+      "read 202604010900-mapa-api-e-convencoes.md"
+    ],
+    "notes_read": [
+      "202601050900-mapa-dominio-usuarios.md",
+      "202601051030-papeis-do-tenant.md",
+      "202601201330-codigos-de-erro-da-api.md",
+      "202602101430-ultimo-owner.md",
+      "202603150900-soft-delete-30-dias.md",
+      "202604010900-mapa-api-e-convencoes.md"
+    ],
+    "gold_notes": [
+      "202601201330-codigos-de-erro-da-api.md",
+      "202602041100-expiracao-de-convites-72h.md",
+      "202605021430-convites-pendentes-contam.md"
+    ],
+    "gold_hits": [
+      "202601201330-codigos-de-erro-da-api.md"
+    ],
+    "gold_hit_rate": 0.333
+  },
+  "tokens": {
+    "prompt_tokens": 59855,
+    "completion_tokens": 11098
+  },
+  "duration_s": 596.4
+}

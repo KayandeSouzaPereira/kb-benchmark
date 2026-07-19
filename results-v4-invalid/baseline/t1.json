@@ -1,0 +1,53 @@
+{
+  "task": "t1",
+  "title": "Criar convite",
+  "case": "baseline",
+  "model": "qwen3-coder:30b",
+  "score": 0.0,
+  "passed": 0,
+  "total": 6,
+  "compiled": true,
+  "repairs": 0,
+  "error": null,
+  "tests": [
+    {
+      "name": "auditoriaRegistraUserInvited",
+      "passed": false
+    },
+    {
+      "name": "limiteDoPlanoFreeContaConvitesPendentes",
+      "passed": false
+    },
+    {
+      "name": "memberNaoPodeConvidar",
+      "passed": false
+    },
+    {
+      "name": "atorDeOutroTenantRecebe404",
+      "passed": false
+    },
+    {
+      "name": "conviteExpiraEm72Horas",
+      "passed": false
+    },
+    {
+      "name": "adminCriaConvitePersistido",
+      "passed": false
+    }
+  ],
+  "files_written": [
+    "src/main/java/com/bench/api/InvitationResource.java"
+  ],
+  "retrieval": {
+    "actions": [],
+    "notes_read": [],
+    "gold_notes": [],
+    "gold_hits": [],
+    "gold_hit_rate": null
+  },
+  "tokens": {
+    "prompt_tokens": 836,
+    "completion_tokens": 1259
+  },
+  "duration_s": 146.4
+}

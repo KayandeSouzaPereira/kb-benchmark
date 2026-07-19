@@ -1,0 +1,81 @@
+{
+  "task": "t4",
+  "title": "Alterar papel",
+  "case": "vault-b",
+  "model": "qwen3-coder:30b",
+  "score": 0.0,
+  "passed": 0,
+  "total": 6,
+  "compiled": true,
+  "repairs": 1,
+  "error": null,
+  "tests": [
+    {
+      "name": "ultimoOwnerNaoPodeSerRebaixado",
+      "passed": false,
+      "failure": "1 expectation failed.\nExpected status code <409> but was <404>.\n\njava.lang.AssertionError: \n1 expectation failed.\nExpected status code <409> but was <404>.\n\n\tat java.base/jdk.internal.reflect.DirectConstructorHandleAccessor.newInstance(DirectConstructorHandleAccessor.java:62)\n\tat java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Constructor.java:502)\n\tat java.base/java.lang.reflect.Constructor.newInstance(Constructor.java:486)\n\tat org.codehaus.groovy.reflection.CachedConstructor.invoke(CachedConstructor.java:73)\n\tat org.codehaus.groovy.runtime.callsite.ConstructorSite$ConstructorSi"
+    },
+    {
+      "name": "adminNaoAlteraPapelDeOwner",
+      "passed": false,
+      "failure": "1 expectation failed.\nExpected status code <403> but was <404>.\n\njava.lang.AssertionError: \n1 expectation failed.\nExpected status code <403> but was <404>.\n\n\tat java.base/jdk.internal.reflect.DirectConstructorHandleAccessor.newInstance(DirectConstructorHandleAccessor.java:62)\n\tat java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Constructor.java:502)\n\tat java.base/java.lang.reflect.Constructor.newInstance(Constructor.java:486)\n\tat org.codehaus.groovy.reflection.CachedConstructor.invoke(CachedConstructor.java:73)\n\tat org.codehaus.groovy.runtime.callsite.ConstructorSite$ConstructorSi"
+    },
+    {
+      "name": "auditoriaRegistraMudancaDePapel",
+      "passed": false,
+      "failure": "1 expectation failed.\nExpected status code <200> but was <404>.\n\njava.lang.AssertionError: \n1 expectation failed.\nExpected status code <200> but was <404>.\n\n\tat java.base/jdk.internal.reflect.DirectConstructorHandleAccessor.newInstance(DirectConstructorHandleAccessor.java:62)\n\tat java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Constructor.java:502)\n\tat java.base/java.lang.reflect.Constructor.newInstance(Constructor.java:486)\n\tat org.codehaus.groovy.reflection.CachedConstructor.invoke(CachedConstructor.java:73)\n\tat org.codehaus.groovy.runtime.callsite.ConstructorSite$ConstructorSi"
+    },
+    {
+      "name": "memberNaoAlteraPapeis",
+      "passed": false,
+      "failure": "1 expectation failed.\nExpected status code <403> but was <404>.\n\njava.lang.AssertionError: \n1 expectation failed.\nExpected status code <403> but was <404>.\n\n\tat java.base/jdk.internal.reflect.DirectConstructorHandleAccessor.newInstance(DirectConstructorHandleAccessor.java:62)\n\tat java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Constructor.java:502)\n\tat java.base/java.lang.reflect.Constructor.newInstance(Constructor.java:486)\n\tat org.codehaus.groovy.reflection.CachedConstructor.invoke(CachedConstructor.java:73)\n\tat org.codehaus.groovy.runtime.callsite.ConstructorSite$ConstructorSi"
+    },
+    {
+      "name": "adminPromoveMember",
+      "passed": false,
+      "failure": "1 expectation failed.\nExpected status code <200> but was <404>.\n\njava.lang.AssertionError: \n1 expectation failed.\nExpected status code <200> but was <404>.\n\n\tat java.base/jdk.internal.reflect.DirectConstructorHandleAccessor.newInstance(DirectConstructorHandleAccessor.java:62)\n\tat java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Constructor.java:502)\n\tat java.base/java.lang.reflect.Constructor.newInstance(Constructor.java:486)\n\tat org.codehaus.groovy.reflection.CachedConstructor.invoke(CachedConstructor.java:73)\n\tat org.codehaus.groovy.runtime.callsite.ConstructorSite$ConstructorSi"
+    },
+    {
+      "name": "ownerPodeRebaixarOutroOwner",
+      "passed": false,
+      "failure": "1 expectation failed.\nExpected status code <200> but was <404>.\n\njava.lang.AssertionError: \n1 expectation failed.\nExpected status code <200> but was <404>.\n\n\tat java.base/jdk.internal.reflect.DirectConstructorHandleAccessor.newInstance(DirectConstructorHandleAccessor.java:62)\n\tat java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Constructor.java:502)\n\tat java.base/java.lang.reflect.Constructor.newInstance(Constructor.java:486)\n\tat org.codehaus.groovy.reflection.CachedConstructor.invoke(CachedConstructor.java:73)\n\tat org.codehaus.groovy.runtime.callsite.ConstructorSite$ConstructorSi"
+    }
+  ],
+  "files_written": [
+    "src/main/java/com/bench/api/UserRoleResource.java"
+  ],
+  "retrieval": {
+    "actions": [
+      "ls .",
+      "grep -i \"papel\\|role\" 202601051030-papeis-do-tenant.md",
+      "read 202601051030-papeis-do-tenant.md",
+      "read 202602101415-protecao-do-owner.md",
+      "read 202602101430-ultimo-owner.md",
+      "read 202601201330-codigos-de-erro-da-api.md",
+      "read 202602151100-isolamento-de-tenant-404.md"
+    ],
+    "notes_read": [
+      "202601051030-papeis-do-tenant.md",
+      "202601201330-codigos-de-erro-da-api.md",
+      "202602101415-protecao-do-owner.md",
+      "202602101430-ultimo-owner.md",
+      "202602151100-isolamento-de-tenant-404.md"
+    ],
+    "gold_notes": [
+      "202601201330-codigos-de-erro-da-api.md",
+      "202602101415-protecao-do-owner.md",
+      "202602101430-ultimo-owner.md"
+    ],
+    "gold_hits": [
+      "202601201330-codigos-de-erro-da-api.md",
+      "202602101415-protecao-do-owner.md",
+      "202602101430-ultimo-owner.md"
+    ],
+    "gold_hit_rate": 1.0
+  },
+  "tokens": {
+    "prompt_tokens": 19203,
+    "completion_tokens": 1694
+  },
+  "duration_s": 108.7
+}

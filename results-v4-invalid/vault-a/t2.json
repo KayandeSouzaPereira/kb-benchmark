@@ -1,0 +1,67 @@
+{
+  "task": "t2",
+  "title": "Excluir usuário (soft-delete)",
+  "case": "vault-a",
+  "model": "qwen3-coder:30b",
+  "score": 0.0,
+  "passed": 0,
+  "total": 7,
+  "compiled": true,
+  "repairs": 0,
+  "error": null,
+  "tests": [
+    {
+      "name": "adminNaoPodeDeletarOwner",
+      "passed": false
+    },
+    {
+      "name": "purgeAtEm30Dias",
+      "passed": false
+    },
+    {
+      "name": "memberNaoPodeDeletar",
+      "passed": false
+    },
+    {
+      "name": "auditoriaRegistraSoftDelete",
+      "passed": false
+    },
+    {
+      "name": "atorDeOutroTenantRecebe404",
+      "passed": false
+    },
+    {
+      "name": "ninguemDeletaASiMesmo",
+      "passed": false
+    },
+    {
+      "name": "adminFazSoftDelete",
+      "passed": false
+    }
+  ],
+  "files_written": [
+    "src/main/java/com/bench/api/UserResource.java"
+  ],
+  "retrieval": {
+    "actions": [
+      "ls .",
+      "ls decisoes/",
+      "read decisoes/adr-001-soft-delete-com-retencao.md"
+    ],
+    "notes_read": [
+      "decisoes/adr-001-soft-delete-com-retencao.md"
+    ],
+    "gold_notes": [
+      "dominio/exclusao-de-usuarios.md",
+      "dominio/papeis-e-permissoes.md",
+      "padroes-codigo/formato-de-erros-api.md"
+    ],
+    "gold_hits": [],
+    "gold_hit_rate": 0.0
+  },
+  "tokens": {
+    "prompt_tokens": 5007,
+    "completion_tokens": 1125
+  },
+  "duration_s": 86.9
+}

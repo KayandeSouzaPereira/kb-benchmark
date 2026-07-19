@@ -1,0 +1,46 @@
+{
+  "task": "t3",
+  "title": "Reenviar convite",
+  "case": "vault-a",
+  "model": "qwen3:8b",
+  "score": 0.0,
+  "passed": 0,
+  "total": 5,
+  "compiled": false,
+  "repairs": 3,
+  "error": "sem relatorio surefire (compilacao?)\nwork/vault-a/t3/src/main/java/com/bench/api/ResendInvitationResource.java:[29,36] cannot find symbol\n  symbol:   variable Status\n  location: class com.bench.api.ResendInvitationResource\n[ERROR] /work/vault-a/t3/src/main/java/com/bench/api/ResendInvitationResource.java:[40,36] cannot find symbol\n  symbol:   variable Status\n  location: class com.bench.api.ResendInvitationResource\n[ERROR] /work/vault-a/t3/src/main/java/com/bench/api/ResendInvitationResource.java:[45,36] cannot find symbol\n  symbol:   variable Status\n  location: class com.bench.api.ResendInvitationResource\n[ERROR] /work/vault-a/t3/src/main/java/com/bench/api/ResendInvitationResource.java:[50,36] cannot find symbol\n  symbol:   variable Status\n  location: class com.bench.api.ResendInvitationResource\n[ERROR] /work/vault-a/t3/src/main/java/com/bench/api/ResendInvitationResource.java:[57,36] cannot find symbol\n  symbol:   variable Status\n  location: class com.bench.api.ResendInvitationResource\n[INFO] 5 errors \n[INFO] -------------------------------------------------------------\n[INFO] ------------------------------------------------------------------------\n[INFO] BUILD FAILURE\n[INFO] ------------------------------------------------------------------------\n[INFO] Total time:  2.628 s\n[INFO] Finished at: 2026-07-19T16:20:33Z\n[INFO] ------------------------------------------------------------------------\n[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.15.0:compile (default-compile) on project saas-users: Compilation failure: Compilation failure: \n[ERROR] /work/vault-a/t3/src/main/java/com/bench/api/ResendInvitationResource.java:[29,36] cannot find symbol\n[ERROR]   symbol:   variable Status\n[ERROR]   location: class com.bench.api.ResendInvitationResource\n[ERROR] /work/vault-a/t3/src/main/java/com/bench/api/ResendInvitationResource.java:[40,36] cannot find symbol\n[ERROR]   symbol:   variable Status\n[ERROR]   location: class com.bench.api.ResendInvitationResource\n[ERROR] /work/vault-a/t3/src/main/java/com/bench/api/ResendInvitationResource.java:[45,36] cannot find symbol\n[ERROR]   symbol:   variable Status\n[ERROR]   location: class com.bench.api.ResendInvitationResource\n[ERROR] /work/vault-a/t3/src/main/java/com/bench/api/ResendInvitationResource.java:[50,36] cannot find symbol\n[ERROR]   symbol:   variable Status\n[ERROR]   location: class com.bench.api.ResendInvitationResource\n[ERROR] /work/vault-a/t3/src/main/java/com/bench/api/ResendInvitationResource.java:[57,36] cannot find symbol\n[ERROR]   symbol:   variable Status\n[ERROR]   location: class com.bench.api.ResendInvitationResource\n[ERROR] -> [Help 1]\n[ERROR] \n[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.\n[ERROR] Re-run Maven using the -X switch to enable full debug logging.\n[ERROR] \n[ERROR] For more information about the errors and possible solutions, please read the following articles:\n[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException\n",
+  "tests": [],
+  "files_written": [
+    "src/main/java/com/bench/api/ResendInvitationResource.java"
+  ],
+  "retrieval": {
+    "actions": [
+      "ls .",
+      "ls produto",
+      "read produto/planos-e-precos.md",
+      "ls dominio",
+      "read dominio/convites.md",
+      "read dominio/papeis-e-permissoes.md",
+      "read dominio/auditoria.md"
+    ],
+    "notes_read": [
+      "dominio/auditoria.md",
+      "dominio/convites.md",
+      "dominio/papeis-e-permissoes.md",
+      "produto/planos-e-precos.md"
+    ],
+    "gold_notes": [
+      "dominio/convites.md",
+      "padroes-codigo/formato-de-erros-api.md"
+    ],
+    "gold_hits": [
+      "dominio/convites.md"
+    ],
+    "gold_hit_rate": 0.5
+  },
+  "tokens": {
+    "prompt_tokens": 28436,
+    "completion_tokens": 2572
+  },
+  "duration_s": 195.5
+}

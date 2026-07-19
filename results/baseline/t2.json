@@ -1,0 +1,62 @@
+{
+  "task": "t2",
+  "title": "Excluir usuário (soft-delete)",
+  "case": "baseline",
+  "model": "qwen3-coder:30b",
+  "score": 0.286,
+  "passed": 2,
+  "total": 7,
+  "compiled": true,
+  "repairs": 0,
+  "error": null,
+  "tests": [
+    {
+      "name": "adminNaoPodeDeletarOwner",
+      "passed": false,
+      "failure": "1 expectation failed.\nExpected status code <403> but was <422>.\n\njava.lang.AssertionError: \n1 expectation failed.\nExpected status code <403> but was <422>.\n\n\tat java.base/jdk.internal.reflect.DirectConstructorHandleAccessor.newInstance(DirectConstructorHandleAccessor.java:62)\n\tat java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Constructor.java:502)\n\tat java.base/java.lang.reflect.Constructor.newInstance(Constructor.java:486)\n\tat org.codehaus.groovy.reflection.CachedConstructor.invoke(CachedConstructor.java:73)\n\tat org.codehaus.groovy.runtime.callsite.ConstructorSite$ConstructorSi"
+    },
+    {
+      "name": "purgeAtEm30Dias",
+      "passed": true
+    },
+    {
+      "name": "memberNaoPodeDeletar",
+      "passed": false,
+      "failure": "Expected response body to be verified as JSON, HTML or XML but content-type 'text/plain' is not supported out of the box.\nTry registering a custom parser using:\n   RestAssured.registerParser(\"text/plain\", <parser type>);\nContent was:\nInsufficient permissions\n\njava.lang.IllegalStateException: \nExpected response body to be verified as JSON, HTML or XML but content-type 'text/plain' is not supported out of the box.\nTry registering a custom parser using:\n   RestAssured.registerParser(\"text/plain\", <parser type>);\nContent was:\nInsufficient permissions\n\n\tat java.base/jdk.internal.reflect.DirectConst"
+    },
+    {
+      "name": "auditoriaRegistraSoftDelete",
+      "passed": false,
+      "failure": "audit log deve conter USER_SOFT_DELETED com target u-member2 ==> expected: <true> but was: <false>\norg.opentest4j.AssertionFailedError: audit log deve conter USER_SOFT_DELETED com target u-member2 ==> expected: <true> but was: <false>\n\tat org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)\n\tat org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)\n\tat org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)\n\tat org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:36)\n\tat org.junit.jupiter.api.Assertions.ass"
+    },
+    {
+      "name": "atorDeOutroTenantRecebe404",
+      "passed": false,
+      "failure": "1 expectation failed.\nExpected status code <404> but was <204>.\n\njava.lang.AssertionError: \n1 expectation failed.\nExpected status code <404> but was <204>.\n\n\tat java.base/jdk.internal.reflect.DirectConstructorHandleAccessor.newInstance(DirectConstructorHandleAccessor.java:62)\n\tat java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Constructor.java:502)\n\tat java.base/java.lang.reflect.Constructor.newInstance(Constructor.java:486)\n\tat org.codehaus.groovy.reflection.CachedConstructor.invoke(CachedConstructor.java:73)\n\tat org.codehaus.groovy.runtime.callsite.ConstructorSite$ConstructorSi"
+    },
+    {
+      "name": "ninguemDeletaASiMesmo",
+      "passed": false,
+      "failure": "Expected response body to be verified as JSON, HTML or XML but content-type 'text/plain' is not supported out of the box.\nTry registering a custom parser using:\n   RestAssured.registerParser(\"text/plain\", <parser type>);\nContent was:\nCannot delete yourself\n\njava.lang.IllegalStateException: \nExpected response body to be verified as JSON, HTML or XML but content-type 'text/plain' is not supported out of the box.\nTry registering a custom parser using:\n   RestAssured.registerParser(\"text/plain\", <parser type>);\nContent was:\nCannot delete yourself\n\n\tat java.base/jdk.internal.reflect.DirectConstruct"
+    },
+    {
+      "name": "adminFazSoftDelete",
+      "passed": true
+    }
+  ],
+  "files_written": [
+    "src/main/java/com/bench/api/UserResource.java"
+  ],
+  "retrieval": {
+    "actions": [],
+    "notes_read": [],
+    "gold_notes": [],
+    "gold_hits": [],
+    "gold_hit_rate": null
+  },
+  "tokens": {
+    "prompt_tokens": 786,
+    "completion_tokens": 761
+  },
+  "duration_s": 59.9
+}
