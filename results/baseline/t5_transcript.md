@@ -73,9 +73,9 @@ import { UserView } from './user.model';
           <td>{{ user.email }}</td>
           <td>{{ user.role }}</td>
           <td>
-            <span [class]="'badge badge-' + getStatusClass(user.status)"
-                  [title]="getStatusTooltip(user.status, user.purgeAt)">
-              {{ getStatusLabel(user.status) }}
+            <span [class]="'badge badge-' + getUserStatusClass(user.status)"
+                  [title]="getUserStatusTooltip(user)">
+              {{ getUserStatusLabel(user.status) }}
             </span>
           </td>
         </tr>
@@ -87,52 +87,39 @@ import { UserView } from './user.model';
 export class UserListComponent {
   @Input() users: UserView[] = [];
 
-  getStatusClass(status: UserView['status']): string {
+  getUserStatusClass(status: UserView['status']): string {
     switch (status) {
       case 'ACTIVE':
         return 'success';
-      case 'INVITED':
-        return 'warning';
       case 'SUSPENDED':
-        return 'danger';
+        return 'warning';
       case 'DELETED':
-        return 'secondary';
+        return 'danger';
+      case 'INVITED':
       default:
-        return 'secondary';
+        return 'info';
     }
   }
 
-  getStatusLabel(status: UserView['status']): string {
+  getUserStatusLabel(status: UserView['status']): string {
     switch (status) {
       case 'ACTIVE':
         return 'Ativo';
-      case 'INVITED':
-        return 'Convidado';
       case 'SUSPENDED':
         return 'Suspenso';
       case 'DELETED':
         return 'Excluído';
+      case 'INVITED':
       default:
-        return status;
+        return 'Convidado';
     }
   }
 
-  getStatusTooltip(status: UserView['status'], purgeAt?: string): string {
-    switch (status) {
-      case 'ACTIVE':
-        return 'Usuário ativo no sistema';
-      case 'INVITED':
-        return 'Usuário convidado, aguardando aceite';
-      case 'SUSPENDED':
-        return 'Usuário suspenso temporariamente';
-      case 'DELETED':
-        if (purgeAt) {
-          return `Usuário excluído. Será removido do sistema em ${purgeAt}`;
-        }
-        return 'Usuário excluído permanentemente';
-      default:
-        return '';
+  getUserStatusTooltip(user: UserView): string {
+    if (user.status === 'SUSPENDED' && user.purgeAt) {
+      return `Suspenso até ${new Date(user.purgeAt).toLocaleDateString()}`;
     }
+    return '';
   }
 }
 ```

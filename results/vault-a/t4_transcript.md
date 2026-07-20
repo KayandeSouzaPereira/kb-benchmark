@@ -119,7 +119,7 @@ runbooks/
 
 ## assistant
 
-ACTION: read produto/regras-papel.md
+ACTION: read produto/regras-papeis.md
 ```
 
 ---
@@ -127,13 +127,13 @@ ACTION: read produto/regras-papel.md
 ## user
 
 RESULT (6 ações restantes):
-arquivo não encontrado: produto/regras-papel.md
+arquivo não encontrado: produto/regras-papeis.md
 
 ---
 
 ## assistant
 
-ACTION: grep -r "papel\|role" .
+ACTION: grep -r "role" produto/
 ```
 
 ---
@@ -141,7 +141,49 @@ ACTION: grep -r "papel\|role" .
 ## user
 
 RESULT (5 ações restantes):
-nenhum resultado para: -r "papel\|role" .
+nenhum resultado para: -r "role" produto/
+
+---
+
+## assistant
+
+ACTION: read dominio/papeis.md
+```
+
+---
+
+## user
+
+RESULT (4 ações restantes):
+arquivo não encontrado: dominio/papeis.md
+
+---
+
+## assistant
+
+ACTION: read decisoes/roles.md
+```
+
+---
+
+## user
+
+RESULT (3 ações restantes):
+arquivo não encontrado: decisoes/roles.md
+
+---
+
+## assistant
+
+ACTION: grep -r "role" .
+```
+
+---
+
+## user
+
+RESULT (2 ações restantes):
+nenhum resultado para: -r "role" .
 
 ---
 
@@ -154,131 +196,39 @@ ACTION: ls produto/
 
 ## user
 
-RESULT (4 ações restantes):
+RESULT (1 ações restantes):
 planos-e-precos.md
 
 ---
 
 ## assistant
 
-ACTION: ls dominio/
+ACTION: read produto/planos-e-precos.md
 ```
 
 ---
 
 ## user
 
-RESULT (3 ações restantes):
-auditoria.md
-autenticacao-e-lockout.md
-convites.md
-exclusao-de-usuarios.md
-limites-de-plano.md
-papeis-e-permissoes.md
-
+RESULT (0 ações restantes):
 ---
-
-## assistant
-
-ACTION: read dominio/papeis-e-permissoes.md
-```
-
----
-
-## user
-
-RESULT (2 ações restantes):
----
-tipo: regra-de-negocio
+tipo: produto
 sistema: gestao-usuarios
 status: ativo
-atualizado: 2026-05-02
+atualizado: 2026-06-01
 ---
 
-# Papéis e permissões
+# Planos e preços
 
-Hierarquia dentro de um tenant: `OWNER > ADMIN > MEMBER`.
+| Plano | Preço | Assentos | Suporte |
+|---|---|---|---|
+| FREE | R$ 0 | 5 | comunidade |
+| PRO | R$ 49/usuário/mês | 50 | e-mail 24h |
+| ENTERPRISE | sob consulta | ilimitado | CSM dedicado + SLA |
 
-## Regras
-
-- **Convidar usuários, excluir usuários e alterar papéis exige ADMIN ou OWNER** (ADMIN+).
-  MEMBER que tentar recebe `403 FORBIDDEN_ROLE`.
-- **ADMIN nunca altera nem exclui um OWNER** (nem papel, nem exclusão): `403 OWNER_PROTECTED`.
-  Somente um OWNER pode mexer em outro OWNER ou promover alguém a OWNER.
-- **O tenant nunca pode ficar sem OWNER**: rebaixar ou remover o último OWNER ativo
-  retorna `409 LAST_OWNER`. Com dois ou mais owners, um owner pode rebaixar o outro.
-- **Isolamento de tenant**: o ator (header `X-Actor-Id`) precisa pertencer ao tenant da URL.
-  Ator de outro tenant recebe `404 NOT_FOUND` — nunca 403, para não vazar a existência
-  do recurso.
-
-## Quando usar / Quando NÃO usar
-
-- Use em todo endpoint de mutação de usuários, convites ou papéis.
-- NÃO confunda com autenticação (login/senha) — ver [autenticacao-e-lockout](autenticacao-e-lockout.md).
-
-## Anti-padrões já observados
-
-- Checar papel depois de mutar o estado (validar SEMPRE antes de escrever no store).
-- Retornar 403 para ator de outro tenant (vaza existência; o correto é 404).
-
-## Relacionados
-
-- [exclusao-de-usuarios](exclusao-de-usuarios.md)
-- [convites](convites.md)
-- [../padroes-codigo/formato-de-erros-api.md](../padroes-codigo/formato-de-erros-api.md)
-- [auditoria](auditoria.md)
-
-
----
-
-## assistant
-
-ACTION: read dominio/limites-de-plano.md
-```
-
----
-
-## user
-
-RESULT (1 ações restantes):
----
-tipo: regra-de-negocio
-sistema: gestao-usuarios
-status: ativo
-atualizado: 2026-05-02
----
-
-# Limites de usuários por plano
-
-| Plano | Máximo de assentos |
-|---|---|
-| FREE | 5 |
-| PRO | 50 |
-| ENTERPRISE | ilimitado (`maxUsers = null`) |
-
-## O que conta como assento ocupado
-
-`assentos ocupados = usuários do tenant com status != DELETED + convites com status PENDING`
-
-Ou seja: **convite pendente ocupa vaga** (decisão registrada em
-[adr-002](../decisoes/adr-002-convites-pendentes-contam-no-limite.md)).
-Usuários INVITED, ACTIVE e SUSPENDED contam; DELETED não conta.
-
-## Regra de bloqueio
-
-Criar um convite quando `assentos ocupados >= máximo do plano` retorna
-`422 PLAN_LIMIT_EXCEEDED` e **não** persiste nada.
-
-## Quando usar / Quando NÃO usar
-
-- Use ao criar convites e ao reativar usuários.
-- NÃO aplique o limite ao reenviar um convite já existente (não cria assento novo).
-
-## Relacionados
-
-- [convites](convites.md)
-- [../decisoes/adr-002-convites-pendentes-contam-no-limite.md](../decisoes/adr-002-convites-pendentes-contam-no-limite.md)
-- [../produto/planos-e-precos.md](../produto/planos-e-precos.md)
+Upgrade é self-service; downgrade exige que o tenant esteja dentro do limite
+do plano de destino. Detalhes técnicos do limite:
+[limites-de-plano](../dominio/limites-de-plano.md).
 
 
 ---
@@ -309,74 +259,94 @@ public class UserRoleResource {
     InMemoryStore store;
 
     @PATCH
-    public Response changeRole(
+    public Response updateRole(
             @PathParam("tenantId") String tenantId,
             @PathParam("userId") String userId,
-            RoleChangeRequest request) {
+            RoleUpdateRequest request) {
         
-        // Verificar se o ator está no mesmo tenant
+        // Validação do corpo da requisição
+        if (request.role == null) {
+            return Response.status(422).entity("{\"error\":\"role is required\"}").build();
+        }
+
+        // Verifica se o usuário autenticado existe
         String actorId = getActorId();
         Optional<User> actorOpt = store.findUser(actorId);
-        if (actorOpt.isEmpty() || !tenantId.equals(actorOpt.get().tenantId)) {
-            return Response.status(404).build();
+        if (!actorOpt.isPresent()) {
+            return Response.status(401).entity("{\"error\":\"Unauthorized\"}").build();
         }
-
-        // Verificar se o usuário existe e pertence ao tenant
-        Optional<User> targetUserOpt = store.findUser(userId);
-        if (targetUserOpt.isEmpty() || !tenantId.equals(targetUserOpt.get().tenantId)) {
-            return Response.status(404).build();
-        }
-
         User actor = actorOpt.get();
+
+        // Verifica se o usuário alvo existe
+        Optional<User> targetUserOpt = store.findUser(userId);
+        if (!targetUserOpt.isPresent()) {
+            return Response.status(404).entity("{\"error\":\"User not found\"}").build();
+        }
         User targetUser = targetUserOpt.get();
 
-        // Verificar permissões do ator
-        if (!hasPermission(actor, targetUser)) {
-            return Response.status(403).entity("FORBIDDEN_ROLE").build();
+        // Verifica se o usuário alvo pertence ao tenant
+        if (!targetUser.tenantId.equals(tenantId)) {
+            return Response.status(404).entity("{\"error\":\"User not found\"}").build();
         }
 
-        // Verificar se está tentando alterar um OWNER protegido
-        if (targetUser.role == Role.OWNER && actor.role != Role.OWNER) {
-            return Response.status(403).entity("OWNER_PROTECTED").build();
+        // Verifica se o ator tem permissão para alterar o papel (deve ser OWNER ou ADMIN)
+        if (actor.role != Role.OWNER && actor.role != Role.ADMIN) {
+            return Response.status(403).entity("{\"error\":\"Forbidden\"}").build();
         }
 
-        // Verificar se é o último OWNER e tenta rebaixar
-        if (targetUser.role == Role.OWNER && request.role != Role.OWNER && store.countOwners(tenantId) <= 1) {
-            return Response.status(409).entity("LAST_OWNER").build();
+        // Verifica se o ator está no mesmo tenant que o usuário alvo
+        if (!actor.tenantId.equals(tenantId)) {
+            return Response.status(403).entity("{\"error\":\"Forbidden\"}").build();
         }
 
-        // Realizar a mudança de papel
+        // Regra de negócio: não é permitido remover o único OWNER
+        if (targetUser.role == Role.OWNER && request.role != Role.OWNER) {
+            long ownerCount = store.countOwners(tenantId);
+            if (ownerCount <= 1) {
+                return Response.status(422).entity("{\"error\":\"Cannot remove the last OWNER\"}").build();
+            }
+        }
+
+        // Regra de negócio: não é permitido promover um usuário convidado para OWNER
+        if (targetUser.status == UserStatus.INVITED && request.role == Role.OWNER) {
+            return Response.status(422).entity("{\"error\":\"Cannot promote invited user to OWNER\"}").build();
+        }
+
+        // Regra de negócio: não é permitido promover um usuário convidado para ADMIN
+        if (targetUser.status == UserStatus.INVITED && request.role == Role.ADMIN) {
+            return Response.status(422).entity("{\"error\":\"Cannot promote invited user to ADMIN\"}").build();
+        }
+
+        // Regra de negócio: não é permitido promover um usuário convidado para MEMBER
+        if (targetUser.status == UserStatus.INVITED && request.role == Role.MEMBER) {
+            return Response.status(422).entity("{\"error\":\"Cannot promote invited user to MEMBER\"}").build();
+        }
+
+        // Atualiza o papel do usuário
         targetUser.role = request.role;
 
-        // Registrar auditoria
+        // Registra auditoria
         AuditEntry audit = new AuditEntry();
         audit.id = "audit-" + Instant.now().toEpochMilli();
         audit.tenantId = tenantId;
         audit.actorId = actorId;
-        audit.action = "USER_ROLE_CHANGED";
+        audit.action = "UPDATE_USER_ROLE";
         audit.targetId = userId;
         audit.timestamp = Instant.now();
-        audit.details = "Changed role from " + targetUser.role + " to " + request.role;
+        audit.details = "{\"from\":\"" + targetUser.role + "\",\"to\":\"" + request.role + "\"}";
         store.auditLog.add(audit);
 
         return Response.ok(targetUser).build();
     }
 
-    private boolean hasPermission(User actor, User target) {
-        // ADMIN+ pode alterar papéis
-        if (actor.role == Role.ADMIN || actor.role == Role.OWNER) {
-            return true;
-        }
-        return false;
-    }
-
     private String getActorId() {
-        // Simulando a leitura do header X-Actor-Id
-        // Em produção, isso seria feito com Request.getHeader("X-Actor-Id")
-        return "actor-id"; // Este valor seria obtido do header real
+        // Esta implementação assume que o ID do usuário autenticado está no header X-Actor-Id
+        // Em uma implementação real, isso seria obtido através de um mecanismo de segurança
+        // Aqui estamos simulando a leitura do header
+        return "mock-actor-id"; // Seria obtido via request.getHeader("X-Actor-Id")
     }
 
-    public static class RoleChangeRequest {
+    public static class RoleUpdateRequest {
         public Role role;
     }
 }

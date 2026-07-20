@@ -6,10 +6,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && apt-get install -y --no-install-recommends nodejs \
     && rm -rf /var/lib/apt/lists/*
 
-# Aquece o repositorio Maven e valida que o scaffold compila e sobe (SmokeTest)
+# Habilita o Dev MCP do Quarkus (lido de ~/.quarkus/dev-mcp.properties)
+RUN mkdir -p /root/.quarkus && echo "enabled=true" > /root/.quarkus/dev-mcp.properties
+
+# Aquece o repositorio Maven e valida que o scaffold compila e sobe (SmokeTest);
+# tambem aquece as deps do quarkus:dev (usado no modo de avaliacao dev-mcp)
 COPY scaffold/backend /opt/scaffold/backend
 RUN mvn -B -f /opt/scaffold/backend/pom.xml test \
-    && mvn -B -f /opt/scaffold/backend/pom.xml clean
+    && mvn -B -f /opt/scaffold/backend/pom.xml quarkus:go-offline -q || true
+RUN mvn -B -f /opt/scaffold/backend/pom.xml clean
 
 # Aquece node_modules do scaffold frontend
 COPY scaffold/frontend /opt/scaffold/frontend

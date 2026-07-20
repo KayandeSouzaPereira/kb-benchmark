@@ -3,41 +3,44 @@
   "title": "Criar convite",
   "case": "vault-a",
   "model": "qwen3-coder:30b",
-  "score": 0.167,
-  "passed": 1,
+  "score": 0.5,
+  "passed": 3,
   "total": 6,
   "compiled": true,
-  "repairs": 1,
+  "repairs": 0,
+  "eval_mode": "devmcp",
+  "eval_times_s": [
+    10.3
+  ],
+  "dev_boot_wait_s": 2.2,
   "error": null,
   "tests": [
     {
-      "name": "auditoriaRegistraUserInvited",
-      "passed": false,
-      "failure": "audit log deve conter USER_INVITED do ator u-admin ==> expected: <true> but was: <false>\norg.opentest4j.AssertionFailedError: audit log deve conter USER_INVITED do ator u-admin ==> expected: <true> but was: <false>\n\tat org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)\n\tat org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)\n\tat org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)\n\tat org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:36)\n\tat org.junit.jupiter.api.Assertions.assertTrue(Assertions.j"
-    },
-    {
-      "name": "limiteDoPlanoFreeContaConvitesPendentes",
-      "passed": false,
-      "failure": "1 expectation failed.\nExpected status code <422> but was <403>.\n\njava.lang.AssertionError: \n1 expectation failed.\nExpected status code <422> but was <403>.\n\n\tat java.base/jdk.internal.reflect.DirectConstructorHandleAccessor.newInstance(DirectConstructorHandleAccessor.java:62)\n\tat java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Constructor.java:502)\n\tat java.base/java.lang.reflect.Constructor.newInstance(Constructor.java:486)\n\tat org.codehaus.groovy.reflection.CachedConstructor.invoke(CachedConstructor.java:73)\n\tat org.codehaus.groovy.runtime.callsite.ConstructorSite$ConstructorSi"
-    },
-    {
-      "name": "memberNaoPodeConvidar",
-      "passed": false,
-      "failure": "Expected response body to be verified as JSON, HTML or XML but no content-type was defined in the response.\nTry registering a default parser using:\n   RestAssured.defaultParser(<parser type>);\nContent was:\n\n\njava.lang.IllegalStateException: \nExpected response body to be verified as JSON, HTML or XML but no content-type was defined in the response.\nTry registering a default parser using:\n   RestAssured.defaultParser(<parser type>);\nContent was:\n\n\n\tat java.base/jdk.internal.reflect.DirectConstructorHandleAccessor.newInstance(DirectConstructorHandleAccessor.java:62)\n\tat java.base/java.lang.reflec"
-    },
-    {
-      "name": "atorDeOutroTenantRecebe404",
-      "passed": false,
-      "failure": "1 expectation failed.\nExpected status code <404> but was <403>.\n\njava.lang.AssertionError: \n1 expectation failed.\nExpected status code <404> but was <403>.\n\n\tat java.base/jdk.internal.reflect.DirectConstructorHandleAccessor.newInstance(DirectConstructorHandleAccessor.java:62)\n\tat java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Constructor.java:502)\n\tat java.base/java.lang.reflect.Constructor.newInstance(Constructor.java:486)\n\tat org.codehaus.groovy.reflection.CachedConstructor.invoke(CachedConstructor.java:73)\n\tat org.codehaus.groovy.runtime.callsite.ConstructorSite$ConstructorSi"
-    },
-    {
       "name": "conviteExpiraEm72Horas",
-      "passed": false,
-      "failure": "expiresAt deve ser ~72h no futuro, foi: 2026-07-26T19:52:18.538387944Z ==> expected: <true> but was: <false>\norg.opentest4j.AssertionFailedError: expiresAt deve ser ~72h no futuro, foi: 2026-07-26T19:52:18.538387944Z ==> expected: <true> but was: <false>\n\tat org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)\n\tat org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)\n\tat org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)\n\tat org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:36)\n\tat org.junit.jupite"
+      "passed": true
     },
     {
       "name": "adminCriaConvitePersistido",
       "passed": true
+    },
+    {
+      "name": "auditoriaRegistraUserInvited",
+      "passed": true
+    },
+    {
+      "name": "memberNaoPodeConvidar",
+      "passed": false,
+      "failure": "1 expectation failed.\nJSON path code doesn't match.\nExpected: FORBIDDEN_ROLE\n  Actual: null"
+    },
+    {
+      "name": "atorDeOutroTenantRecebe404",
+      "passed": false,
+      "failure": "1 expectation failed.\nExpected status code <404> but was <403>."
+    },
+    {
+      "name": "limiteDoPlanoFreeContaConvitesPendentes",
+      "passed": false,
+      "failure": "1 expectation failed.\nExpected status code <422> but was <201>."
     }
   ],
   "files_written": [
@@ -46,18 +49,15 @@
   "retrieval": {
     "actions": [
       "ls .",
-      "read decisoes/decisoes.md",
-      "ls decisoes/",
-      "read decisoes/convites.md",
-      "ls decisoes/",
-      "read decisoes/adr-002-convites-pendentes-contam-no-limite.md",
-      "read dominio/limites-de-plano.md",
-      "read produto/planos-e-precos.md"
+      "read produto/convites.md",
+      "grep -r \"convite\" .",
+      "grep -r \"invitation\" .",
+      "ls produto/",
+      "ls dominio/",
+      "read dominio/convites.md"
     ],
     "notes_read": [
-      "decisoes/adr-002-convites-pendentes-contam-no-limite.md",
-      "dominio/limites-de-plano.md",
-      "produto/planos-e-precos.md"
+      "dominio/convites.md"
     ],
     "gold_notes": [
       "dominio/convites.md",
@@ -65,13 +65,13 @@
       "padroes-codigo/formato-de-erros-api.md"
     ],
     "gold_hits": [
-      "dominio/limites-de-plano.md"
+      "dominio/convites.md"
     ],
     "gold_hit_rate": 0.333
   },
   "tokens": {
-    "prompt_tokens": 58083,
-    "completion_tokens": 10481
+    "prompt_tokens": 11375,
+    "completion_tokens": 1202
   },
-  "duration_s": 682.9
+  "duration_s": 92.3
 }

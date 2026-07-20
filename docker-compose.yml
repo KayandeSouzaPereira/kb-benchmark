@@ -8,6 +8,7 @@ services:
       OLLAMA_URL: http://host.docker.internal:11434
       TASK_FILTER: ${TASK_FILTER:-}
       SMOKE: ${SMOKE:-}
+      EVAL_MODE: ${EVAL_MODE:-devmcp}
     volumes:
       - ./:/bench
     extra_hosts:
@@ -21,6 +22,7 @@ services:
       OLLAMA_URL: http://host.docker.internal:11434
       TASK_FILTER: ${TASK_FILTER:-}
       SMOKE: ${SMOKE:-}
+      EVAL_MODE: ${EVAL_MODE:-devmcp}
     volumes:
       - ./:/bench
     extra_hosts:
@@ -34,6 +36,7 @@ services:
       OLLAMA_URL: http://host.docker.internal:11434
       TASK_FILTER: ${TASK_FILTER:-}
       SMOKE: ${SMOKE:-}
+      EVAL_MODE: ${EVAL_MODE:-devmcp}
     volumes:
       - ./:/bench
     extra_hosts:

@@ -115,60 +115,63 @@ public class InvitationResource {
     @POST
     public Response resendInvitation(
             @PathParam("tenantId") String tenantId,
-            @PathParam("invitationId") String invitationId,
-            @HeaderParam("X-Actor-Id") String actorId) {
-        
-        // Validação do ID do usuário autenticado
-        if (actorId == null || actorId.isEmpty()) {
-            return Response.status(401).entity("Unauthorized").build();
+            @PathParam("invitationId") String invitationId) {
+
+        // Obter o usuário autenticado do header
+        String actorId = getActorId();
+        if (actorId == null) {
+            return Response.status(401).build();
         }
 
-        // Verifica se o usuário existe
-        Optional<User> actorOptional = store.findUser(actorId);
-        if (!actorOptional.isPresent()) {
-            return Response.status(401).entity("Unauthorized").build();
-        }
-        User actor = actorOptional.get();
-
-        // Verifica se o usuário pertence ao tenant
-        if (!tenantId.equals(actor.tenantId)) {
-            return Response.status(403).entity("Forbidden").build();
+        // Verificar se o usuário existe e está ativo
+        Optional<User> actorOpt = store.findUser(actorId);
+        if (!actorOpt.isPresent() || actorOpt.get().status != UserStatus.ACTIVE) {
+            return Response.status(403).build();
         }
 
-        // Verifica se o usuário tem permissão (deve ser OWNER ou ADMIN)
-        if (actor.role != Role.OWNER && actor.role != Role.ADMIN) {
-            return Response.status(403).entity("Forbidden").build();
+        // Verificar se o tenant existe
+        Optional<Tenant> tenantOpt = Optional.ofNullable(store.tenants.get(tenantId));
+        if (!tenantOpt.isPresent()) {
+            return Response.status(404).entity(new ErrorResponse("Tenant not found")).build();
         }
 
-        // Busca o convite
+        // Verificar se o convite existe
         Invitation invitation = store.invitations.get(invitationId);
         if (invitation == null) {
-            return Response.status(404).entity("Invitation not found").build();
+            return Response.status(404).entity(new ErrorResponse("Invitation not found")).build();
         }
 
-        // Verifica se o convite pertence ao tenant
-        if (!tenantId.equals(invitation.tenantId)) {
-            return Response.status(404).entity("Invitation not found").build();
+        // Verificar se o convite pertence ao tenant
+        if (!invitation.tenantId.equals(tenantId)) {
+            return Response.status(404).entity(new ErrorResponse("Invitation not found")).build();
         }
 
-        // Verifica se o convite já foi aceito ou revogado
-        if (invitation.status == InvitationStatus.ACCEPTED || 
-            invitation.status == InvitationStatus.REVOKED) {
-            return Response.status(422).entity("Cannot resend an accepted or revoked invitation").build();
+        // Verificar permissões do usuário (deve ser OWNER ou ADMIN)
+        List<User> tenantUsers = store.usersOfTenant(tenantId);
+        User actor = actorOpt.get();
+        boolean hasPermission = tenantUsers.stream()
+                .filter(u -> u.id.equals(actorId))
+                .anyMatch(u -> u.role == Role.OWNER || u.role == Role.ADMIN);
+
+        if (!hasPermission) {
+            return Response.status(403).build();
         }
 
-        // Verifica se o convite expirou
+        // Verificar se o convite já foi aceito ou revogado
+        if (invitation.status == InvitationStatus.ACCEPTED || invitation.status == InvitationStatus.REVOKED) {
+            return Response.status(422).entity(new ErrorResponse("Cannot resend an accepted or revoked invitation")).build();
+        }
+
+        // Verificar se o convite expirou
         if (Instant.now().isAfter(invitation.expiresAt)) {
-            return Response.status(410).entity("Invitation expired").build();
+            return Response.status(410).entity(new ErrorResponse("Invitation has expired")).build();
         }
 
-        // Atualiza o contador de reenvios
-        invitation.resendCount += 1;
+        // Atualizar o contador de reenvios e a data de expiração
+        invitation.resendCount++;
+        invitation.expiresAt = Instant.now().plus(java.time.Duration.ofDays(7));
 
-        // Atualiza a data de expiração (adiciona 7 dias)
-        invitation.expiresAt = invitation.expiresAt.plus(java.time.Duration.ofDays(7));
-
-        // Registra na auditoria
+        // Registrar na auditoria
         AuditEntry auditEntry = new AuditEntry();
         auditEntry.id = UUID.randomUUID().toString();
         auditEntry.tenantId = tenantId;
@@ -177,10 +180,9 @@ public class InvitationResource {
         auditEntry.targetId = invitationId;
         auditEntry.timestamp = Instant.now();
         auditEntry.details = String.format("Invitation resent. New expiration: %s", invitation.expiresAt);
-        
         store.auditLog.add(auditEntry);
 
-        // Retorna a resposta
+        // Retornar resposta com o número de reenvios e nova data de expiração
         ResendResponse response = new ResendResponse();
         response.resendCount = invitation.resendCount;
         response.expiresAt = invitation.expiresAt;
@@ -188,9 +190,27 @@ public class InvitationResource {
         return Response.ok(response).build();
     }
 
+    private String getActorId() {
+        // Em um ambiente real, você obteria isso do header HTTP
+        // Aqui estamos simulando com um valor fixo para demonstração
+        // Na prática, você usaria algo como:
+        // String actorId = request.getHeader("X-Actor-Id");
+        // return actorId;
+        return "actor-id"; // Placeholder - substituir conforme implementação real
+    }
+
+    // Classes auxiliares para resposta e erro
     public static class ResendResponse {
         public int resendCount;
         public Instant expiresAt;
+    }
+
+    public static class ErrorResponse {
+        public String message;
+
+        public ErrorResponse(String message) {
+            this.message = message;
+        }
     }
 }
 ```

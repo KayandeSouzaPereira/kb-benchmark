@@ -16,6 +16,7 @@ import json
 import os
 import re
 import shutil
+import signal
 import subprocess
 import sys
 import time
@@ -40,6 +41,10 @@ EVAL_DIR = BENCH / "eval"
 MAX_ACTIONS = 8
 MAX_NUDGES = 2
 MAX_REPAIRS = 3
+# devmcp: avaliacao via Quarkus dev mode + continuous testing (Dev MCP);
+# classic: mvn test frio a cada avaliacao
+EVAL_MODE = os.environ.get("EVAL_MODE", "devmcp")
+DEV_MCP_URL = "http://localhost:8080/q/dev-mcp"
 NUM_CTX = 16384
 TEMPERATURE = 0.2
 
@@ -205,6 +210,182 @@ def write_generated_files(ws, blocks):
     return written
 
 
+# --------------------------------------------------- dev mode (Dev MCP) -----
+
+def _tail_file(path, n=3000):
+    try:
+        txt = Path(path).read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return "(sem log)"
+    txt = re.sub(r"\x1b\[[0-9;]*m", "", txt)
+    return txt[-n:]
+
+
+class DevMode:
+    """Processo `mvn quarkus:dev` persistente por tarefa, dirigido via Dev MCP."""
+
+    def __init__(self, ws):
+        self.ws = ws
+        self.log = ws / "devmode.log"
+        self.proc = None
+        self._logf = None
+        self.ready = False
+        self.last_run = 0
+        self.boot_wait_s = None
+
+    def start(self):
+        # mata qualquer dev mode orfao de tarefa anterior (libera a porta 8080)
+        subprocess.run(["pkill", "-f", "quarkus:dev"], capture_output=True)
+        time.sleep(1)
+        self._logf = open(self.log, "w", encoding="utf-8")
+        self.proc = subprocess.Popen(
+            ["mvn", "-B", "quarkus:dev", "-Dquarkus.analytics.disabled=true"],
+            cwd=self.ws, stdout=self._logf, stderr=subprocess.STDOUT,
+            stdin=subprocess.DEVNULL, start_new_session=True)
+
+    def _rpc(self, method, params=None, timeout=30):
+        payload = {"jsonrpc": "2.0", "id": 1, "method": method}
+        if params is not None:
+            payload["params"] = params
+        req = urllib.request.Request(
+            DEV_MCP_URL, data=json.dumps(payload).encode(),
+            headers={"Content-Type": "application/json",
+                     "Accept": "application/json, text/event-stream"})
+        with urllib.request.urlopen(req, timeout=timeout) as r:
+            return json.loads(r.read())
+
+    def tool(self, name):
+        data = self._rpc("tools/call", {"name": name, "arguments": {}})
+        txt = data.get("result", {}).get("content", [{}])[0].get("text", "")
+        try:
+            return json.loads(txt)
+        except (json.JSONDecodeError, TypeError):
+            return txt
+
+    def wait_ready(self, timeout=120):
+        t0 = time.time()
+        while time.time() - t0 < timeout:
+            if self.proc.poll() is not None:
+                raise RuntimeError(
+                    f"quarkus:dev terminou (rc={self.proc.returncode}):\n"
+                    + _tail_file(self.log))
+            try:
+                self._rpc("ping", timeout=5)
+                return
+            except (urllib.error.URLError, OSError, TimeoutError):
+                time.sleep(2)
+        raise RuntimeError("Dev MCP nao respondeu:\n" + _tail_file(self.log))
+
+    def wait_new_run(self, timeout):
+        t0 = time.time()
+        while time.time() - t0 < timeout:
+            try:
+                st = self.tool("devui-continuous-testing_getStatus")
+            except (urllib.error.URLError, OSError, TimeoutError):
+                st = None
+            if (isinstance(st, dict) and st.get("lastRun", 0) > self.last_run
+                    and st.get("running", -1) == -1):
+                self.last_run = st["lastRun"]
+                return st
+            time.sleep(2)
+        return None
+
+    def stop(self):
+        if self.proc and self.proc.poll() is None:
+            try:
+                os.killpg(os.getpgid(self.proc.pid), signal.SIGTERM)
+                self.proc.wait(timeout=20)
+            except (ProcessLookupError, subprocess.TimeoutExpired):
+                try:
+                    os.killpg(os.getpgid(self.proc.pid), signal.SIGKILL)
+                except ProcessLookupError:
+                    pass
+        if self._logf:
+            self._logf.close()
+
+
+def parse_ct_results(data):
+    """Extrai testes por metodo do JSON do getTestResults (defensivo)."""
+    found = {}
+
+    def walk(o):
+        if isinstance(o, dict):
+            for key in ("passing", "failing", "skipped"):
+                if isinstance(o.get(key), list):
+                    for e in o[key]:
+                        dn = e.get("displayName", "") if isinstance(e, dict) else ""
+                        if "#" in dn:
+                            name = dn.split("#", 1)[1].rstrip("()")
+                            item = {"name": name,
+                                    "passed": e.get("state") == "PASSED"}
+                            thr = ((e.get("testExecutionResult") or {})
+                                   .get("throwable") or {})
+                            if thr.get("message"):
+                                item["failure"] = thr["message"].strip()[:600]
+                            found[name] = item
+            for v in o.values():
+                walk(v)
+        elif isinstance(o, list):
+            for v in o:
+                walk(v)
+
+    walk(data)
+    return list(found.values())
+
+
+def eval_backend_devmcp(task, ws, dev):
+    if not dev.ready:
+        boot0 = time.time()
+        if dev.proc is None or dev.proc.poll() is not None:
+            dev.start()
+        try:
+            # fonte quebrada impede o dev mode de subir o HTTP; o processo
+            # fica re-tentando compilar — tratamos como falha de compilacao
+            # reparavel e o proximo evaluate() tenta de novo
+            dev.wait_ready()
+        except RuntimeError as e:
+            return {"compiled": False, "passed": 0,
+                    "total": task["expected_tests"], "tests": [],
+                    "error": f"dev mode nao subiu (compilacao?):\n{e}"[-3500:]}
+        dev.tool("devui-continuous-testing_start")
+        dev.ready = True
+        dev.boot_wait_s = round(time.time() - boot0, 1)
+        st = dev.wait_new_run(180)
+    else:
+        # run incremental disparado pela escrita dos arquivos (pode nao vir)
+        st = dev.wait_new_run(60)
+
+    # forca um run COMPLETO: os contadores por-run do getStatus enganam em
+    # runs incrementais (re-rodam so os afetados); o placar vem do estado
+    # cumulativo do getTestResults apos um runAll
+    try:
+        dev.tool("devui-continuous-testing_runAll")
+        st2 = dev.wait_new_run(90)
+    except (urllib.error.URLError, OSError, TimeoutError):
+        st2 = None
+    if st2 is not None:
+        st = st2
+    if st is None:
+        return {"compiled": False, "passed": 0,
+                "total": task["expected_tests"], "tests": [],
+                "error": "continuous testing nao produziu novo run "
+                         "(erro de compilacao?)\n" + _tail_file(dev.log)}
+
+    try:
+        detail = dev.tool("devui-continuous-testing_getTestResults")
+        tests = parse_ct_results(detail)
+    except (urllib.error.URLError, OSError, TimeoutError):
+        tests = []
+    total = task["expected_tests"]
+    if tests:
+        passed = sum(1 for t in tests if t["passed"])
+    else:
+        passed = int(st.get("totalTestsPassed", 0))
+    passed = min(passed, total)
+    return {"compiled": True, "passed": passed, "total": total,
+            "tests": tests, "error": None}
+
+
 # ------------------------------------------------------------------ eval ----
 
 def eval_backend(task, ws):
@@ -280,6 +461,19 @@ def run_task(task):
     t0 = time.time()
     ws = prepare_workspace(task)
 
+    dev = None
+    if task["type"] == "backend" and EVAL_MODE == "devmcp":
+        test_src = EVAL_DIR / task["id"] / task["eval_file"]
+        dest = ws / "src/test/java/com/bench/evaltest" / test_src.name
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy(test_src, dest)
+        smoke = ws / "src/test/java/com/bench/SmokeTest.java"
+        if smoke.exists():
+            smoke.unlink()
+        dev = DevMode(ws)
+        dev.start()
+        log("  quarkus:dev subindo em paralelo com a geração")
+
     stats = {"prompt_tokens": 0, "completion_tokens": 0}
     notes_read = set()
     actions = []
@@ -344,10 +538,20 @@ def run_task(task):
 
     written = write_generated_files(ws, blocks)
 
+    eval_times = []
+
     def evaluate():
         log("  avaliando...")
-        return (eval_frontend(task, ws) if task["type"] == "frontend"
-                else eval_backend(task, ws))
+        e0 = time.time()
+        if task["type"] == "frontend":
+            ev = eval_frontend(task, ws)
+        elif dev is not None:
+            ev = eval_backend_devmcp(task, ws, dev)
+        else:
+            ev = eval_backend(task, ws)
+        eval_times.append(round(time.time() - e0, 1))
+        log(f"  avaliação em {eval_times[-1]}s")
+        return ev
 
     repairs = 0
     if written:
@@ -376,6 +580,9 @@ def run_task(task):
         ev = {"compiled": False, "passed": 0, "total": task["expected_tests"],
               "tests": [], "error": "modelo não produziu arquivos"}
 
+    if dev is not None:
+        dev.stop()
+
     gold = set(task["gold_notes"].get(CASE, []))
     result = {
         "task": task["id"],
@@ -387,6 +594,10 @@ def run_task(task):
         "total": ev["total"],
         "compiled": ev["compiled"],
         "repairs": repairs,
+        "eval_mode": ("frontend" if task["type"] == "frontend"
+                      else ("devmcp" if dev is not None else "classic")),
+        "eval_times_s": eval_times,
+        "dev_boot_wait_s": dev.boot_wait_s if dev is not None else None,
         "error": ev["error"],
         "tests": ev["tests"],
         "files_written": written,

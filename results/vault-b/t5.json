@@ -3,11 +3,16 @@
   "title": "Listagem com badges (Angular)",
   "case": "vault-b",
   "model": "qwen3-coder:30b",
-  "score": 0.714,
-  "passed": 5,
+  "score": 0.857,
+  "passed": 6,
   "total": 7,
   "compiled": true,
   "repairs": 0,
+  "eval_mode": "frontend",
+  "eval_times_s": [
+    0.8
+  ],
+  "dev_boot_wait_s": null,
   "error": null,
   "tests": [
     {
@@ -24,7 +29,7 @@
     },
     {
       "name": "INVITED: classe badge-warning + rotulo 'Convite pendente'",
-      "passed": false
+      "passed": true
     },
     {
       "name": "SUSPENDED: classe badge-muted + rotulo 'Suspenso'",
@@ -47,13 +52,16 @@
       "ls .",
       "read 202604111600-badges-de-status-no-front.md",
       "read 202603150900-soft-delete-30-dias.md",
-      "read 202604111600-badges-de-status-no-front.md",
-      "grep \"badge-muted\" 202604111600-badges-de-status-no-front.md",
-      "read 202604111600-badges-de-status-no-front.md"
+      "read 202601050900-mapa-dominio-usuarios.md",
+      "grep \"badge\" 202604111600-badges-de-status-no-front.md",
+      "grep -i \"badge\" 202604111600-badges-de-status-no-front.md",
+      "read 202605190800-ideias-de-precos.md"
     ],
     "notes_read": [
+      "202601050900-mapa-dominio-usuarios.md",
       "202603150900-soft-delete-30-dias.md",
-      "202604111600-badges-de-status-no-front.md"
+      "202604111600-badges-de-status-no-front.md",
+      "202605190800-ideias-de-precos.md"
     ],
     "gold_notes": [
       "202604111600-badges-de-status-no-front.md"
@@ -64,8 +72,8 @@
     "gold_hit_rate": 1.0
   },
   "tokens": {
-    "prompt_tokens": 17822,
-    "completion_tokens": 3090
+    "prompt_tokens": 12268,
+    "completion_tokens": 576
   },
-  "duration_s": 166.5
+  "duration_s": 43.0
 }

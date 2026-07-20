@@ -8,6 +8,11 @@
   "total": 7,
   "compiled": true,
   "repairs": 0,
+  "eval_mode": "frontend",
+  "eval_times_s": [
+    0.7
+  ],
+  "dev_boot_wait_s": null,
   "error": null,
   "tests": [
     {
@@ -51,7 +56,7 @@
   },
   "tokens": {
     "prompt_tokens": 364,
-    "completion_tokens": 510
+    "completion_tokens": 416
   },
-  "duration_s": 34.6
+  "duration_s": 26.1
 }

@@ -1,0 +1,77 @@
+{
+  "task": "t2",
+  "title": "Excluir usuário (soft-delete)",
+  "case": "vault-a",
+  "model": "qwen3-coder:30b",
+  "score": 0.429,
+  "passed": 3,
+  "total": 7,
+  "compiled": true,
+  "repairs": 0,
+  "error": null,
+  "tests": [
+    {
+      "name": "adminNaoPodeDeletarOwner",
+      "passed": false,
+      "failure": "Expected response body to be verified as JSON, HTML or XML but content-type 'text/plain' is not supported out of the box.\nTry registering a custom parser using:\n   RestAssured.registerParser(\"text/plain\", <parser type>);\nContent was:\nOWNER_PROTECTED\n\njava.lang.IllegalStateException: \nExpected response body to be verified as JSON, HTML or XML but content-type 'text/plain' is not supported out of the box.\nTry registering a custom parser using:\n   RestAssured.registerParser(\"text/plain\", <parser type>);\nContent was:\nOWNER_PROTECTED\n\n\tat java.base/jdk.internal.reflect.DirectConstructorHandleAccess"
+    },
+    {
+      "name": "purgeAtEm30Dias",
+      "passed": true
+    },
+    {
+      "name": "memberNaoPodeDeletar",
+      "passed": false,
+      "failure": "Expected response body to be verified as JSON, HTML or XML but no content-type was defined in the response.\nTry registering a default parser using:\n   RestAssured.defaultParser(<parser type>);\nContent was:\n\n\njava.lang.IllegalStateException: \nExpected response body to be verified as JSON, HTML or XML but no content-type was defined in the response.\nTry registering a default parser using:\n   RestAssured.defaultParser(<parser type>);\nContent was:\n\n\n\tat java.base/jdk.internal.reflect.DirectConstructorHandleAccessor.newInstance(DirectConstructorHandleAccessor.java:62)\n\tat java.base/java.lang.reflec"
+    },
+    {
+      "name": "auditoriaRegistraSoftDelete",
+      "passed": true
+    },
+    {
+      "name": "atorDeOutroTenantRecebe404",
+      "passed": false,
+      "failure": "1 expectation failed.\nExpected status code <404> but was <403>.\n\njava.lang.AssertionError: \n1 expectation failed.\nExpected status code <404> but was <403>.\n\n\tat java.base/jdk.internal.reflect.DirectConstructorHandleAccessor.newInstance(DirectConstructorHandleAccessor.java:62)\n\tat java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Constructor.java:502)\n\tat java.base/java.lang.reflect.Constructor.newInstance(Constructor.java:486)\n\tat org.codehaus.groovy.reflection.CachedConstructor.invoke(CachedConstructor.java:73)\n\tat org.codehaus.groovy.runtime.callsite.ConstructorSite$ConstructorSi"
+    },
+    {
+      "name": "ninguemDeletaASiMesmo",
+      "passed": false,
+      "failure": "Expected response body to be verified as JSON, HTML or XML but content-type 'text/plain' is not supported out of the box.\nTry registering a custom parser using:\n   RestAssured.registerParser(\"text/plain\", <parser type>);\nContent was:\nCANNOT_DELETE_SELF\n\njava.lang.IllegalStateException: \nExpected response body to be verified as JSON, HTML or XML but content-type 'text/plain' is not supported out of the box.\nTry registering a custom parser using:\n   RestAssured.registerParser(\"text/plain\", <parser type>);\nContent was:\nCANNOT_DELETE_SELF\n\n\tat java.base/jdk.internal.reflect.DirectConstructorHandle"
+    },
+    {
+      "name": "adminFazSoftDelete",
+      "passed": true
+    }
+  ],
+  "files_written": [
+    "src/main/java/com/bench/api/UserResource.java"
+  ],
+  "retrieval": {
+    "actions": [
+      "ls .",
+      "read produto/regras-usuarios.md",
+      "grep -r \"exclusao\" .",
+      "grep -r \"usuario\" .",
+      "ls produto/",
+      "ls dominio/",
+      "read dominio/exclusao-de-usuarios.md"
+    ],
+    "notes_read": [
+      "dominio/exclusao-de-usuarios.md"
+    ],
+    "gold_notes": [
+      "dominio/exclusao-de-usuarios.md",
+      "dominio/papeis-e-permissoes.md",
+      "padroes-codigo/formato-de-erros-api.md"
+    ],
+    "gold_hits": [
+      "dominio/exclusao-de-usuarios.md"
+    ],
+    "gold_hit_rate": 0.333
+  },
+  "tokens": {
+    "prompt_tokens": 9182,
+    "completion_tokens": 732
+  },
+  "duration_s": 66.1
+}

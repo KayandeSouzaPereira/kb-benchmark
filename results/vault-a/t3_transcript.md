@@ -464,12 +464,12 @@ public class InvitationResource {
             return Response.status(404).entity(new ErrorResponse("NOT_FOUND", "Recurso não encontrado")).build();
         }
 
-        // Verificar se o ator tem permissão (ADMIN ou OWNER)
+        // Verificar se o ator tem permissão (ADMIN+)
         if (actor.role == Role.MEMBER) {
             return Response.status(403).entity(new ErrorResponse("FORBIDDEN_ROLE", "Acesso negado")).build();
         }
 
-        // Obter o convite
+        // Encontrar o convite
         Invitation invitation = store.invitations.get(invitationId);
         if (invitation == null || !invitation.tenantId.equals(tenantId)) {
             return Response.status(404).entity(new ErrorResponse("NOT_FOUND", "Convite não encontrado")).build();
@@ -487,20 +487,20 @@ public class InvitationResource {
                     .build();
         }
 
-        // Atualizar o convite: resetar expiração e incrementar resendCount
+        // Atualizar o convite: resetar expiração e incrementar contador
         Instant now = Instant.now();
         invitation.expiresAt = now.plus(java.time.Duration.ofHours(72));
         invitation.resendCount++;
 
         // Registrar auditoria
-        AuditEntry auditEntry = new AuditEntry();
-        auditEntry.id = UUID.randomUUID().toString();
-        auditEntry.tenantId = tenantId;
-        auditEntry.actorId = actorId;
-        auditEntry.action = "INVITATION_RESENT";
-        auditEntry.targetId = invitationId;
-        auditEntry.timestamp = now;
-        store.auditLog.add(auditEntry);
+        AuditEntry audit = new AuditEntry();
+        audit.id = UUID.randomUUID().toString();
+        audit.tenantId = tenantId;
+        audit.actorId = actorId;
+        audit.action = "INVITATION_RESENT";
+        audit.targetId = invitationId;
+        audit.timestamp = now;
+        store.auditLog.add(audit);
 
         // Retornar resposta
         ResendResponse response = new ResendResponse();

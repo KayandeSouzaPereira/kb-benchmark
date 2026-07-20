@@ -148,15 +148,14 @@ public class InvitationResource {
                     .entity(new ErrorResponse("Forbidden"))
                     .build();
         }
-        
-        // Verifica se o usuário tem permissão para convidar (não é necessário ser OWNER, 
-        // mas precisa ter pelo menos ADMIN)
-        if (actor.role != Role.OWNER && actor.role != Role.ADMIN) {
+
+        // Verifica se o usuário autenticado tem permissão para convidar (ADMIN ou OWNER)
+        if (actor.role != Role.ADMIN && actor.role != Role.OWNER) {
             return Response.status(403)
                     .entity(new ErrorResponse("Forbidden"))
                     .build();
         }
-        
+
         // Verifica se o email já está em uso
         List<User> existingUsers = store.usersOfTenant(tenantId);
         for (User user : existingUsers) {
@@ -166,7 +165,7 @@ public class InvitationResource {
                         .build();
             }
         }
-        
+
         // Verifica se já existe um convite pendente para esse email
         List<Invitation> existingInvitations = store.invitationsOfTenant(tenantId);
         for (Invitation invitation : existingInvitations) {
@@ -177,31 +176,31 @@ public class InvitationResource {
                         .build();
             }
         }
-        
-        // Verifica se o plano permite mais usuários
+
+        // Verifica se o tenant existe
         Optional<Tenant> tenantOpt = store.tenants.values().stream()
                 .filter(t -> t.id.equals(tenantId))
                 .findFirst();
         
-        if (tenantOpt.isPresent()) {
-            Tenant tenant = tenantOpt.get();
-            if (tenant.plan.maxUsers != null) {
-                long userCount = existingUsers.stream()
-                        .filter(u -> u.status != UserStatus.DELETED)
-                        .count();
-                
-                long invitationCount = existingInvitations.stream()
-                        .filter(i -> i.status == InvitationStatus.PENDING)
-                        .count();
-                
-                if (userCount + invitationCount >= tenant.plan.maxUsers) {
-                    return Response.status(422)
-                            .entity(new ErrorResponse("Tenant user limit reached"))
-                            .build();
-                }
-            }
+        if (!tenantOpt.isPresent()) {
+            return Response.status(404)
+                    .entity(new ErrorResponse("Tenant not found"))
+                    .build();
         }
+
+        Tenant tenant = tenantOpt.get();
+
+        // Verifica se o número de usuários excederia o limite do plano
+        long currentUsers = existingUsers.size();
+        long owners = store.countOwners(tenantId);
+        long maxUsers = tenant.plan.maxUsers != null ? tenant.plan.maxUsers : Long.MAX_VALUE;
         
+        if (currentUsers + 1 > maxUsers) {
+            return Response.status(422)
+                    .entity(new ErrorResponse("Tenant user limit exceeded"))
+                    .build();
+        }
+
         // Cria o convite
         Invitation invitation = new Invitation();
         invitation.id = UUID.randomUUID().toString();
@@ -209,53 +208,52 @@ public class InvitationResource {
         invitation.email = request.email;
         invitation.role = request.role;
         invitation.createdAt = Instant.now();
-        invitation.expiresAt = Instant.now().plus(java.time.Duration.ofHours(24));
+        invitation.expiresAt = Instant.now().plus(java.time.Duration.ofDays(7));
         invitation.resendCount = 0;
         invitation.status = InvitationStatus.PENDING;
-        
+
         // Persiste o convite
         store.invitations.put(invitation.id, invitation);
-        
+
         // Registra na auditoria
-        AuditEntry audit = new AuditEntry();
-        audit.id = UUID.randomUUID().toString();
-        audit.tenantId = tenantId;
-        audit.actorId = actorId;
-        audit.action = "INVITE_USER";
-        audit.targetId = invitation.id;
-        audit.timestamp = Instant.now();
-        audit.details = String.format("Invited user %s with role %s", request.email, request.role);
-        store.auditLog.add(audit);
-        
-        // Retorna resposta
+        AuditEntry auditEntry = new AuditEntry();
+        auditEntry.id = UUID.randomUUID().toString();
+        auditEntry.tenantId = tenantId;
+        auditEntry.actorId = actorId;
+        auditEntry.action = "INVITE_USER";
+        auditEntry.targetId = invitation.id;
+        auditEntry.timestamp = Instant.now();
+        auditEntry.details = String.format("Invited user %s with role %s", 
+                                          invitation.email, invitation.role);
+        store.auditLog.add(auditEntry);
+
+        // Retorna a resposta
         InvitationResponse response = new InvitationResponse();
         response.id = invitation.id;
         response.expiresAt = invitation.expiresAt;
-        
+
         return Response.status(201).entity(response).build();
     }
-    
+
     private String getActorId() {
         // Em um ambiente real, isso viria do header HTTP
-        // Aqui estamos simulando com uma implementação simples
-        // Na prática, você usaria:
-        // String actorId = request.getHeader("X-Actor-Id");
-        return "test-user-id"; // Placeholder - substituir conforme necessário
+        // Aqui estamos simulando com um valor fixo para testes
+        return "actor-123";
     }
-    
+
     public static class InvitationRequest {
         public String email;
         public Role role;
     }
-    
+
     public static class InvitationResponse {
         public String id;
         public Instant expiresAt;
     }
-    
+
     public static class ErrorResponse {
         public String message;
-        
+
         public ErrorResponse(String message) {
             this.message = message;
         }

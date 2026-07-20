@@ -8,32 +8,37 @@
   "total": 5,
   "compiled": true,
   "repairs": 0,
+  "eval_mode": "devmcp",
+  "eval_times_s": [
+    8.4
+  ],
+  "dev_boot_wait_s": 2.3,
   "error": null,
   "tests": [
     {
-      "name": "reenvioIncrementaContadorEResetaExpiracao",
+      "name": "auditoriaRegistraReenvio",
       "passed": false,
-      "failure": "1 expectation failed.\nExpected status code <200> but was <415>.\n\njava.lang.AssertionError: \n1 expectation failed.\nExpected status code <200> but was <415>.\n\n\tat java.base/jdk.internal.reflect.DirectConstructorHandleAccessor.newInstance(DirectConstructorHandleAccessor.java:62)\n\tat java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Constructor.java:502)\n\tat java.base/java.lang.reflect.Constructor.newInstance(Constructor.java:486)\n\tat org.codehaus.groovy.reflection.CachedConstructor.invoke(CachedConstructor.java:73)\n\tat org.codehaus.groovy.runtime.callsite.ConstructorSite$ConstructorSi"
+      "failure": "1 expectation failed.\nExpected status code <200> but was <415>."
     },
     {
-      "name": "maximoDe3Reenvios",
+      "name": "reenvioIncrementaContadorEResetaExpiracao",
       "passed": false,
-      "failure": "1 expectation failed.\nExpected status code <422> but was <415>.\n\njava.lang.AssertionError: \n1 expectation failed.\nExpected status code <422> but was <415>.\n\n\tat java.base/jdk.internal.reflect.DirectConstructorHandleAccessor.newInstance(DirectConstructorHandleAccessor.java:62)\n\tat java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Constructor.java:502)\n\tat java.base/java.lang.reflect.Constructor.newInstance(Constructor.java:486)\n\tat org.codehaus.groovy.reflection.CachedConstructor.invoke(CachedConstructor.java:73)\n\tat org.codehaus.groovy.runtime.callsite.ConstructorSite$ConstructorSi"
+      "failure": "1 expectation failed.\nExpected status code <200> but was <415>."
     },
     {
       "name": "reenvioReativaConviteExpirado",
       "passed": false,
-      "failure": "1 expectation failed.\nExpected status code <200> but was <415>.\n\njava.lang.AssertionError: \n1 expectation failed.\nExpected status code <200> but was <415>.\n\n\tat java.base/jdk.internal.reflect.DirectConstructorHandleAccessor.newInstance(DirectConstructorHandleAccessor.java:62)\n\tat java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Constructor.java:502)\n\tat java.base/java.lang.reflect.Constructor.newInstance(Constructor.java:486)\n\tat org.codehaus.groovy.reflection.CachedConstructor.invoke(CachedConstructor.java:73)\n\tat org.codehaus.groovy.runtime.callsite.ConstructorSite$ConstructorSi"
+      "failure": "1 expectation failed.\nExpected status code <200> but was <415>."
     },
     {
       "name": "memberNaoPodeReenviar",
       "passed": false,
-      "failure": "1 expectation failed.\nExpected status code <403> but was <415>.\n\njava.lang.AssertionError: \n1 expectation failed.\nExpected status code <403> but was <415>.\n\n\tat java.base/jdk.internal.reflect.DirectConstructorHandleAccessor.newInstance(DirectConstructorHandleAccessor.java:62)\n\tat java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Constructor.java:502)\n\tat java.base/java.lang.reflect.Constructor.newInstance(Constructor.java:486)\n\tat org.codehaus.groovy.reflection.CachedConstructor.invoke(CachedConstructor.java:73)\n\tat org.codehaus.groovy.runtime.callsite.ConstructorSite$ConstructorSi"
+      "failure": "1 expectation failed.\nExpected status code <403> but was <415>."
     },
     {
-      "name": "auditoriaRegistraReenvio",
+      "name": "maximoDe3Reenvios",
       "passed": false,
-      "failure": "1 expectation failed.\nExpected status code <200> but was <415>.\n\njava.lang.AssertionError: \n1 expectation failed.\nExpected status code <200> but was <415>.\n\n\tat java.base/jdk.internal.reflect.DirectConstructorHandleAccessor.newInstance(DirectConstructorHandleAccessor.java:62)\n\tat java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Constructor.java:502)\n\tat java.base/java.lang.reflect.Constructor.newInstance(Constructor.java:486)\n\tat org.codehaus.groovy.reflection.CachedConstructor.invoke(CachedConstructor.java:73)\n\tat org.codehaus.groovy.runtime.callsite.ConstructorSite$ConstructorSi"
+      "failure": "1 expectation failed.\nExpected status code <422> but was <415>."
     }
   ],
   "files_written": [
@@ -48,7 +53,7 @@
   },
   "tokens": {
     "prompt_tokens": 809,
-    "completion_tokens": 816
+    "completion_tokens": 1004
   },
-  "duration_s": 63.5
+  "duration_s": 70.4
 }

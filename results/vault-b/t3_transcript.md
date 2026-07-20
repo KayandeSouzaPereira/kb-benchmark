@@ -333,39 +333,40 @@ public class InvitationResource {
             @PathParam("invitationId") String invitationId,
             @HeaderParam("X-Actor-Id") String actorId) {
 
-        // Verificar se o ator pertence ao tenant
+        // Verifica se o ator pertence ao tenant
         User actor = store.findUser(actorId).orElse(null);
         if (actor == null || !actor.tenantId.equals(tenantId)) {
             return Response.status(404).entity(new ErrorResponse("NOT_FOUND", "Tenant or user not found")).build();
         }
 
-        // Verificar se o ator tem permissão ADMIN+
+        // Verifica se o ator tem permissão ADMIN+
         if (actor.role != Role.OWNER && actor.role != Role.ADMIN) {
             return Response.status(403).entity(new ErrorResponse("FORBIDDEN_ROLE", "Insufficient role")).build();
         }
 
+        // Encontra o convite
         Invitation invitation = store.invitations.get(invitationId);
         if (invitation == null || !invitation.tenantId.equals(tenantId)) {
             return Response.status(404).entity(new ErrorResponse("NOT_FOUND", "Invitation not found")).build();
         }
 
-        // Verificar se o convite já foi aceito ou revogado
+        // Verifica se o convite já foi aceito ou revogado
         if (invitation.status == InvitationStatus.ACCEPTED || invitation.status == InvitationStatus.REVOKED) {
             return Response.status(400).entity(new ErrorResponse("INVALID_INVITATION_STATUS", "Cannot resend accepted or revoked invitation")).build();
         }
 
-        // Verificar limite de reenvios
+        // Verifica o limite de reenvios
         if (invitation.resendCount >= 3) {
             return Response.status(422)
                     .entity(new ErrorResponse("RESEND_LIMIT_REACHED", "Maximum number of resends reached"))
                     .build();
         }
 
-        // Atualizar o convite
+        // Atualiza o convite: incrementa resendCount e redefine expiresAt para 72h a partir de agora
         invitation.resendCount++;
         invitation.expiresAt = Instant.now().plus(java.time.Duration.ofHours(72));
 
-        // Registrar auditoria
+        // Registra auditoria
         AuditEntry auditEntry = new AuditEntry();
         auditEntry.id = UUID.randomUUID().toString();
         auditEntry.tenantId = tenantId;
@@ -375,11 +376,8 @@ public class InvitationResource {
         auditEntry.timestamp = Instant.now();
         store.auditLog.add(auditEntry);
 
-        // Retornar resposta
-        ResendResponse response = new ResendResponse();
-        response.resendCount = invitation.resendCount;
-        response.expiresAt = invitation.expiresAt;
-
+        // Retorna resposta com resendCount e nova data de expiração
+        ResendResponse response = new ResendResponse(invitation.resendCount, invitation.expiresAt);
         return Response.ok(response).build();
     }
 
@@ -396,6 +394,11 @@ public class InvitationResource {
     public static class ResendResponse {
         public int resendCount;
         public Instant expiresAt;
+
+        public ResendResponse(int resendCount, Instant expiresAt) {
+            this.resendCount = resendCount;
+            this.expiresAt = expiresAt;
+        }
     }
 }
 ```

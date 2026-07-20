@@ -100,7 +100,19 @@ Armadilhas de API conhecidas:
 ## assistant
 
 ACTION: ls .
+FILE: caminho/relativo/do/Arquivo.java
+```java
+<conteúdo completo do arquivo>
 ```
+
+ACTION: grep -r "delete" .
+ACTION: read regras/negocio.md
+ACTION: read convencoes/erros.md
+ACTION: read convencoes/auditoria.md
+ACTION: read regras/usuarios.md
+ACTION: read regras/permissoes.md
+ACTION: read api/users.md
+ACTION: read modelo/dados.md
 
 ---
 
@@ -114,141 +126,84 @@ padroes-codigo/
 produto/
 runbooks/
 
+(Seus blocos FILE foram IGNORADOS porque vieram junto com um ACTION. Termine a exploração e reenvie todos os FILE completos sozinhos na resposta final.)
+
 ---
 
 ## assistant
 
-ACTION: read produto/regras-usuarios.md
-```
+ACTION: ls decisoes/
+ACTION: ls dominio/
+ACTION: ls padroes-codigo/
+ACTION: ls produto/
+ACTION: ls runbooks/
+ACTION: read produto/usuarios.md
+ACTION: read dominio/permissoes.md
+ACTION: read padroes-codigo/erros.md
 
 ---
 
 ## user
 
 RESULT (6 ações restantes):
-arquivo não encontrado: produto/regras-usuarios.md
+adr-001-soft-delete-com-retencao.md
+adr-002-convites-pendentes-contam-no-limite.md
 
 ---
 
 ## assistant
 
-ACTION: grep -r "exclusao" .
-```
+ACTION: read decisoes/adr-001-soft-delete-com-retencao.md
+ACTION: read decisoes/adr-002-convites-pendentes-contam-no-limite.md
+ACTION: read dominio/permissoes.md
+ACTION: read produto/usuarios.md
+ACTION: read padroes-codigo/erros.md
+ACTION: grep -r "DELETE" api/
+ACTION: read api/users.md
 
 ---
 
 ## user
 
 RESULT (5 ações restantes):
-nenhum resultado para: -r "exclusao" .
-
 ---
-
-## assistant
-
-ACTION: grep -r "usuario" .
-```
-
----
-
-## user
-
-RESULT (4 ações restantes):
-nenhum resultado para: -r "usuario" .
-
----
-
-## assistant
-
-ACTION: ls produto/
-```
-
----
-
-## user
-
-RESULT (3 ações restantes):
-planos-e-precos.md
-
----
-
-## assistant
-
-ACTION: ls dominio/
-```
-
----
-
-## user
-
-RESULT (2 ações restantes):
-auditoria.md
-autenticacao-e-lockout.md
-convites.md
-exclusao-de-usuarios.md
-limites-de-plano.md
-papeis-e-permissoes.md
-
----
-
-## assistant
-
-ACTION: read dominio/exclusao-de-usuarios.md
-```
-
----
-
-## user
-
-RESULT (1 ações restantes):
----
-tipo: regra-de-negocio
+tipo: adr
 sistema: gestao-usuarios
 status: ativo
-atualizado: 2026-05-02
+atualizado: 2026-03-15
 ---
 
-# Exclusão de usuários (soft-delete)
+# ADR-001 — Exclusão de usuário é sempre soft-delete com retenção de 30 dias
 
-**Não existe hard delete de usuário neste produto.** Decisão registrada em
-[adr-001](../decisoes/adr-001-soft-delete-com-retencao.md).
+## Decisão
 
-## Regras
+Excluir usuário = `status DELETED` + `deletedAt = agora` + `purgeAt = agora + 30 dias`.
+O registro fica no store até o job de purge. Restauração dentro da janela é
+permitida (ação `USER_RESTORED`).
 
-- Excluir um usuário significa: `status = DELETED`, `deletedAt = agora`,
-  `purgeAt = agora + 30 dias`. O registro **permanece no store**.
-- Somente ADMIN+ exclui, e apenas usuários do próprio tenant.
-- ADMIN não pode excluir OWNER: `403 OWNER_PROTECTED`
-  (ver [papeis-e-permissoes](papeis-e-permissoes.md)).
-- **Ninguém exclui a si mesmo**: `422 CANNOT_DELETE_SELF` — evita tenant órfão
-  por acidente e abuso de sessões roubadas.
-- Sucesso responde `204 No Content`.
-- Auditoria obrigatória: ação `USER_SOFT_DELETED` com `targetId` = id do usuário
-  excluído (ver [auditoria](auditoria.md)).
+## Contexto
 
-## Quando usar / Quando NÃO usar
+Clientes B2B excluem usuários por engano com frequência; compliance exige
+trilha de auditoria íntegra por no mínimo 30 dias.
 
-- Use em qualquer remoção de usuário disparada pela UI ou API.
-- NÃO use para saída voluntária do tenant (fluxo "leave" tem regra própria
-  de último owner).
+## Alternativas descartadas — não propor novamente
 
-## Anti-padrões já observados
-
-- `store.users.remove(id)` — perde histórico e quebra auditoria. Nunca.
-- Esquecer `purgeAt` — o job de purge definitivo depende desse campo.
+- **Hard delete imediato**: quebra auditoria e FK lógicas; rejeitado.
+- **Retenção de 90 dias**: conflita com pedidos de LGPD/erasure; 30 dias foi o
+  acordo com jurídico.
+- **Flag booleana `deleted`**: insuficiente — precisamos de `purgeAt` para o job
+  de purge e de `deletedAt` para relatórios.
 
 ## Relacionados
 
-- [../decisoes/adr-001-soft-delete-com-retencao.md](../decisoes/adr-001-soft-delete-com-retencao.md)
-- [papeis-e-permissoes](papeis-e-permissoes.md)
-- [auditoria](auditoria.md)
+- [../dominio/exclusao-de-usuarios.md](../dominio/exclusao-de-usuarios.md)
 
 
 ---
 
 ## assistant
 
-FILE: src/main/java/com/bench/api/UserResource.java
+FILE: src/main/java/com/bench/api/UsersResource.java
 ```java
 package com.bench.api;
 
@@ -260,9 +215,10 @@ import jakarta.ws.rs.core.Response;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Optional;
 
 @Path("/tenants/{tenantId}/users/{userId}")
-public class UserResource {
+public class UsersResource {
 
     @Inject
     InMemoryStore store;
@@ -273,61 +229,78 @@ public class UserResource {
             @PathParam("userId") String userId,
             @HeaderParam("X-Actor-Id") String actorId) {
         
-        // Verificar se o usuário autenticado existe
-        User actor = store.findUser(actorId).orElseThrow(() -> 
-            new NotFoundException("Actor not found"));
-        
-        // Verificar se o usuário a ser excluído existe
-        User userToDelete = store.findUser(userId).orElseThrow(() -> 
-            new NotFoundException("User not found"));
-        
-        // Verificar se o usuário pertence ao mesmo tenant
-        if (!userToDelete.tenantId.equals(tenantId)) {
-            return Response.status(403).build();
+        // Validação de parâmetros
+        if (tenantId == null || tenantId.isEmpty()) {
+            return Response.status(422).entity("tenantId é obrigatório").build();
         }
-        
-        // Verificar se o ator pertence ao mesmo tenant
+        if (userId == null || userId.isEmpty()) {
+            return Response.status(422).entity("userId é obrigatório").build();
+        }
+        if (actorId == null || actorId.isEmpty()) {
+            return Response.status(401).entity("X-Actor-Id header é obrigatório").build();
+        }
+
+        // Verifica se o usuário autenticado existe
+        Optional<User> actorOpt = store.findUser(actorId);
+        if (!actorOpt.isPresent()) {
+            return Response.status(401).entity("Usuário autenticado não encontrado").build();
+        }
+        User actor = actorOpt.get();
+
+        // Verifica se o usuário a ser excluído existe
+        Optional<User> userOpt = store.findUser(userId);
+        if (!userOpt.isPresent()) {
+            return Response.status(404).entity("Usuário não encontrado").build();
+        }
+        User user = userOpt.get();
+
+        // Verifica se o usuário pertence ao tenant correto
+        if (!user.tenantId.equals(tenantId)) {
+            return Response.status(403).entity("Acesso negado: usuário não pertence a este tenant").build();
+        }
+
+        // Verifica permissões do usuário autenticado
         if (!actor.tenantId.equals(tenantId)) {
-            return Response.status(403).build();
+            return Response.status(403).entity("Acesso negado: usuário autenticado não pertence a este tenant").build();
         }
-        
-        // Verificar se o ator está tentando excluir a si mesmo
-        if (actorId.equals(userId)) {
-            return Response.status(422).entity("CANNOT_DELETE_SELF").build();
+
+        // Verifica se o usuário autenticado tem permissão para excluir (OWNER ou ADMIN)
+        if (actor.role != Role.OWNER && actor.role != Role.ADMIN) {
+            return Response.status(403).entity("Acesso negado: permissão insuficiente").build();
         }
-        
-        // Verificar se o ator tem permissão para excluir (ADMIN ou OWNER)
-        if (actor.role != Role.ADMIN && actor.role != Role.OWNER) {
-            return Response.status(403).build();
+
+        // Verifica se o usuário a ser excluído é o próprio usuário autenticado
+        if (user.id.equals(actorId)) {
+            return Response.status(422).entity("Não é possível excluir o próprio usuário").build();
         }
-        
-        // Verificar se o usuário a ser excluído é OWNER
-        if (userToDelete.role == Role.OWNER) {
-            // Verificar se há pelo menos um OWNER ativo no tenant
-            long ownerCount = store.countOwners(tenantId);
-            if (ownerCount <= 1) {
-                return Response.status(403).entity("OWNER_PROTECTED").build();
-            }
+
+        // Verifica se o usuário já está deletado
+        if (user.status == UserStatus.DELETED) {
+            return Response.status(410).entity("Usuário já foi excluído").build();
         }
-        
-        // Realizar a exclusão (soft delete)
+
+        // Verifica se o usuário é o único OWNER do tenant
+        if (user.role == Role.OWNER && store.countOwners(tenantId) <= 1) {
+            return Response.status(422).entity("Não é possível excluir o único OWNER do tenant").build();
+        }
+
+        // Realiza a exclusão (soft delete)
         Instant now = Instant.now();
-        userToDelete.status = UserStatus.DELETED;
-        userToDelete.deletedAt = now;
-        userToDelete.purgeAt = now.plus(30, ChronoUnit.DAYS);
-        
-        // Registrar auditoria
-        AuditEntry auditEntry = new AuditEntry();
-        auditEntry.id = "audit-" + Instant.now().toEpochMilli();
-        auditEntry.tenantId = tenantId;
-        auditEntry.actorId = actorId;
-        auditEntry.action = "USER_SOFT_DELETED";
-        auditEntry.targetId = userId;
-        auditEntry.timestamp = now;
-        auditEntry.details = "User soft deleted by actor " + actorId;
-        
-        store.auditLog.add(auditEntry);
-        
+        user.status = UserStatus.DELETED;
+        user.deletedAt = now;
+        user.purgeAt = now.plus(30, ChronoUnit.DAYS);
+
+        // Registra auditoria
+        AuditEntry audit = new AuditEntry();
+        audit.id = java.util.UUID.randomUUID().toString();
+        audit.tenantId = tenantId;
+        audit.actorId = actorId;
+        audit.action = "USER_DELETED";
+        audit.targetId = userId;
+        audit.timestamp = now;
+        audit.details = String.format("Usuário excluído. Motivo: Exclusão via API.");
+        store.auditLog.add(audit);
+
         return Response.noContent().build();
     }
 }

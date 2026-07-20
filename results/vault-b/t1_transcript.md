@@ -362,7 +362,6 @@ import jakarta.ws.rs.core.Response;
 
 import java.time.Instant;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Path("/tenants/{tenantId}/invitations")
@@ -380,44 +379,36 @@ public class InvitationResource {
         String actorId = getActorId();
 
         // Verificar se o ator pertence ao tenant
-        Optional<User> actorOpt = store.findUser(actorId);
-        if (actorOpt.isEmpty() || !actorOpt.get().tenantId.equals(tenantId)) {
+        User actor = store.findUser(actorId).orElse(null);
+        if (actor == null || !actor.tenantId.equals(tenantId)) {
             return Response.status(404).entity(new ErrorResponse("NOT_FOUND", "Tenant or user not found")).build();
         }
 
-        User actor = actorOpt.get();
-
         // Verificar permissões
-        if (!isOwnerOrAdmin(actor.role)) {
-            return Response.status(403)
-                    .entity(new ErrorResponse("FORBIDDEN_ROLE", "Insufficient role to invite users"))
-                    .build();
+        if (actor.role != Role.ADMIN && actor.role != Role.OWNER) {
+            return Response.status(403).entity(new ErrorResponse("FORBIDDEN_ROLE", "Insufficient role")).build();
         }
 
         // Verificar se o email já está em uso ou já foi convidado
         List<Invitation> existingInvitations = store.invitationsOfTenant(tenantId);
         for (Invitation inv : existingInvitations) {
             if (inv.email.equals(request.email) && inv.status == InvitationStatus.PENDING) {
-                return Response.status(409)
-                        .entity(new ErrorResponse("INVITATION_EXISTS", "User already invited"))
-                        .build();
+                return Response.status(409).entity(new ErrorResponse("INVITATION_EXISTS", "User already invited")).build();
             }
         }
 
         // Verificar limite de assentos
         long occupiedSeats = store.usersOfTenant(tenantId).stream()
-                .filter(user -> user.status != UserStatus.DELETED)
+                .filter(u -> u.status != UserStatus.DELETED)
                 .count();
 
         occupiedSeats += existingInvitations.stream()
-                .filter(inv -> inv.status == InvitationStatus.PENDING)
+                .filter(i -> i.status == InvitationStatus.PENDING)
                 .count();
 
         Tenant tenant = store.tenants.get(tenantId);
         if (tenant != null && tenant.plan.maxUsers != null && occupiedSeats >= tenant.plan.maxUsers) {
-            return Response.status(422)
-                    .entity(new ErrorResponse("PLAN_LIMIT_EXCEEDED", "Plan limit exceeded"))
-                    .build();
+            return Response.status(422).entity(new ErrorResponse("PLAN_LIMIT_EXCEEDED", "Plan limit exceeded")).build();
         }
 
         // Criar convite
@@ -431,10 +422,10 @@ public class InvitationResource {
         invitation.resendCount = 0;
         invitation.status = InvitationStatus.PENDING;
 
-        // Salvar convite
+        // Persistir
         store.invitations.put(invitation.id, invitation);
 
-        // Registrar auditoria
+        // Auditoria
         AuditEntry audit = new AuditEntry();
         audit.id = UUID.randomUUID().toString();
         audit.tenantId = tenantId;
@@ -444,18 +435,12 @@ public class InvitationResource {
         audit.timestamp = Instant.now();
         store.auditLog.add(audit);
 
-        return Response.status(201)
-                .entity(new InvitationResponse(invitation.id, invitation.expiresAt))
-                .build();
-    }
-
-    private boolean isOwnerOrAdmin(Role role) {
-        return role == Role.OWNER || role == Role.ADMIN;
+        return Response.status(201).entity(new InvitationResponse(invitation.id, invitation.expiresAt)).build();
     }
 
     private String getActorId() {
         // Em um ambiente real, isso viria do header HTTP
-        // Aqui estamos simulando com um valor fixo para demonstração
+        // Aqui estamos simulando com um valor fixo para simplificação
         return "actor-123";
     }
 

@@ -47,39 +47,71 @@ e mecanismo de navegação.
 | v2 | qwen3:8b | 2 reparos de compilação | 7/31 | 7/31 | 3/31 |
 | v3 | qwen3:8b | 3 reparos + dicas neutras de API Java | 8/31 | 8/31 | 2/31 |
 | v4 | qwen3-coder:30b | *descartada* — bug de scaffold (ver §6) | — | — | — |
-| **v5 (definitiva)** | **qwen3-coder:30b** | scaffold corrigido (`@Singleton`) | **11/31 (35%)** | **12/31 (39%)** | **4/31 (13%)** |
+| v5 | qwen3-coder:30b | scaffold corrigido (`@Singleton`) | 11/31 (35%) | 12/31 (39%) | 4/31 (13%) |
+| **v6 (definitiva)** | **qwen3-coder:30b** | avaliação via **Quarkus Dev MCP** (Quarkus 3.33 LTS) | **12/31 (39%)** | **13/31 (42%)** | **2/31 (6%)** |
 
-### Detalhe v5 por tarefa
+### Detalhe v6 por tarefa
 
 | Tarefa | A | B | C |
 |---|---|---|---|
-| t1 — Criar convite | 1/6 | 1/6 | 0/6 |
-| t2 — Excluir usuário (soft-delete) | 3/7 | 1/7 | 2/7 |
+| t1 — Criar convite | **3/6** | 1/6 | 0/6 |
+| t2 — Excluir usuário (soft-delete) | 2/7 | 1/7 | 0/7 |
 | t3 — Reenviar convite | **5/5** | **5/5** | 0/5 |
 | t4 — Alterar papel | 0/6 * | 0/6 * | 0/6 * |
-| t5 — Badges Angular | 2/7 | **5/7** | 2/7 |
+| t5 — Badges Angular | 2/7 | **6/7** | 2/7 |
+
+### v6: avaliação via Quarkus Dev MCP (a mudança de infra)
+
+A partir da v6, a avaliação backend deixou de rodar `mvn test` frio (JVM nova a
+cada rodada, 30–90 s) e passou a usar **`mvn quarkus:dev` persistente por
+tarefa**, dirigido pelo **Dev MCP** (`/q/dev-mcp`, Quarkus 3.33): o runner chama
+as tools `devui-continuous-testing_start/runAll/getStatus/getTestResults` via
+JSON-RPC e pontua pelo estado cumulativo por teste. O dev mode sobe **em
+paralelo com a geração do modelo**.
+
+Resultado medido (12 tarefas backend, mesmas condições):
+
+| Métrica | v5 (mvn test frio) | v6 (Dev MCP) |
+|---|---|---|
+| Duração média por tarefa backend | 195 s | **104 s (−47%)** |
+| Avaliação por rodada | 30–90 s | **~17 s** (inclui `runAll` de segurança) |
+| Espera efetiva de boot | — | **2,2 s** (sobreposto à geração) |
+| Re-run após mudança de código | novo JVM | **~3 s** (hot reload) |
+| Feedback de erro de compilação | só via run completo | quase instantâneo, no log do dev mode |
+
+Duas armadilhas do Dev MCP descobertas (e tratadas) no caminho — ver §6.
 
 \* t4 zerou nos 3 casos pelo mesmo vício do modelo: em vez de ler o header
 `X-Actor-Id`, gerou `return "actor-id"; // Placeholder para demonstração` — todo
 request caía em 404. Falha do modelo, idêntica nas três condições (não enviesa a
 comparação).
 
-### Retrieval e custo (v5)
+### Retrieval e custo (v6)
 
 | Métrica | A — estruturado | B — Zettelkasten | C — sem KB |
 |---|---|---|---|
-| Ações de retrieval (média/tarefa) | 7,2 | 6,8 | 0 |
-| Notas lidas (média) | 2,6 | 4,8 | 0 |
-| **Acerto de notas-ouro** | **0,43** | **0,87** | — |
-| Tokens de prompt (média) | 20.406 | 28.730 | 721 |
-| Duração por tarefa (média) | 186 s | 254 s | 77 s |
+| Ações de retrieval (média/tarefa) | 6,4 | 6,8 | 0 |
+| Notas lidas (média) | 1,8 | 5,2 | 0 |
+| **Acerto de notas-ouro** | **0,27** | **0,93** | — |
+| Tokens de prompt (média) | 14.033 | 18.458 | 721 |
+| Duração por tarefa (média) | 123 s | 133 s | 63 s |
 
-O padrão de retrieval replicou nas 3 rodadas: B acha as notas certas em ~87–93%
-dos casos, A em ~40–47%; B custa ~30–40% mais tokens e tempo.
+O padrão de retrieval replicou nas **4 rodadas**: B acha as notas certas em
+~87–93% dos casos, A em ~27–47%; B lê 2–3× mais notas e custa ~30–40% mais
+tokens. Na v6 a exploração rasa do A ficou ainda mais evidente (1,8 notas por
+tarefa), e mesmo assim o score empatou — o modelo compensa parte do não-lido
+com bom senso, mas perde exatamente as regras não-adivinháveis.
 
 ## 4. Conclusões
 
-1. **Ter KB ≈ 3× o resultado — em todas as rodadas, com dois modelos diferentes.**
+0. **Avaliar com Quarkus Dev MCP funciona e paga o custo.** A v6 provou que dá
+   para dirigir continuous testing por MCP num harness automatizado: −47% de
+   tempo por tarefa backend, feedback de compilação quase instantâneo para o
+   loop de reparo, e detalhe por teste mais rico que o surefire (mensagem de
+   falha + request/response HTTP). Recomendado como padrão do harness daqui em
+   diante (`EVAL_MODE=devmcp`; `classic` mantido como fallback).
+
+1. **Ter KB ≈ 3–6× o resultado — em todas as rodadas, com dois modelos diferentes.**
    O caso exemplar é o t3: uma nota atômica bem escrita sobre reenvio de convites
    produziu **5/5 nas duas vaults contra 0/5 do baseline** — transferência perfeita
    de regra de negócio para código. O baseline nunca acerta o que não dá para
@@ -133,6 +165,15 @@ não sair cedo demais.
 - **Coder-models misturam exploração e resposta final** — o protocolo precisa dar
   prioridade à exploração quando ACTION e FILE vêm juntos, ou o agente "responde"
   sem nunca ler a KB.
+- **Dev MCP: contadores por-run enganam.** `getStatus.testsPassed` conta só o
+  run incremental (continuous testing re-roda apenas os afetados) — um run
+  incremental reporta 0 passados com tudo verde. O placar correto vem do estado
+  cumulativo do `getTestResults` após um `runAll` explícito.
+- **Dev MCP: fonte quebrada no boot = endpoint mudo.** Se o código não compila
+  quando `quarkus:dev` sobe, o HTTP (e o `/q/dev-mcp`) nunca abre — mas o
+  processo fica re-tentando compilar. O harness precisa tratar timeout de boot
+  como erro de compilação reparável (o dev mode sobe sozinho quando o modelo
+  corrige o arquivo).
 
 ## 7. Reproduzir
 
@@ -145,6 +186,7 @@ docker compose run --rm bench-b   # zettelkasten
 python agent/report.py            # gera results/report.md
 
 # variáveis: MODEL=qwen3:8b|qwen3-coder:30b  TASK_FILTER=t1,t3  SMOKE=1
+#            EVAL_MODE=devmcp (padrão, Quarkus Dev MCP) | classic (mvn test frio)
 ```
 
 Estrutura: `knowledge/` (as duas vaults), `tasks/` (enunciados + referência do

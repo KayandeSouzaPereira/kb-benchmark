@@ -8,6 +8,11 @@
   "total": 7,
   "compiled": true,
   "repairs": 0,
+  "eval_mode": "frontend",
+  "eval_times_s": [
+    0.7
+  ],
+  "dev_boot_wait_s": null,
   "error": null,
   "tests": [
     {
@@ -46,15 +51,13 @@
     "actions": [
       "ls .",
       "read produto/usuario.md",
-      "grep -r \"badge\" .",
-      "grep -r \"status\" produto/",
+      "read produto/usuarios.md",
       "ls produto/",
-      "ls dominio/",
-      "read dominio/autenticacao-e-lockout.md"
+      "grep -r \"badge\" produto/usuario.md",
+      "grep -r \"badge\" padroes-codigo/css.md",
+      "read produto/usuario.md"
     ],
-    "notes_read": [
-      "dominio/autenticacao-e-lockout.md"
-    ],
+    "notes_read": [],
     "gold_notes": [
       "padroes-codigo/badges-de-status-frontend.md"
     ],
@@ -62,8 +65,8 @@
     "gold_hit_rate": 0.0
   },
   "tokens": {
-    "prompt_tokens": 5483,
-    "completion_tokens": 418
+    "prompt_tokens": 24431,
+    "completion_tokens": 4812
   },
-  "duration_s": 37.0
+  "duration_s": 283.4
 }

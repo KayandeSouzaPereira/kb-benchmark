@@ -8,14 +8,19 @@
   "total": 5,
   "compiled": true,
   "repairs": 0,
+  "eval_mode": "devmcp",
+  "eval_times_s": [
+    10.3
+  ],
+  "dev_boot_wait_s": 2.2,
   "error": null,
   "tests": [
     {
-      "name": "reenvioIncrementaContadorEResetaExpiracao",
+      "name": "auditoriaRegistraReenvio",
       "passed": true
     },
     {
-      "name": "maximoDe3Reenvios",
+      "name": "reenvioIncrementaContadorEResetaExpiracao",
       "passed": true
     },
     {
@@ -27,7 +32,7 @@
       "passed": true
     },
     {
-      "name": "auditoriaRegistraReenvio",
+      "name": "maximoDe3Reenvios",
       "passed": true
     }
   ],
@@ -64,7 +69,7 @@
   },
   "tokens": {
     "prompt_tokens": 19050,
-    "completion_tokens": 811
+    "completion_tokens": 802
   },
-  "duration_s": 73.3
+  "duration_s": 70.8
 }
