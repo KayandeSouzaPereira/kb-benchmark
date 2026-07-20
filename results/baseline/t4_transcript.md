@@ -1,46 +1,46 @@
 ## system
 
-Você é um engenheiro de software sênior de um time de produto.
-Você NÃO tem acesso à documentação do time; use seu melhor julgamento para
-regras de negócio e convenções.
+You are a senior software engineer on a product team.
+You do NOT have access to the team's documentation; use your best judgment for
+business rules and conventions.
 
-Produza os arquivos finais neste formato exato (pode haver mais de um bloco
-FILE):
+Produce the final files in this exact format (there may be more than one FILE
+block):
 
-FILE: caminho/relativo/do/Arquivo.java
+FILE: relative/path/to/File.java
 ```java
-<conteúdo completo do arquivo>
+<complete file content>
 ```
 
-Escreva arquivos completos e compiláveis; não modifique os arquivos
-existentes do projeto.
+Write complete, compilable files; do not modify the project's existing
+files.
 
 ---
 
 ## user
 
-# Tarefa: alterar papel de usuário
+# Task: change user role
 
-Implemente o endpoint de mudança de papel:
+Implement the role change endpoint:
 
 ```
 PATCH /tenants/{tenantId}/users/{userId}/role
 Request JSON:  { "role": "OWNER" | "ADMIN" | "MEMBER" }
-Sucesso: 200 com JSON do usuário atualizado
+Success: 200 with the updated user as JSON
 ```
 
-Implemente TODAS as regras de negócio, permissões, validações e convenções de
-erro/auditoria que o time definiu para papéis.
+Implement ALL the business rules, permissions, validations and error/audit
+conventions the team has defined for roles.
 
 
-## Projeto existente (Quarkus 3, Java 21) — NÃO reescreva estas classes
+## Existing project (Quarkus 3, Java 21) — do NOT rewrite these classes
 
-Pacote `com.bench.model`:
+Package `com.bench.model`:
 
 ```java
 public enum Role { OWNER, ADMIN, MEMBER }
 public enum UserStatus { INVITED, ACTIVE, SUSPENDED, DELETED }
-public enum Plan { FREE, PRO, ENTERPRISE }        // campo público: Integer maxUsers (null = ilimitado)
+public enum Plan { FREE, PRO, ENTERPRISE }        // public field: Integer maxUsers (null = unlimited)
 public enum InvitationStatus { PENDING, ACCEPTED, REVOKED }
 
 public class User { public String id, tenantId, email; public Role role;
@@ -53,7 +53,7 @@ public class AuditEntry { public String id, tenantId, actorId, action, targetId;
                           public java.time.Instant timestamp; public String details; }
 ```
 
-Pacote `com.bench.store` — injete com `@Inject`:
+Package `com.bench.store` — inject with `@Inject`:
 
 ```java
 @Singleton
@@ -65,23 +65,31 @@ public class InMemoryStore {
     public Optional<User> findUser(String id);
     public List<User> usersOfTenant(String tenantId);
     public List<Invitation> invitationsOfTenant(String tenantId);
-    public long countOwners(String tenantId);   // owners com status != DELETED
+    public long countOwners(String tenantId);   // owners with status != DELETED
     public void reset();
 }
 ```
 
-Contexto de autenticação: o id do usuário autenticado (ator) chega no header
-HTTP `X-Actor-Id` e corresponde a um `User` no store.
+Authentication context: the id of the authenticated user (the actor) arrives in
+the HTTP header `X-Actor-Id` and matches a `User` in the store. Read it as a
+method parameter, exactly like this:
 
-Crie seus recursos REST (jakarta.ws.rs) em `src/main/java/com/bench/api/`.
-Lembre-se dos imports: `com.bench.model.*`, `com.bench.store.InMemoryStore`,
-`jakarta.ws.rs.*`, `jakarta.ws.rs.core.*`, `jakarta.inject.Inject`. Use apenas
-classes e métodos que existem no scaffold acima.
+```java
+@POST
+public Response create(@PathParam("tenantId") String tenantId,
+                       SomeRequestBody body,
+                       @HeaderParam("X-Actor-Id") String actorId) { ... }
+```
 
-Armadilhas de API conhecidas:
-- Para status HTTP fora do enum padrão (ex.: 422, 410), use
-  `Response.status(422)` — `Response.Status` NÃO tem essas constantes.
-- `Instant` não tem `plusHours`/`plusDays`; use
+Create your REST resources (jakarta.ws.rs) under `src/main/java/com/bench/api/`.
+Remember the imports: `com.bench.model.*`, `com.bench.store.InMemoryStore`,
+`jakarta.ws.rs.*`, `jakarta.ws.rs.core.*`, `jakarta.inject.Inject`. Use only
+classes and methods that exist in the scaffold above.
+
+Known API traps:
+- For HTTP statuses outside the standard enum (e.g. 422, 410), use
+  `Response.status(422)` — `Response.Status` does NOT have those constants.
+- `Instant` has no `plusHours`/`plusDays`; use
   `instant.plus(java.time.Duration.ofHours(n))`.
 
 
@@ -99,9 +107,11 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Path("/tenants/{tenantId}/users/{userId}/role")
 public class UserRoleResource {
@@ -113,127 +123,102 @@ public class UserRoleResource {
     public Response changeRole(
             @PathParam("tenantId") String tenantId,
             @PathParam("userId") String userId,
-            RoleUpdateRequest request) {
+            ChangeRoleRequest request,
+            @HeaderParam("X-Actor-Id") String actorId) {
         
-        // Validação do corpo da requisição
+        // Validate request
         if (request == null || request.role == null) {
-            return Response.status(422)
-                    .entity("{\"error\":\"Role is required\"}")
-                    .build();
+            return Response.status(422).entity("Role is required").build();
         }
 
-        // Verifica se o usuário autenticado existe
-        String actorId = getActorId();
+        // Find the actor user
         Optional<User> actorOpt = store.findUser(actorId);
         if (!actorOpt.isPresent()) {
-            return Response.status(401)
-                    .entity("{\"error\":\"Unauthorized\"}")
-                    .build();
+            return Response.status(401).entity("Unauthorized").build();
         }
         User actor = actorOpt.get();
 
-        // Verifica se o tenant existe
-        Optional<Tenant> tenantOpt = store.tenants.values().stream()
-                .filter(t -> t.id.equals(tenantId))
-                .findFirst();
-        if (!tenantOpt.isPresent()) {
-            return Response.status(404)
-                    .entity("{\"error\":\"Tenant not found\"}")
-                    .build();
+        // Verify actor belongs to the same tenant
+        if (!tenantId.equals(actor.tenantId)) {
+            return Response.status(403).entity("Forbidden").build();
         }
-        Tenant tenant = tenantOpt.get();
 
-        // Verifica se o usuário a ser modificado existe
+        // Find the target user
         Optional<User> targetUserOpt = store.findUser(userId);
         if (!targetUserOpt.isPresent()) {
-            return Response.status(404)
-                    .entity("{\"error\":\"User not found\"}")
-                    .build();
+            return Response.status(404).entity("User not found").build();
         }
         User targetUser = targetUserOpt.get();
 
-        // Verifica se o usuário pertence ao tenant
-        if (!targetUser.tenantId.equals(tenantId)) {
-            return Response.status(403)
-                    .entity("{\"error\":\"Forbidden\"}")
-                    .build();
+        // Verify target user belongs to the same tenant
+        if (!tenantId.equals(targetUser.tenantId)) {
+            return Response.status(404).entity("User not found").build();
         }
 
-        // Verifica se o ator tem permissão para alterar o papel do usuário
-        // O ator precisa ser OWNER ou ADMIN e não pode ser o próprio usuário sendo modificado
-        if (!actor.id.equals(userId) && 
-            (actor.role != Role.OWNER && actor.role != Role.ADMIN)) {
-            return Response.status(403)
-                    .entity("{\"error\":\"Forbidden\"}")
-                    .build();
+        // Check if actor has permission to change roles (OWNER or ADMIN)
+        if (actor.role != Role.OWNER && actor.role != Role.ADMIN) {
+            return Response.status(403).entity("Forbidden").build();
         }
 
-        // Verifica se o ator está tentando alterar o próprio papel para MEMBER
-        if (actor.id.equals(userId) && request.role == Role.MEMBER) {
-            return Response.status(422)
-                    .entity("{\"error\":\"Cannot downgrade own role to MEMBER\"}")
-                    .build();
+        // Validate that target user is not deleted
+        if (targetUser.status == UserStatus.DELETED) {
+            return Response.status(410).entity("User has been deleted").build();
         }
 
-        // Verifica se o ator está tentando alterar o papel do usuário para OWNER
-        if (request.role == Role.OWNER && actor.role != Role.OWNER) {
-            return Response.status(403)
-                    .entity("{\"error\":\"Forbidden\"}")
-                    .build();
+        // Validate that target user is active
+        if (targetUser.status != UserStatus.ACTIVE) {
+            return Response.status(422).entity("Cannot change role of non-active user").build();
         }
 
-        // Verifica se o usuário está ativo
-        if (targetUser.status == UserStatus.DELETED || targetUser.status == UserStatus.SUSPENDED) {
-            return Response.status(410)
-                    .entity("{\"error\":\"User is not active\"}")
-                    .build();
+        // Validate that the actor cannot change their own role to MEMBER or ADMIN
+        if (actor.id.equals(userId) && (request.role == Role.MEMBER || request.role == Role.ADMIN)) {
+            return Response.status(422).entity("Cannot change own role to MEMBER or ADMIN").build();
         }
 
-        // Verifica se há pelo menos um OWNER no tenant
-        if (request.role == Role.MEMBER && targetUser.role == Role.OWNER) {
+        // Validate that there's at least one OWNER in the tenant
+        if (request.role != Role.OWNER && targetUser.role == Role.OWNER) {
             long ownerCount = store.countOwners(tenantId);
             if (ownerCount <= 1) {
-                return Response.status(422)
-                        .entity("{\"error\":\"Cannot remove last OWNER from tenant\"}")
-                        .build();
+                return Response.status(422).entity("Cannot remove last OWNER from tenant").build();
             }
         }
 
-        // Verifica se o novo papel é válido com base no plano do tenant
-        if (request.role == Role.ADMIN && tenant.plan == Plan.FREE) {
-            return Response.status(422)
-                    .entity("{\"error\":\"ADMIN role not allowed in FREE plan\"}")
-                    .build();
+        // Validate that the new role is valid for the tenant's plan
+        Tenant tenant = store.tenants.get(tenantId);
+        if (tenant != null && tenant.plan.maxUsers != null) {
+            List<User> activeUsers = store.usersOfTenant(tenantId);
+            long activeUserCount = activeUsers.stream()
+                    .filter(u -> u.status == UserStatus.ACTIVE)
+                    .count();
+            
+            // If we're promoting to OWNER, check if we're at the limit
+            if (request.role == Role.OWNER && targetUser.role != Role.OWNER) {
+                if (activeUserCount >= tenant.plan.maxUsers) {
+                    return Response.status(422).entity("Tenant plan limit reached").build();
+                }
+            }
         }
 
-        // Atualiza o papel do usuário
+        // Update user role
         targetUser.role = request.role;
 
-        // Registra a auditoria
+        // Create audit entry
         AuditEntry audit = new AuditEntry();
-        audit.id = "audit-" + Instant.now().toEpochMilli();
+        audit.id = UUID.randomUUID().toString();
         audit.tenantId = tenantId;
         audit.actorId = actorId;
         audit.action = "USER_ROLE_CHANGED";
         audit.targetId = userId;
         audit.timestamp = Instant.now();
-        audit.details = "{\"from\":\"" + targetUser.role + "\",\"to\":\"" + request.role + "\"}";
+        audit.details = "Changed role from " + targetUser.role + " to " + request.role;
+
         store.auditLog.add(audit);
 
-        // Retorna o usuário atualizado
+        // Return updated user
         return Response.ok(targetUser).build();
     }
 
-    private String getActorId() {
-        // Em um ambiente real, isso viria do header HTTP
-        // Por simplicidade, estamos retornando um valor fixo para testes
-        // Na implementação real, você usaria algo como:
-        // ContainerRequestContext requestContext = ...;
-        // String actorId = requestContext.getHeaderString("X-Actor-Id");
-        return "actor-123"; // Placeholder - substituir com lógica real
-    }
-
-    public static class RoleUpdateRequest {
+    public static class ChangeRoleRequest {
         public Role role;
     }
 }

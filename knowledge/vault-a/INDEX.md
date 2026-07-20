@@ -1,26 +1,26 @@
-# INDEX — Base de conhecimento do time (SaaS de gestão de usuários)
+# INDEX — Team knowledge base (SaaS user management)
 
-Leia este arquivo primeiro. Ele mapeia o que existe em cada pasta e quando consultar.
+Read this file first. It maps what lives in each folder and when to consult it.
 
-| Pasta | Conteúdo | Quando consultar |
+| Folder | Contents | When to consult |
 |---|---|---|
-| `dominio/` | Regras de negócio do produto: papéis e permissões, limites de plano, convites, exclusão de usuários, auditoria, autenticação | Antes de implementar QUALQUER endpoint ou tela que mexa com usuários, convites ou papéis |
-| `padroes-codigo/` | Convenções técnicas do time: formato de erros da API, badges de status no frontend | Sempre que for retornar erro HTTP ou renderizar status na UI |
-| `decisoes/` | ADRs — decisões arquiteturais com alternativas descartadas | Quando uma regra parecer estranha ou você quiser propor algo diferente |
-| `produto/` | Material de produto: planos e preços | Contexto comercial; raramente necessário para código |
-| `runbooks/` | Procedimentos operacionais (deploy etc.) | Operação, não desenvolvimento |
+| `domain/` | Product business rules: roles and permissions, plan limits, invitations, user deletion, audit log, authentication | Before implementing ANY endpoint or screen that touches users, invitations or roles |
+| `code-standards/` | Team technical conventions: API error format, frontend status badges | Whenever returning an HTTP error or rendering status in the UI |
+| `decisions/` | ADRs — architectural decisions with discarded alternatives | When a rule seems odd or you want to propose something different |
+| `product/` | Product material: plans and pricing | Commercial context; rarely needed for code |
+| `runbooks/` | Operational procedures (deploy etc.) | Operations, not development |
 
-## Arquivos por pasta
+## Files per folder
 
-- `dominio/papeis-e-permissoes.md` — hierarquia OWNER/ADMIN/MEMBER, quem pode fazer o quê, proteções do owner
-- `dominio/limites-de-plano.md` — quantos usuários cada plano permite e o que conta no limite
-- `dominio/convites.md` — ciclo de vida do convite: expiração, reenvio, aceitação
-- `dominio/exclusao-de-usuarios.md` — soft-delete, retenção, quem pode excluir
-- `dominio/auditoria.md` — o que auditar e formato obrigatório do AuditEntry
-- `dominio/autenticacao-e-lockout.md` — política de senha e bloqueio de conta
-- `padroes-codigo/formato-de-erros-api.md` — envelope JSON de erro + tabela de códigos e status HTTP
-- `padroes-codigo/badges-de-status-frontend.md` — classes CSS e rótulos PT-BR por status de usuário
-- `decisoes/adr-001-soft-delete-com-retencao.md` — por que nunca há hard delete
-- `decisoes/adr-002-convites-pendentes-contam-no-limite.md` — por que convite pendente ocupa vaga
-- `produto/planos-e-precos.md` — Free / Pro / Enterprise
-- `runbooks/deploy-producao.md` — pipeline de deploy
+- `domain/roles-and-permissions.md` — OWNER/ADMIN/MEMBER hierarchy, who can do what, owner protections
+- `domain/plan-limits.md` — how many users each plan allows and what counts toward the limit
+- `domain/invitations.md` — invitation lifecycle: expiry, resend, acceptance
+- `domain/user-deletion.md` — soft-delete, retention, who can delete
+- `domain/audit-log.md` — what to audit and the mandatory AuditEntry format
+- `domain/authentication-and-lockout.md` — password policy and account lockout
+- `code-standards/api-error-format.md` — JSON error envelope + table of codes and HTTP statuses
+- `code-standards/frontend-status-badges.md` — CSS classes and pt-BR labels per user status
+- `decisions/adr-001-soft-delete-with-retention.md` — why there is never a hard delete
+- `decisions/adr-002-pending-invitations-count-toward-limit.md` — why a pending invite occupies a seat
+- `product/plans-and-pricing.md` — Free / Pro / Enterprise
+- `runbooks/production-deploy.md` — deploy pipeline

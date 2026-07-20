@@ -48,7 +48,40 @@ e mecanismo de navegação.
 | v3 | qwen3:8b | 3 reparos + dicas neutras de API Java | 8/31 | 8/31 | 2/31 |
 | v4 | qwen3-coder:30b | *descartada* — bug de scaffold (ver §6) | — | — | — |
 | v5 | qwen3-coder:30b | scaffold corrigido (`@Singleton`) | 11/31 (35%) | 12/31 (39%) | 4/31 (13%) |
-| **v6 (definitiva)** | **qwen3-coder:30b** | avaliação via **Quarkus Dev MCP** (Quarkus 3.33 LTS) | **12/31 (39%)** | **13/31 (42%)** | **2/31 (6%)** |
+| v6 | qwen3-coder:30b | avaliação via **Quarkus Dev MCP** (Quarkus 3.33 LTS) | 12/31 (39%) | 13/31 (42%) | 2/31 (6%) |
+| **v7 (definitiva)** | **qwen3-coder:30b** | **KB e prompts em inglês** + dica `@HeaderParam` | **21/31 (68%)** | **15/31 (48%)** | **8/31 (26%)** |
+
+### v7: inglês + dica de header — o maior salto do benchmark
+
+| Tarefa | A | B | C |
+|---|---|---|---|
+| t1 — Criar convite | **4/6** | **4/6** | 1/6 |
+| t2 — Excluir usuário | **4/7** | 3/7 | 2/7 |
+| t3 — Reenviar convite | **5/5** | 0/5 † | 0/5 |
+| t4 — Alterar papel | **6/6** | **6/6** | 3/6 |
+| t5 — Badges Angular | 2/7 | 2/7 | 2/7 |
+
+† A vault-b leu as duas notas-ouro do reenvio (retrieval perfeito), mas
+declarou `@Consumes(APPLICATION_JSON)` num POST sem corpo → 415 em todos os
+testes. Sem esse único deslize de API, A e B empatariam em 20/31.
+
+Mudanças da v7 e atribuição dos ganhos:
+
+- **Tudo em inglês** (conteúdo E nomes de arquivo das vaults, enunciados,
+  prompts do agente). Rótulos de badge permanecem pt-BR como regra de produto
+  explícita ("do not translate").
+- **Dica neutra de `@HeaderParam`** com exemplo de assinatura no scaffold de
+  referência — destravou o t4 nos 3 casos (0→3/6/6): era o stub/`@Context`
+  errado que zerava a tarefa desde a v5.
+- Descontando o efeito da dica (t4), o **idioma responde pelo resto do salto**:
+  t1 0→4, t2 1-2→3-4 nos casos com vault, e o retrieval do vault estruturado
+  saltou de 27% para **67% de acerto de notas-ouro** — nomes de arquivo em
+  inglês são muito melhor navegados pelo modelo. Tokens por tarefa caíram ~30%
+  (inglês é mais denso) e a duração média por tarefa backend caiu junto.
+- Primeira rodada em que A > B no placar (21 vs 15), mas a diferença é quase
+  toda o acidente do t3 (†) — o veredito honesto continua "empate técnico com
+  perfis diferentes", agora com A navegando tão bem quanto B (gold-hit 0,67 ×
+  0,67) e gastando menos.
 
 ### Detalhe v6 por tarefa
 
@@ -104,20 +137,30 @@ com bom senso, mas perde exatamente as regras não-adivinháveis.
 
 ## 4. Conclusões
 
-0. **Avaliar com Quarkus Dev MCP funciona e paga o custo.** A v6 provou que dá
+0. **O idioma da KB importa — muito.** Traduzir vaults (conteúdo e nomes de
+   arquivo), enunciados e prompts de PT-BR para inglês levou o benchmark de
+   12-13/31 para 15-21/31 nos casos com KB (e o baseline de 2 para 8, somado à
+   dica de header). O efeito mais nítido foi no retrieval por filesystem: com
+   nomes de arquivo em inglês, o vault estruturado saltou de 27% para 67% de
+   acerto de notas-ouro — o modelo navega semanticamente pelos nomes, e nomes
+   em português eram um atrito invisível. Para KBs consumidas por agentes,
+   escreva em inglês (mantendo strings de produto no idioma do produto, como
+   regra explícita).
+
+1. **Avaliar com Quarkus Dev MCP funciona e paga o custo.** A v6 provou que dá
    para dirigir continuous testing por MCP num harness automatizado: −47% de
    tempo por tarefa backend, feedback de compilação quase instantâneo para o
    loop de reparo, e detalhe por teste mais rico que o surefire (mensagem de
    falha + request/response HTTP). Recomendado como padrão do harness daqui em
    diante (`EVAL_MODE=devmcp`; `classic` mantido como fallback).
 
-1. **Ter KB ≈ 3–6× o resultado — em todas as rodadas, com dois modelos diferentes.**
+2. **Ter KB ≈ 2–6× o resultado — em todas as rodadas, com dois modelos diferentes.**
    O caso exemplar é o t3: uma nota atômica bem escrita sobre reenvio de convites
    produziu **5/5 nas duas vaults contra 0/5 do baseline** — transferência perfeita
    de regra de negócio para código. O baseline nunca acerta o que não dá para
    adivinhar (72h, códigos de erro, retenção de 30 dias).
 
-2. **Zettelkasten vs. vault estruturado: empate técnico no score, perfis opostos.**
+3. **Zettelkasten vs. vault estruturado: empate técnico no score, perfis opostos.**
    - **B (Zettelkasten)** maximiza *recall*: os wikilinks funcionam como GPS — o
      modelo segue `[[link]]` e chega na regra, inclusive atravessando a nota
      contraditória até a correção. Foi o que lhe deu o t5 (achou a nota de badges;
@@ -126,7 +169,7 @@ com bom senso, mas perde exatamente as regras não-adivinháveis.
      mas induz **exploração rasa** — o modelo lê 2–3 notas e para (no t1 leu
      limites de plano mas não convites, e chutou expiração de 7 dias).
 
-3. **O gargalo é o modelo, não a organização.** O qwen3:8b morria em sintaxe Java
+4. **O gargalo é o modelo, não a organização.** O qwen3:8b morria em sintaxe Java
    (72% das tarefas com vault não compilavam); o coder:30b compila tudo, mas comete
    pecados de aderência (placeholder no lugar do header, ação de auditoria
    inventada). Com modelos locais desta faixa, a KB melhora muito o resultado, mas

@@ -3,8 +3,8 @@
   "title": "Listagem com badges (Angular)",
   "case": "vault-b",
   "model": "qwen3-coder:30b",
-  "score": 0.857,
-  "passed": 6,
+  "score": 0.286,
+  "passed": 2,
   "total": 7,
   "compiled": true,
   "repairs": 0,
@@ -25,19 +25,19 @@
     },
     {
       "name": "ACTIVE: classe badge-success + rotulo 'Ativo'",
-      "passed": true
+      "passed": false
     },
     {
       "name": "INVITED: classe badge-warning + rotulo 'Convite pendente'",
-      "passed": true
+      "passed": false
     },
     {
       "name": "SUSPENDED: classe badge-muted + rotulo 'Suspenso'",
-      "passed": true
+      "passed": false
     },
     {
       "name": "DELETED: classe badge-danger + rotulo 'Excluído'",
-      "passed": true
+      "passed": false
     },
     {
       "name": "DELETED: exibe purgeAt no formato dd/MM/yyyy",
@@ -49,31 +49,22 @@
   ],
   "retrieval": {
     "actions": [
+      "read src/app/user.model.ts",
+      "ls src/app/",
       "ls .",
-      "read 202604111600-badges-de-status-no-front.md",
-      "read 202603150900-soft-delete-30-dias.md",
-      "read 202601050900-mapa-dominio-usuarios.md",
-      "grep \"badge\" 202604111600-badges-de-status-no-front.md",
-      "grep -i \"badge\" 202604111600-badges-de-status-no-front.md",
-      "read 202605190800-ideias-de-precos.md"
+      "read docs/202604111600-frontend-status-badges.md",
+      "ls docs/"
     ],
-    "notes_read": [
-      "202601050900-mapa-dominio-usuarios.md",
-      "202603150900-soft-delete-30-dias.md",
-      "202604111600-badges-de-status-no-front.md",
-      "202605190800-ideias-de-precos.md"
-    ],
+    "notes_read": [],
     "gold_notes": [
-      "202604111600-badges-de-status-no-front.md"
+      "202604111600-frontend-status-badges.md"
     ],
-    "gold_hits": [
-      "202604111600-badges-de-status-no-front.md"
-    ],
-    "gold_hit_rate": 1.0
+    "gold_hits": [],
+    "gold_hit_rate": 0.0
   },
   "tokens": {
-    "prompt_tokens": 12268,
-    "completion_tokens": 576
+    "prompt_tokens": 6760,
+    "completion_tokens": 1913
   },
-  "duration_s": 43.0
+  "duration_s": 116.8
 }

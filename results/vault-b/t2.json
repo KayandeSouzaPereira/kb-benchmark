@@ -3,86 +3,86 @@
   "title": "Excluir usuário (soft-delete)",
   "case": "vault-b",
   "model": "qwen3-coder:30b",
-  "score": 0.143,
-  "passed": 1,
+  "score": 0.429,
+  "passed": 3,
   "total": 7,
   "compiled": true,
   "repairs": 0,
   "eval_mode": "devmcp",
   "eval_times_s": [
-    7.4
+    10.3
   ],
-  "dev_boot_wait_s": 1.3,
+  "dev_boot_wait_s": 2.3,
   "error": null,
   "tests": [
     {
-      "name": "atorDeOutroTenantRecebe404",
+      "name": "adminFazSoftDelete",
       "passed": true
     },
     {
-      "name": "adminFazSoftDelete",
+      "name": "purgeAtEm30Dias",
+      "passed": true
+    },
+    {
+      "name": "auditoriaRegistraSoftDelete",
+      "passed": true
+    },
+    {
+      "name": "atorDeOutroTenantRecebe404",
       "passed": false,
-      "failure": "1 expectation failed.\nExpected status code <204> but was <404>."
+      "failure": "1 expectation failed.\nExpected status code <404> but was <403>."
     },
     {
       "name": "ninguemDeletaASiMesmo",
       "passed": false,
-      "failure": "1 expectation failed.\nExpected status code <422> but was <404>."
+      "failure": "Expected response body to be verified as JSON, HTML or XML but content-type 'text/plain' is not supported out of the box.\nTry registering a custom parser using:\n   RestAssured.registerParser(\"text/plain\", <parser type>);\nContent was:\nCANNOT_DELETE_SELF"
     },
     {
       "name": "memberNaoPodeDeletar",
       "passed": false,
-      "failure": "1 expectation failed.\nExpected status code <403> but was <404>."
-    },
-    {
-      "name": "purgeAtEm30Dias",
-      "passed": false,
-      "failure": "1 expectation failed.\nExpected status code <204> but was <404>."
+      "failure": "Expected response body to be verified as JSON, HTML or XML but no content-type was defined in the response.\nTry registering a default parser using:\n   RestAssured.defaultParser(<parser type>);\nContent was:"
     },
     {
       "name": "adminNaoPodeDeletarOwner",
       "passed": false,
-      "failure": "1 expectation failed.\nExpected status code <403> but was <404>."
-    },
-    {
-      "name": "auditoriaRegistraSoftDelete",
-      "passed": false,
-      "failure": "1 expectation failed.\nExpected status code <204> but was <404>."
+      "failure": "Expected response body to be verified as JSON, HTML or XML but content-type 'text/plain' is not supported out of the box.\nTry registering a custom parser using:\n   RestAssured.registerParser(\"text/plain\", <parser type>);\nContent was:\nOWNER_PROTECTED"
     }
   ],
   "files_written": [
-    "com/bench/api/DeleteUserResource.java"
+    "src/main/java/com/bench/api/UserResource.java"
   ],
   "retrieval": {
     "actions": [
       "ls .",
-      "read 202601050900-mapa-dominio-usuarios.md",
-      "read 202603150900-soft-delete-30-dias.md",
-      "read 202603150930-quem-pode-deletar.md",
-      "read 202601201300-auditoria-de-mutacoes.md",
-      "read 202601051030-papeis-do-tenant.md"
+      "read 202601050900-user-domain-map.md",
+      "read 202603150900-soft-delete-30-days.md",
+      "read 202603150930-who-can-delete-users.md",
+      "read 202602101415-owner-protection.md",
+      "read 202601201300-mutation-audit-log.md",
+      "read 202602101430-last-owner.md"
     ],
     "notes_read": [
-      "202601050900-mapa-dominio-usuarios.md",
-      "202601051030-papeis-do-tenant.md",
-      "202601201300-auditoria-de-mutacoes.md",
-      "202603150900-soft-delete-30-dias.md",
-      "202603150930-quem-pode-deletar.md"
+      "202601050900-user-domain-map.md",
+      "202601201300-mutation-audit-log.md",
+      "202602101415-owner-protection.md",
+      "202602101430-last-owner.md",
+      "202603150900-soft-delete-30-days.md",
+      "202603150930-who-can-delete-users.md"
     ],
     "gold_notes": [
-      "202601201330-codigos-de-erro-da-api.md",
-      "202603150900-soft-delete-30-dias.md",
-      "202603150930-quem-pode-deletar.md"
+      "202601201330-api-error-codes.md",
+      "202603150900-soft-delete-30-days.md",
+      "202603150930-who-can-delete-users.md"
     ],
     "gold_hits": [
-      "202603150900-soft-delete-30-dias.md",
-      "202603150930-quem-pode-deletar.md"
+      "202603150900-soft-delete-30-days.md",
+      "202603150930-who-can-delete-users.md"
     ],
     "gold_hit_rate": 0.667
   },
   "tokens": {
-    "prompt_tokens": 23144,
-    "completion_tokens": 3270
+    "prompt_tokens": 15444,
+    "completion_tokens": 803
   },
-  "duration_s": 206.4
+  "duration_s": 65.3
 }

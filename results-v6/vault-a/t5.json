@@ -1,0 +1,72 @@
+{
+  "task": "t5",
+  "title": "Listagem com badges (Angular)",
+  "case": "vault-a",
+  "model": "qwen3-coder:30b",
+  "score": 0.286,
+  "passed": 2,
+  "total": 7,
+  "compiled": true,
+  "repairs": 0,
+  "eval_mode": "frontend",
+  "eval_times_s": [
+    0.7
+  ],
+  "dev_boot_wait_s": null,
+  "error": null,
+  "tests": [
+    {
+      "name": "arquivo src/app/user-list.component.ts existe",
+      "passed": true
+    },
+    {
+      "name": "type-check (tsc --noEmit) passa",
+      "passed": true
+    },
+    {
+      "name": "ACTIVE: classe badge-success + rotulo 'Ativo'",
+      "passed": false
+    },
+    {
+      "name": "INVITED: classe badge-warning + rotulo 'Convite pendente'",
+      "passed": false
+    },
+    {
+      "name": "SUSPENDED: classe badge-muted + rotulo 'Suspenso'",
+      "passed": false
+    },
+    {
+      "name": "DELETED: classe badge-danger + rotulo 'Excluído'",
+      "passed": false
+    },
+    {
+      "name": "DELETED: exibe purgeAt no formato dd/MM/yyyy",
+      "passed": false
+    }
+  ],
+  "files_written": [
+    "src/app/user-list.component.ts"
+  ],
+  "retrieval": {
+    "actions": [
+      "ls .",
+      "read produto/usuario.md",
+      "read produto/usuarios.md",
+      "ls produto/",
+      "grep -r \"badge\" produto/usuario.md",
+      "grep -r \"badge\" padroes-codigo/css.md",
+      "read produto/usuario.md"
+    ],
+    "notes_read": [],
+    "gold_notes": [
+      "padroes-codigo/badges-de-status-frontend.md"
+    ],
+    "gold_hits": [],
+    "gold_hit_rate": 0.0
+  },
+  "tokens": {
+    "prompt_tokens": 24431,
+    "completion_tokens": 4812
+  },
+  "duration_s": 283.4
+}

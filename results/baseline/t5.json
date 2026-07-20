@@ -10,7 +10,7 @@
   "repairs": 0,
   "eval_mode": "frontend",
   "eval_times_s": [
-    0.7
+    0.8
   ],
   "dev_boot_wait_s": null,
   "error": null,
@@ -55,8 +55,8 @@
     "gold_hit_rate": null
   },
   "tokens": {
-    "prompt_tokens": 364,
-    "completion_tokens": 416
+    "prompt_tokens": 314,
+    "completion_tokens": 598
   },
-  "duration_s": 26.1
+  "duration_s": 34.4
 }

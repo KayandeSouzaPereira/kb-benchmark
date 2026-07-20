@@ -3,37 +3,42 @@
   "title": "Reenviar convite",
   "case": "vault-b",
   "model": "qwen3-coder:30b",
-  "score": 1.0,
-  "passed": 5,
+  "score": 0.0,
+  "passed": 0,
   "total": 5,
   "compiled": true,
   "repairs": 0,
   "eval_mode": "devmcp",
   "eval_times_s": [
-    10.4
+    8.3
   ],
-  "dev_boot_wait_s": 2.4,
+  "dev_boot_wait_s": 2.3,
   "error": null,
   "tests": [
     {
       "name": "auditoriaRegistraReenvio",
-      "passed": true
+      "passed": false,
+      "failure": "1 expectation failed.\nExpected status code <200> but was <415>."
     },
     {
       "name": "reenvioIncrementaContadorEResetaExpiracao",
-      "passed": true
+      "passed": false,
+      "failure": "1 expectation failed.\nExpected status code <200> but was <415>."
     },
     {
       "name": "reenvioReativaConviteExpirado",
-      "passed": true
+      "passed": false,
+      "failure": "1 expectation failed.\nExpected status code <200> but was <415>."
     },
     {
       "name": "memberNaoPodeReenviar",
-      "passed": true
+      "passed": false,
+      "failure": "1 expectation failed.\nExpected status code <403> but was <415>."
     },
     {
       "name": "maximoDe3Reenvios",
-      "passed": true
+      "passed": false,
+      "failure": "1 expectation failed.\nExpected status code <422> but was <415>."
     }
   ],
   "files_written": [
@@ -42,34 +47,34 @@
   "retrieval": {
     "actions": [
       "ls .",
-      "read 202602041130-reenvio-de-convites.md",
-      "read 202602041100-expiracao-de-convites-72h.md",
-      "read 202601201300-auditoria-de-mutacoes.md",
-      "read 202601051030-papeis-do-tenant.md",
-      "read 202601201330-codigos-de-erro-da-api.md",
-      "read 202602151100-isolamento-de-tenant-404.md"
+      "read 202602041130-invitation-resend.md",
+      "read 202601051030-tenant-roles.md",
+      "read 202601201300-mutation-audit-log.md",
+      "read 202602151100-tenant-isolation-404.md",
+      "read 202601201330-api-error-codes.md",
+      "read 202602101415-owner-protection.md"
     ],
     "notes_read": [
-      "202601051030-papeis-do-tenant.md",
-      "202601201300-auditoria-de-mutacoes.md",
-      "202601201330-codigos-de-erro-da-api.md",
-      "202602041100-expiracao-de-convites-72h.md",
-      "202602041130-reenvio-de-convites.md",
-      "202602151100-isolamento-de-tenant-404.md"
+      "202601051030-tenant-roles.md",
+      "202601201300-mutation-audit-log.md",
+      "202601201330-api-error-codes.md",
+      "202602041130-invitation-resend.md",
+      "202602101415-owner-protection.md",
+      "202602151100-tenant-isolation-404.md"
     ],
     "gold_notes": [
-      "202601201330-codigos-de-erro-da-api.md",
-      "202602041130-reenvio-de-convites.md"
+      "202601201330-api-error-codes.md",
+      "202602041130-invitation-resend.md"
     ],
     "gold_hits": [
-      "202601201330-codigos-de-erro-da-api.md",
-      "202602041130-reenvio-de-convites.md"
+      "202601201330-api-error-codes.md",
+      "202602041130-invitation-resend.md"
     ],
     "gold_hit_rate": 1.0
   },
   "tokens": {
-    "prompt_tokens": 17467,
-    "completion_tokens": 937
+    "prompt_tokens": 15339,
+    "completion_tokens": 857
   },
-  "duration_s": 77.9
+  "duration_s": 67.0
 }

@@ -51,46 +51,45 @@ TEMPERATURE = 0.2
 FILE_RE = re.compile(r"FILE:\s*([^\n`]+?)\s*\n```[a-zA-Z]*\s*\n(.*?)```", re.S)
 ACTION_RE = re.compile(r"^ACTION:\s*(ls|grep|read)\s*(.*)$", re.M)
 
-SYSTEM_VAULT = """Você é um engenheiro de software sênior de um time de produto.
-O time mantém uma base de conhecimento em arquivos Markdown com as regras de
-negócio e convenções. Você DEVE consultá-la antes de escrever código, porque
-as regras específicas do produto não são óbvias.
+SYSTEM_VAULT = """You are a senior software engineer on a product team.
+The team keeps a knowledge base of Markdown files with the business rules and
+conventions. You MUST consult it before writing code, because the
+product-specific rules are not obvious.
 
-Para explorar a base, responda com UMA única linha de comando por mensagem:
+To explore the knowledge base, reply with ONE single command line per message:
 
-ACTION: ls <caminho>      (lista arquivos de um diretório; use "." para a raiz)
-ACTION: grep <termo>      (busca textual em todas as notas)
-ACTION: read <arquivo>    (lê o conteúdo de uma nota)
+ACTION: ls <path>       (lists files in a directory; use "." for the root)
+ACTION: grep <term>     (text search across all notes)
+ACTION: read <file>     (reads the content of a note)
 
-Após cada ACTION você receberá o resultado. Você tem no máximo {max_actions}
-ações no total — use-as bem.
+After each ACTION you will receive the result. You have at most {max_actions}
+actions in total — use them well.
 
-Quando tiver o que precisa, produza os arquivos finais neste formato exato
-(pode haver mais de um bloco FILE):
+When you have what you need, produce the final files in this exact format
+(there may be more than one FILE block):
 
-FILE: caminho/relativo/do/Arquivo.java
+FILE: relative/path/to/File.java
 ```java
-<conteúdo completo do arquivo>
+<complete file content>
 ```
 
-Regras do formato: nunca misture ACTION e FILE na mesma resposta; escreva
-arquivos completos e compiláveis; não modifique os arquivos existentes do
-projeto."""
+Format rules: never mix ACTION and FILE in the same reply; write complete,
+compilable files; do not modify the project's existing files."""
 
-SYSTEM_BASELINE = """Você é um engenheiro de software sênior de um time de produto.
-Você NÃO tem acesso à documentação do time; use seu melhor julgamento para
-regras de negócio e convenções.
+SYSTEM_BASELINE = """You are a senior software engineer on a product team.
+You do NOT have access to the team's documentation; use your best judgment for
+business rules and conventions.
 
-Produza os arquivos finais neste formato exato (pode haver mais de um bloco
-FILE):
+Produce the final files in this exact format (there may be more than one FILE
+block):
 
-FILE: caminho/relativo/do/Arquivo.java
+FILE: relative/path/to/File.java
 ```java
-<conteúdo completo do arquivo>
+<complete file content>
 ```
 
-Escreva arquivos completos e compiláveis; não modifique os arquivos
-existentes do projeto."""
+Write complete, compilable files; do not modify the project's existing
+files."""
 
 
 def log(msg):
@@ -516,11 +515,11 @@ def run_task(task):
             remaining = MAX_ACTIONS - len(actions)
             note = ""
             if FILE_RE.search(content):
-                note = ("\n\n(Seus blocos FILE foram IGNORADOS porque vieram "
-                        "junto com um ACTION. Termine a exploração e reenvie "
-                        "todos os FILE completos sozinhos na resposta final.)")
+                note = ("\n\n(Your FILE blocks were IGNORED because they came "
+                        "together with an ACTION. Finish exploring and resend "
+                        "ALL complete FILE blocks alone in your final reply.)")
             messages.append({"role": "user", "content":
-                             f"RESULT ({remaining} ações restantes):\n{result}{note}"})
+                             f"RESULT ({remaining} actions left):\n{result}{note}"})
             continue
 
         nudges += 1
@@ -529,12 +528,12 @@ def run_task(task):
             break
         if m and len(actions) >= MAX_ACTIONS:
             messages.append({"role": "user", "content":
-                             "Limite de ações atingido. Produza AGORA os blocos "
-                             "FILE finais com o código completo."})
+                             "Action limit reached. Produce the final FILE "
+                             "blocks with the complete code NOW."})
         else:
             messages.append({"role": "user", "content":
-                             "Formato inválido. Responda apenas com um ACTION "
-                             "válido ou com blocos FILE no formato especificado."})
+                             "Invalid format. Reply only with a valid ACTION "
+                             "or with FILE blocks in the specified format."})
 
     written = write_generated_files(ws, blocks)
 
@@ -562,10 +561,10 @@ def run_task(task):
             log(f"  reparo {repairs}/{MAX_REPAIRS} (não compilou)")
             err = (ev.get("error") or "erro desconhecido")[-2500:]
             messages.append({"role": "user", "content":
-                             "A compilação/verificação do seu código falhou:\n\n"
+                             "Compilation/verification of your code failed:\n\n"
                              f"```\n{err}\n```\n\n"
-                             "Corrija e reenvie TODOS os blocos FILE, com o "
-                             "conteúdo completo de cada arquivo."})
+                             "Fix it and resend ALL FILE blocks with the "
+                             "complete content of each file."})
             content = chat(messages, stats)
             messages.append({"role": "assistant", "content": content})
             found = FILE_RE.findall(content)

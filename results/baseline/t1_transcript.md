@@ -1,47 +1,47 @@
 ## system
 
-Você é um engenheiro de software sênior de um time de produto.
-Você NÃO tem acesso à documentação do time; use seu melhor julgamento para
-regras de negócio e convenções.
+You are a senior software engineer on a product team.
+You do NOT have access to the team's documentation; use your best judgment for
+business rules and conventions.
 
-Produza os arquivos finais neste formato exato (pode haver mais de um bloco
-FILE):
+Produce the final files in this exact format (there may be more than one FILE
+block):
 
-FILE: caminho/relativo/do/Arquivo.java
+FILE: relative/path/to/File.java
 ```java
-<conteúdo completo do arquivo>
+<complete file content>
 ```
 
-Escreva arquivos completos e compiláveis; não modifique os arquivos
-existentes do projeto.
+Write complete, compilable files; do not modify the project's existing
+files.
 
 ---
 
 ## user
 
-# Tarefa: criar convite de usuário
+# Task: create user invitation
 
-Implemente o endpoint de criação de convite:
+Implement the invitation creation endpoint:
 
 ```
 POST /tenants/{tenantId}/invitations
-Request JSON:  { "email": "pessoa@ex.com", "role": "ADMIN" | "MEMBER" }
-Sucesso: 201 com JSON { "id": "...", "expiresAt": "..." }
+Request JSON:  { "email": "person@ex.com", "role": "ADMIN" | "MEMBER" }
+Success: 201 with JSON { "id": "...", "expiresAt": "..." }
 ```
 
-Persista o convite no `InMemoryStore`. Implemente TODAS as regras de negócio,
-permissões, validações e convenções de erro/auditoria que o time definiu para
-convites.
+Persist the invitation in the `InMemoryStore`. Implement ALL the business
+rules, permissions, validations and error/audit conventions the team has
+defined for invitations.
 
 
-## Projeto existente (Quarkus 3, Java 21) — NÃO reescreva estas classes
+## Existing project (Quarkus 3, Java 21) — do NOT rewrite these classes
 
-Pacote `com.bench.model`:
+Package `com.bench.model`:
 
 ```java
 public enum Role { OWNER, ADMIN, MEMBER }
 public enum UserStatus { INVITED, ACTIVE, SUSPENDED, DELETED }
-public enum Plan { FREE, PRO, ENTERPRISE }        // campo público: Integer maxUsers (null = ilimitado)
+public enum Plan { FREE, PRO, ENTERPRISE }        // public field: Integer maxUsers (null = unlimited)
 public enum InvitationStatus { PENDING, ACCEPTED, REVOKED }
 
 public class User { public String id, tenantId, email; public Role role;
@@ -54,7 +54,7 @@ public class AuditEntry { public String id, tenantId, actorId, action, targetId;
                           public java.time.Instant timestamp; public String details; }
 ```
 
-Pacote `com.bench.store` — injete com `@Inject`:
+Package `com.bench.store` — inject with `@Inject`:
 
 ```java
 @Singleton
@@ -66,23 +66,31 @@ public class InMemoryStore {
     public Optional<User> findUser(String id);
     public List<User> usersOfTenant(String tenantId);
     public List<Invitation> invitationsOfTenant(String tenantId);
-    public long countOwners(String tenantId);   // owners com status != DELETED
+    public long countOwners(String tenantId);   // owners with status != DELETED
     public void reset();
 }
 ```
 
-Contexto de autenticação: o id do usuário autenticado (ator) chega no header
-HTTP `X-Actor-Id` e corresponde a um `User` no store.
+Authentication context: the id of the authenticated user (the actor) arrives in
+the HTTP header `X-Actor-Id` and matches a `User` in the store. Read it as a
+method parameter, exactly like this:
 
-Crie seus recursos REST (jakarta.ws.rs) em `src/main/java/com/bench/api/`.
-Lembre-se dos imports: `com.bench.model.*`, `com.bench.store.InMemoryStore`,
-`jakarta.ws.rs.*`, `jakarta.ws.rs.core.*`, `jakarta.inject.Inject`. Use apenas
-classes e métodos que existem no scaffold acima.
+```java
+@POST
+public Response create(@PathParam("tenantId") String tenantId,
+                       SomeRequestBody body,
+                       @HeaderParam("X-Actor-Id") String actorId) { ... }
+```
 
-Armadilhas de API conhecidas:
-- Para status HTTP fora do enum padrão (ex.: 422, 410), use
-  `Response.status(422)` — `Response.Status` NÃO tem essas constantes.
-- `Instant` não tem `plusHours`/`plusDays`; use
+Create your REST resources (jakarta.ws.rs) under `src/main/java/com/bench/api/`.
+Remember the imports: `com.bench.model.*`, `com.bench.store.InMemoryStore`,
+`jakarta.ws.rs.*`, `jakarta.ws.rs.core.*`, `jakarta.inject.Inject`. Use only
+classes and methods that exist in the scaffold above.
+
+Known API traps:
+- For HTTP statuses outside the standard enum (e.g. 422, 410), use
+  `Response.status(422)` — `Response.Status` does NOT have those constants.
+- `Instant` has no `plusHours`/`plusDays`; use
   `instant.plus(java.time.Duration.ofHours(n))`.
 
 
@@ -114,149 +122,136 @@ public class InvitationResource {
     InMemoryStore store;
 
     @POST
-    public Response createInvitation(
-            @PathParam("tenantId") String tenantId,
-            InvitationRequest request) {
-        
-        // Validação do corpo da requisição
-        if (request.email == null || request.email.isEmpty()) {
-            return Response.status(422)
-                    .entity(new ErrorResponse("Email is required"))
-                    .build();
+    public Response create(@PathParam("tenantId") String tenantId,
+                           InvitationRequest body,
+                           @HeaderParam("X-Actor-Id") String actorId) {
+        // Validate request body
+        if (body.email == null || body.email.isEmpty()) {
+            return Response.status(422).entity("{\"error\":\"Email is required\"}").build();
         }
         
-        if (request.role == null) {
-            return Response.status(422)
-                    .entity(new ErrorResponse("Role is required"))
-                    .build();
+        if (body.role == null) {
+            return Response.status(422).entity("{\"error\":\"Role is required\"}").build();
         }
 
-        // Verifica se o usuário autenticado existe
-        String actorId = getActorId();
-        Optional<User> actorOpt = store.findUser(actorId);
-        if (!actorOpt.isPresent()) {
-            return Response.status(401)
-                    .entity(new ErrorResponse("Unauthorized"))
-                    .build();
-        }
-        
-        User actor = actorOpt.get();
-        
-        // Verifica se o usuário autenticado pertence ao tenant
-        if (!tenantId.equals(actor.tenantId)) {
-            return Response.status(403)
-                    .entity(new ErrorResponse("Forbidden"))
-                    .build();
-        }
-
-        // Verifica se o usuário autenticado tem permissão para convidar (ADMIN ou OWNER)
-        if (actor.role != Role.ADMIN && actor.role != Role.OWNER) {
-            return Response.status(403)
-                    .entity(new ErrorResponse("Forbidden"))
-                    .build();
-        }
-
-        // Verifica se o email já está em uso
-        List<User> existingUsers = store.usersOfTenant(tenantId);
-        for (User user : existingUsers) {
-            if (user.email.equals(request.email)) {
-                return Response.status(422)
-                        .entity(new ErrorResponse("Email already in use"))
-                        .build();
-            }
-        }
-
-        // Verifica se já existe um convite pendente para esse email
-        List<Invitation> existingInvitations = store.invitationsOfTenant(tenantId);
-        for (Invitation invitation : existingInvitations) {
-            if (invitation.email.equals(request.email) && 
-                invitation.status == InvitationStatus.PENDING) {
-                return Response.status(422)
-                        .entity(new ErrorResponse("Invitation already exists for this email"))
-                        .build();
-            }
-        }
-
-        // Verifica se o tenant existe
+        // Validate tenant exists
         Optional<Tenant> tenantOpt = store.tenants.values().stream()
                 .filter(t -> t.id.equals(tenantId))
                 .findFirst();
         
         if (!tenantOpt.isPresent()) {
-            return Response.status(404)
-                    .entity(new ErrorResponse("Tenant not found"))
-                    .build();
+            return Response.status(404).entity("{\"error\":\"Tenant not found\"}").build();
         }
-
+        
         Tenant tenant = tenantOpt.get();
 
-        // Verifica se o número de usuários excederia o limite do plano
-        long currentUsers = existingUsers.size();
-        long owners = store.countOwners(tenantId);
-        long maxUsers = tenant.plan.maxUsers != null ? tenant.plan.maxUsers : Long.MAX_VALUE;
+        // Validate actor exists and is active
+        Optional<User> actorOpt = store.findUser(actorId);
+        if (!actorOpt.isPresent() || actorOpt.get().status != UserStatus.ACTIVE) {
+            return Response.status(401).entity("{\"error\":\"Unauthorized\"}").build();
+        }
         
-        if (currentUsers + 1 > maxUsers) {
-            return Response.status(422)
-                    .entity(new ErrorResponse("Tenant user limit exceeded"))
-                    .build();
+        User actor = actorOpt.get();
+        
+        // Validate actor belongs to tenant
+        if (!actor.tenantId.equals(tenantId)) {
+            return Response.status(403).entity("{\"error\":\"Forbidden\"}").build();
         }
 
-        // Cria o convite
+        // Validate actor has permission (OWNER or ADMIN)
+        if (actor.role != Role.OWNER && actor.role != Role.ADMIN) {
+            return Response.status(403).entity("{\"error\":\"Forbidden\"}").build();
+        }
+
+        // Check if user is already a member of the tenant
+        List<User> existingUsers = store.usersOfTenant(tenantId);
+        boolean isAlreadyMember = existingUsers.stream()
+                .anyMatch(u -> u.email.equals(body.email) && u.status != UserStatus.DELETED);
+
+        if (isAlreadyMember) {
+            return Response.status(422).entity("{\"error\":\"User is already a member\"}").build();
+        }
+
+        // Check if there's an existing invitation for this email
+        List<Invitation> existingInvitations = store.invitationsOfTenant(tenantId);
+        boolean hasPendingInvitation = existingInvitations.stream()
+                .anyMatch(i -> i.email.equals(body.email) && i.status == InvitationStatus.PENDING);
+
+        if (hasPendingInvitation) {
+            return Response.status(422).entity("{\"error\":\"An invitation is already pending for this email\"}").build();
+        }
+
+        // Check tenant plan limits
+        if (tenant.plan.maxUsers != null) {
+            long activeUserCount = store.usersOfTenant(tenantId).stream()
+                    .filter(u -> u.status == UserStatus.ACTIVE)
+                    .count();
+            
+            if (activeUserCount >= tenant.plan.maxUsers) {
+                return Response.status(422).entity("{\"error\":\"Tenant user limit reached\"}").build();
+            }
+        }
+
+        // Check if role is valid for the tenant
+        if (body.role == Role.OWNER) {
+            // Only OWNER can invite other OWNERs
+            if (actor.role != Role.OWNER) {
+                return Response.status(403).entity("{\"error\":\"Forbidden\"}").build();
+            }
+            
+            // Ensure tenant has at least one OWNER
+            long ownerCount = store.countOwners(tenantId);
+            if (ownerCount == 0 && body.role != Role.OWNER) {
+                return Response.status(422).entity("{\"error\":\"Tenant must have at least one OWNER\"}").build();
+            }
+        }
+
+        // Create invitation
+        String invitationId = UUID.randomUUID().toString();
+        Instant now = Instant.now();
+        Instant expiresAt = now.plus(java.time.Duration.ofDays(7)); // 7 days expiry
+        
         Invitation invitation = new Invitation();
-        invitation.id = UUID.randomUUID().toString();
+        invitation.id = invitationId;
         invitation.tenantId = tenantId;
-        invitation.email = request.email;
-        invitation.role = request.role;
-        invitation.createdAt = Instant.now();
-        invitation.expiresAt = Instant.now().plus(java.time.Duration.ofDays(7));
+        invitation.email = body.email;
+        invitation.role = body.role;
+        invitation.createdAt = now;
+        invitation.expiresAt = expiresAt;
         invitation.resendCount = 0;
         invitation.status = InvitationStatus.PENDING;
-
-        // Persiste o convite
-        store.invitations.put(invitation.id, invitation);
-
-        // Registra na auditoria
+        
+        // Store invitation
+        store.invitations.put(invitationId, invitation);
+        
+        // Log audit entry
         AuditEntry auditEntry = new AuditEntry();
         auditEntry.id = UUID.randomUUID().toString();
         auditEntry.tenantId = tenantId;
         auditEntry.actorId = actorId;
         auditEntry.action = "INVITE_USER";
-        auditEntry.targetId = invitation.id;
-        auditEntry.timestamp = Instant.now();
-        auditEntry.details = String.format("Invited user %s with role %s", 
-                                          invitation.email, invitation.role);
+        auditEntry.targetId = invitationId;
+        auditEntry.timestamp = now;
+        auditEntry.details = String.format("Invited %s with role %s", body.email, body.role);
+        
         store.auditLog.add(auditEntry);
 
-        // Retorna a resposta
+        // Return success response
         InvitationResponse response = new InvitationResponse();
-        response.id = invitation.id;
-        response.expiresAt = invitation.expiresAt;
-
+        response.id = invitationId;
+        response.expiresAt = expiresAt;
+        
         return Response.status(201).entity(response).build();
-    }
-
-    private String getActorId() {
-        // Em um ambiente real, isso viria do header HTTP
-        // Aqui estamos simulando com um valor fixo para testes
-        return "actor-123";
     }
 
     public static class InvitationRequest {
         public String email;
         public Role role;
     }
-
+    
     public static class InvitationResponse {
         public String id;
         public Instant expiresAt;
-    }
-
-    public static class ErrorResponse {
-        public String message;
-
-        public ErrorResponse(String message) {
-            this.message = message;
-        }
     }
 }
 ```

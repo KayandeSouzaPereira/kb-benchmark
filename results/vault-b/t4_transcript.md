@@ -1,57 +1,56 @@
 ## system
 
-Você é um engenheiro de software sênior de um time de produto.
-O time mantém uma base de conhecimento em arquivos Markdown com as regras de
-negócio e convenções. Você DEVE consultá-la antes de escrever código, porque
-as regras específicas do produto não são óbvias.
+You are a senior software engineer on a product team.
+The team keeps a knowledge base of Markdown files with the business rules and
+conventions. You MUST consult it before writing code, because the
+product-specific rules are not obvious.
 
-Para explorar a base, responda com UMA única linha de comando por mensagem:
+To explore the knowledge base, reply with ONE single command line per message:
 
-ACTION: ls <caminho>      (lista arquivos de um diretório; use "." para a raiz)
-ACTION: grep <termo>      (busca textual em todas as notas)
-ACTION: read <arquivo>    (lê o conteúdo de uma nota)
+ACTION: ls <path>       (lists files in a directory; use "." for the root)
+ACTION: grep <term>     (text search across all notes)
+ACTION: read <file>     (reads the content of a note)
 
-Após cada ACTION você receberá o resultado. Você tem no máximo 8
-ações no total — use-as bem.
+After each ACTION you will receive the result. You have at most 8
+actions in total — use them well.
 
-Quando tiver o que precisa, produza os arquivos finais neste formato exato
-(pode haver mais de um bloco FILE):
+When you have what you need, produce the final files in this exact format
+(there may be more than one FILE block):
 
-FILE: caminho/relativo/do/Arquivo.java
+FILE: relative/path/to/File.java
 ```java
-<conteúdo completo do arquivo>
+<complete file content>
 ```
 
-Regras do formato: nunca misture ACTION e FILE na mesma resposta; escreva
-arquivos completos e compiláveis; não modifique os arquivos existentes do
-projeto.
+Format rules: never mix ACTION and FILE in the same reply; write complete,
+compilable files; do not modify the project's existing files.
 
 ---
 
 ## user
 
-# Tarefa: alterar papel de usuário
+# Task: change user role
 
-Implemente o endpoint de mudança de papel:
+Implement the role change endpoint:
 
 ```
 PATCH /tenants/{tenantId}/users/{userId}/role
 Request JSON:  { "role": "OWNER" | "ADMIN" | "MEMBER" }
-Sucesso: 200 com JSON do usuário atualizado
+Success: 200 with the updated user as JSON
 ```
 
-Implemente TODAS as regras de negócio, permissões, validações e convenções de
-erro/auditoria que o time definiu para papéis.
+Implement ALL the business rules, permissions, validations and error/audit
+conventions the team has defined for roles.
 
 
-## Projeto existente (Quarkus 3, Java 21) — NÃO reescreva estas classes
+## Existing project (Quarkus 3, Java 21) — do NOT rewrite these classes
 
-Pacote `com.bench.model`:
+Package `com.bench.model`:
 
 ```java
 public enum Role { OWNER, ADMIN, MEMBER }
 public enum UserStatus { INVITED, ACTIVE, SUSPENDED, DELETED }
-public enum Plan { FREE, PRO, ENTERPRISE }        // campo público: Integer maxUsers (null = ilimitado)
+public enum Plan { FREE, PRO, ENTERPRISE }        // public field: Integer maxUsers (null = unlimited)
 public enum InvitationStatus { PENDING, ACCEPTED, REVOKED }
 
 public class User { public String id, tenantId, email; public Role role;
@@ -64,7 +63,7 @@ public class AuditEntry { public String id, tenantId, actorId, action, targetId;
                           public java.time.Instant timestamp; public String details; }
 ```
 
-Pacote `com.bench.store` — injete com `@Inject`:
+Package `com.bench.store` — inject with `@Inject`:
 
 ```java
 @Singleton
@@ -76,23 +75,31 @@ public class InMemoryStore {
     public Optional<User> findUser(String id);
     public List<User> usersOfTenant(String tenantId);
     public List<Invitation> invitationsOfTenant(String tenantId);
-    public long countOwners(String tenantId);   // owners com status != DELETED
+    public long countOwners(String tenantId);   // owners with status != DELETED
     public void reset();
 }
 ```
 
-Contexto de autenticação: o id do usuário autenticado (ator) chega no header
-HTTP `X-Actor-Id` e corresponde a um `User` no store.
+Authentication context: the id of the authenticated user (the actor) arrives in
+the HTTP header `X-Actor-Id` and matches a `User` in the store. Read it as a
+method parameter, exactly like this:
 
-Crie seus recursos REST (jakarta.ws.rs) em `src/main/java/com/bench/api/`.
-Lembre-se dos imports: `com.bench.model.*`, `com.bench.store.InMemoryStore`,
-`jakarta.ws.rs.*`, `jakarta.ws.rs.core.*`, `jakarta.inject.Inject`. Use apenas
-classes e métodos que existem no scaffold acima.
+```java
+@POST
+public Response create(@PathParam("tenantId") String tenantId,
+                       SomeRequestBody body,
+                       @HeaderParam("X-Actor-Id") String actorId) { ... }
+```
 
-Armadilhas de API conhecidas:
-- Para status HTTP fora do enum padrão (ex.: 422, 410), use
-  `Response.status(422)` — `Response.Status` NÃO tem essas constantes.
-- `Instant` não tem `plusHours`/`plusDays`; use
+Create your REST resources (jakarta.ws.rs) under `src/main/java/com/bench/api/`.
+Remember the imports: `com.bench.model.*`, `com.bench.store.InMemoryStore`,
+`jakarta.ws.rs.*`, `jakarta.ws.rs.core.*`, `jakarta.inject.Inject`. Use only
+classes and methods that exist in the scaffold above.
+
+Known API traps:
+- For HTTP statuses outside the standard enum (e.g. 422, 410), use
+  `Response.status(422)` — `Response.Status` does NOT have those constants.
+- `Instant` has no `plusHours`/`plusDays`; use
   `instant.plus(java.time.Duration.ofHours(n))`.
 
 
@@ -107,330 +114,206 @@ ACTION: ls .
 
 ## user
 
-RESULT (7 ações restantes):
-202601050900-mapa-dominio-usuarios.md
-202601051030-papeis-do-tenant.md
-202601080800-lockout-e-senhas.md
-202601121000-limites-por-plano.md
-202601201300-auditoria-de-mutacoes.md
-202601201330-codigos-de-erro-da-api.md
-202602041100-expiracao-de-convites-72h.md
-202602041130-reenvio-de-convites.md
-202602101415-protecao-do-owner.md
-202602101430-ultimo-owner.md
-202602151100-isolamento-de-tenant-404.md
-202603121015-convites-e-limite-duvida.md
-202603150900-soft-delete-30-dias.md
-202603150930-quem-pode-deletar.md
-202604010900-mapa-api-e-convencoes.md
-202604111600-badges-de-status-no-front.md
-202605021430-convites-pendentes-contam.md
-202605190800-ideias-de-precos.md
+RESULT (7 actions left):
+202601050900-user-domain-map.md
+202601051030-tenant-roles.md
+202601080800-lockout-and-passwords.md
+202601121000-plan-seat-limits.md
+202601201300-mutation-audit-log.md
+202601201330-api-error-codes.md
+202602041100-invitation-72h-expiry.md
+202602041130-invitation-resend.md
+202602101415-owner-protection.md
+202602101430-last-owner.md
+202602151100-tenant-isolation-404.md
+202603121015-pending-invites-limit-doubt.md
+202603150900-soft-delete-30-days.md
+202603150930-who-can-delete-users.md
+202604010900-api-and-conventions-map.md
+202604111600-frontend-status-badges.md
+202605021430-pending-invitations-count.md
+202605190800-pricing-ideas.md
 
 ---
 
 ## assistant
 
-ACTION: grep -i "papel\|role" 202601051030-papeis-do-tenant.md
+ACTION: read 202601051030-tenant-roles.md
 ```
 
 ---
 
 ## user
 
-RESULT (6 ações restantes):
-nenhum resultado para: -i "papel\|role" 202601051030-papeis-do-tenant.md
+RESULT (6 actions left):
+# 202601051030 Tenant roles
 
----
+Three roles, strict hierarchy: OWNER > ADMIN > MEMBER.
 
-## assistant
+Administrative mutations — inviting someone, deleting a user, changing a role —
+require ADMIN or OWNER ("ADMIN+"). A MEMBER who tries gets 403 with code
+`FORBIDDEN_ROLE` (codes in [[202601201330-api-error-codes]]).
 
-ACTION: read 202601051030-papeis-do-tenant.md
-```
+But hierarchy is not just "whoever is above rules": the owner has specific
+protections that an admin cannot cross → [[202602101415-owner-protection]].
 
----
-
-## user
-
-RESULT (5 ações restantes):
-# 202601051030 Papéis do tenant
-
-Três papéis, hierarquia estrita: OWNER > ADMIN > MEMBER.
-
-Mutações administrativas — convidar alguém, excluir usuário, mudar papel —
-pedem ADMIN ou OWNER ("ADMIN+"). Um MEMBER que tente recebe 403 com código
-`FORBIDDEN_ROLE` (códigos em [[202601201330-codigos-de-erro-da-api]]).
-
-Mas hierarquia não é só "quem está acima manda": o owner tem proteções
-específicas que um admin não atravessa → [[202602101415-protecao-do-owner]].
-
-E o ator precisa ser do próprio tenant → [[202602151100-isolamento-de-tenant-404]].
+And the actor must belong to the tenant itself → [[202602151100-tenant-isolation-404]].
 
 
 ---
 
 ## assistant
 
-ACTION: read 202602101415-protecao-do-owner.md
+ACTION: read 202602101415-owner-protection.md
 ```
 
 ---
 
 ## user
 
-RESULT (4 ações restantes):
-# 202602101415 Proteção do owner
+RESULT (5 actions left):
+# 202602101415 Owner protection
 
-Percebi hoje discutindo o incidente do cliente Vetrix: se um ADMIN pode
-rebaixar ou excluir um OWNER, um admin malicioso toma o tenant.
+Realized today while discussing the Vetrix customer incident: if an ADMIN can
+demote or delete an OWNER, a malicious admin takes over the tenant.
 
-Regra que fechamos: **ADMIN nunca altera nem exclui um OWNER** — nem papel,
-nem exclusão. Resposta: 403 `OWNER_PROTECTED`. Só um OWNER mexe em outro
-OWNER, e só um OWNER promove alguém a OWNER.
+Rule we settled on: **an ADMIN never modifies nor deletes an OWNER** — neither
+role nor deletion. Response: 403 `OWNER_PROTECTED`. Only an OWNER touches
+another OWNER, and only an OWNER promotes someone to OWNER.
 
-Isso conecta com o caso extremo do último owner: [[202602101430-ultimo-owner]].
-Papéis em geral: [[202601051030-papeis-do-tenant]].
+This connects to the last-owner edge case: [[202602101430-last-owner]].
+Roles in general: [[202601051030-tenant-roles]].
 
 
 ---
 
 ## assistant
 
-ACTION: read 202602101430-ultimo-owner.md
+ACTION: read 202602101430-last-owner.md
 ```
 
 ---
 
 ## user
 
-RESULT (3 ações restantes):
-# 202602101430 Último owner
+RESULT (4 actions left):
+# 202602101430 Last owner
 
-Continuação de [[202602101415-protecao-do-owner]]: o tenant nunca pode ficar
-sem OWNER.
+Continuation of [[202602101415-owner-protection]]: a tenant can never be left
+without an OWNER.
 
-Qualquer operação que deixaria zero owners ativos — rebaixar o último owner
-(inclusive ele rebaixando a si mesmo), removê-lo, ele sair do tenant —
-falha com **409 `LAST_OWNER`**.
+Any operation that would leave zero active owners — demoting the last owner
+(including demoting themselves), removing them, them leaving the tenant —
+fails with **409 `LAST_OWNER`**.
 
-Com dois ou mais owners a operação passa: um owner pode rebaixar o outro
-normalmente.
+With two or more owners the operation goes through: one owner may demote the
+other normally.
 
-"Owner ativo" aqui = owner com status != DELETED. Relaciona com
-[[202603150900-soft-delete-30-dias]].
+"Active owner" here = owner with status != DELETED. Relates to
+[[202603150900-soft-delete-30-days]].
 
 
 ---
 
 ## assistant
 
-ACTION: read 202601201330-codigos-de-erro-da-api.md
+ACTION: read 202601201300-mutation-audit-log.md
 ```
 
 ---
 
 ## user
 
-RESULT (2 ações restantes):
-# 202601201330 Códigos de erro da API
+RESULT (3 actions left):
+# 202601201300 Mutation audit log
 
-Envelope padrão de erro de negócio (o `code` é contrato estável, `message`
-é livre):
+Every EFFECTIVE mutation of a user/invitation/role writes an AuditEntry to the
+auditLog, in the same operation (no "I'll audit later"). Denied attempts
+(403/422) do NOT produce an entry.
+
+Fields: `id` (new UUID), `tenantId`, `actorId` (the `X-Actor-Id`), `action`,
+`targetId` (id of the affected resource), `timestamp` (UTC Instant), `details`
+(free, optional).
+
+Valid actions — do not invent strings outside this list, compliance dashboards
+break:
+
+- `USER_INVITED` (targetId = invitation id)
+- `INVITATION_RESENT` (targetId = invitation id)
+- `USER_ROLE_CHANGED` (targetId = user id)
+- `USER_SOFT_DELETED` (targetId = user id)
+- `USER_RESTORED` (targetId = user id)
+
+Links to everything: [[202602041100-invitation-72h-expiry]],
+[[202603150900-soft-delete-30-days]], [[202601051030-tenant-roles]].
+
+
+---
+
+## assistant
+
+ACTION: read 202601201330-api-error-codes.md
+```
+
+---
+
+## user
+
+RESULT (2 actions left):
+# 202601201330 API error codes
+
+Standard business-error envelope (`code` is a stable contract, `message` is
+free):
 
 ```json
-{ "code": "CODIGO_ESTAVEL", "message": "texto humano" }
+{ "code": "STABLE_CODE", "message": "human text" }
 ```
 
-Códigos que já firmamos:
+Codes we've settled on:
 
-- 403 `FORBIDDEN_ROLE` — papel insuficiente ([[202601051030-papeis-do-tenant]])
-- 403 `OWNER_PROTECTED` — admin mexendo em owner ([[202602101415-protecao-do-owner]])
-- 409 `LAST_OWNER` — tenant ficaria sem owner ([[202602101430-ultimo-owner]])
-- 422 `PLAN_LIMIT_EXCEEDED` — limite de assentos ([[202605021430-convites-pendentes-contam]])
-- 422 `CANNOT_DELETE_SELF` — auto-exclusão ([[202603150930-quem-pode-deletar]])
-- 422 `RESEND_LIMIT_REACHED` — 4º reenvio ([[202602041130-reenvio-de-convites]])
-- 410 `INVITATION_EXPIRED` — aceitar convite vencido ([[202602041100-expiracao-de-convites-72h]])
-- 404 `NOT_FOUND` — inexistente OU ator de outro tenant ([[202602151100-isolamento-de-tenant-404]])
+- 403 `FORBIDDEN_ROLE` — insufficient role ([[202601051030-tenant-roles]])
+- 403 `OWNER_PROTECTED` — admin touching an owner ([[202602101415-owner-protection]])
+- 409 `LAST_OWNER` — tenant would be left ownerless ([[202602101430-last-owner]])
+- 422 `PLAN_LIMIT_EXCEEDED` — seat limit ([[202605021430-pending-invitations-count]])
+- 422 `CANNOT_DELETE_SELF` — self-deletion ([[202603150930-who-can-delete-users]])
+- 422 `RESEND_LIMIT_REACHED` — 4th resend ([[202602041130-invitation-resend]])
+- 410 `INVITATION_EXPIRED` — accepting an expired invite ([[202602041100-invitation-72h-expiry]])
+- 404 `NOT_FOUND` — nonexistent OR actor from another tenant ([[202602151100-tenant-isolation-404]])
 
-Sem stacktrace no body, nunca.
+No stacktraces in the body, ever.
 
 
 ---
 
 ## assistant
 
-ACTION: read 202602151100-isolamento-de-tenant-404.md
+ACTION: read 202603150900-soft-delete-30-days.md
 ```
 
 ---
 
 ## user
 
-RESULT (1 ações restantes):
-# 202602151100 Isolamento de tenant responde 404, não 403
+RESULT (1 actions left):
+# 202603150900 Soft-delete with purge in 30 days
 
-O ator (vem no header `X-Actor-Id`) tem que pertencer ao tenant da URL.
+There is no hard delete of users in the product. Deleting =
 
-Detalhe que quase erramos: quando o ator é de OUTRO tenant, a resposta é
-**404 `NOT_FOUND`**, não 403. Um 403 confirmaria para um estranho que o
-recurso existe — vazamento de informação. 404 não conta nada.
+- `status = DELETED`
+- `deletedAt = now`
+- `purgeAt = now + 30 days` (the definitive purge job reads this field)
+- the record STAYS in the store
 
-Vale para todos os endpoints de usuários e convites.
-Papéis: [[202601051030-papeis-do-tenant]].
-Códigos: [[202601201330-codigos-de-erro-da-api]].
+Success responds 204 No Content. Restoring within the window is allowed
+(audit action `USER_RESTORED`).
 
+30 days was the agreement with legal: compliance wants a minimum 30-day trail,
+LGPD killed the 90-day idea. I considered a boolean `deleted` flag and
+discarded it — without `purgeAt` the purge job cannot work.
 
----
+Who can delete: [[202603150930-who-can-delete-users]].
+Deletion auditing: [[202601201300-mutation-audit-log]].
 
-## assistant
-
-FILE: src/main/java/com/bench/api/UserRoleResource.java
-```java
-package com.bench.api;
-
-import com.bench.model.*;
-import com.bench.store.InMemoryStore;
-import jakarta.inject.Inject;
-import jakarta.ws.rs.*;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
-
-import java.time.Instant;
-import java.util.List;
-import java.util.Optional;
-
-@Path("/tenants/{tenantId}/users/{userId}/role")
-public class UserRoleResource {
-
-    @Inject
-    InMemoryStore store;
-
-    @PATCH
-    public Response changeRole(
-            @PathParam("tenantId") String tenantId,
-            @PathParam("userId") String userId,
-            RoleChangeRequest request) {
-        String actorId = getActorId();
-        User actor = store.findUser(actorId).orElse(null);
-        if (actor == null || !tenantId.equals(actor.tenantId)) {
-            return Response.status(404).entity(new ErrorResponse("NOT_FOUND", "Tenant or user not found")).build();
-        }
-
-        User targetUser = store.findUser(userId).orElse(null);
-        if (targetUser == null || !tenantId.equals(targetUser.tenantId)) {
-            return Response.status(404).entity(new ErrorResponse("NOT_FOUND", "User not found")).build();
-        }
-
-        // Verificar permissões do ator
-        if (!hasPermission(actor, targetUser)) {
-            return Response.status(403)
-                    .entity(new ErrorResponse("FORBIDDEN_ROLE", "Insufficient role to change user role"))
-                    .build();
-        }
-
-        // Verificar proteção do owner
-        if (targetUser.role == Role.OWNER && actor.role != Role.OWNER) {
-            return Response.status(403)
-                    .entity(new ErrorResponse("OWNER_PROTECTED", "Cannot modify owner role by non-owner"))
-                    .build();
-        }
-
-        // Verificar se é o último owner
-        if (targetUser.role == Role.OWNER && request.role != Role.OWNER && !canRemoveLastOwner(tenantId, userId)) {
-            return Response.status(409)
-                    .entity(new ErrorResponse("LAST_OWNER", "Cannot remove last owner"))
-                    .build();
-        }
-
-        // Realizar mudança de papel
-        targetUser.role = request.role;
-
-        // Registrar auditoria
-        store.auditLog.add(new AuditEntry()
-                .id(java.util.UUID.randomUUID().toString())
-                .tenantId(tenantId)
-                .actorId(actorId)
-                .action("USER_ROLE_CHANGED")
-                .targetId(userId)
-                .timestamp(Instant.now())
-                .details("Role changed to " + request.role));
-
-        return Response.ok(targetUser).build();
-    }
-
-    private boolean hasPermission(User actor, User targetUser) {
-        if (actor.role == Role.OWNER) return true;
-        if (actor.role == Role.ADMIN && targetUser.role != Role.OWNER) return true;
-        return false;
-    }
-
-    private boolean canRemoveLastOwner(String tenantId, String userId) {
-        List<User> owners = store.usersOfTenant(tenantId).stream()
-                .filter(u -> u.role == Role.OWNER && u.status != UserStatus.DELETED)
-                .toList();
-        return owners.size() > 1 || !owners.get(0).id.equals(userId);
-    }
-
-    private String getActorId() {
-        // Em um ambiente real, isso viria do header HTTP
-        // Aqui estamos simulando com uma variável de ambiente ou configuração
-        return System.getenv("X_ACTOR_ID");
-    }
-
-    public static class RoleChangeRequest {
-        public Role role;
-    }
-
-    public static class ErrorResponse {
-        public String code;
-        public String message;
-
-        public ErrorResponse(String code, String message) {
-            this.code = code;
-            this.message = message;
-        }
-    }
-}
-```
-
----
-
-## user
-
-A compilação/verificação do seu código falhou:
-
-```
-not find symbol
-  symbol:   method id(java.lang.String)
-  location: class com.bench.model.AuditEntry, line 62 in /work/vault-b/t4/src/main/java/com/bench/api/UserRoleResource.java
-2026-07-20 11:36:25,561 ERROR [io.quarkus.deployment.dev.JavaCompilationProvider] (vert.x-worker-thread-1) cannot find symbol
-  symbol:   method id(java.lang.String)
-  location: class com.bench.model.AuditEntry, line 62 in /work/vault-b/t4/src/main/java/com/bench/api/UserRoleResource.java
-2026-07-20 11:36:27,619 ERROR [io.quarkus.deployment.dev.JavaCompilationProvider] (vert.x-worker-thread-1) cannot find symbol
-  symbol:   method id(java.lang.String)
-  location: class com.bench.model.AuditEntry, line 62 in /work/vault-b/t4/src/main/java/com/bench/api/UserRoleResource.java
-2026-07-20 11:36:29,676 ERROR [io.quarkus.deployment.dev.JavaCompilationProvider] (vert.x-worker-thread-1) cannot find symbol
-  symbol:   method id(java.lang.String)
-  location: class com.bench.model.AuditEntry, line 62 in /work/vault-b/t4/src/main/java/com/bench/api/UserRoleResource.java
-2026-07-20 11:36:31,738 ERROR [io.quarkus.deployment.dev.JavaCompilationProvider] (vert.x-worker-thread-1) cannot find symbol
-  symbol:   method id(java.lang.String)
-  location: class com.bench.model.AuditEntry, line 62 in /work/vault-b/t4/src/main/java/com/bench/api/UserRoleResource.java
-2026-07-20 11:36:33,811 ERROR [io.quarkus.deployment.dev.JavaCompilationProvider] (vert.x-worker-thread-1) cannot find symbol
-  symbol:   method id(java.lang.String)
-  location: class com.bench.model.AuditEntry, line 62 in /work/vault-b/t4/src/main/java/com/bench/api/UserRoleResource.java
-2026-07-20 11:36:35,868 ERROR [io.quarkus.deployment.dev.JavaCompilationProvider] (vert.x-worker-thread-1) cannot find symbol
-  symbol:   method id(java.lang.String)
-  location: class com.bench.model.AuditEntry, line 62 in /work/vault-b/t4/src/main/java/com/bench/api/UserRoleResource.java
-2026-07-20 11:36:37,924 ERROR [io.quarkus.deployment.dev.JavaCompilationProvider] (vert.x-worker-thread-1) cannot find symbol
-  symbol:   method id(java.lang.String)
-  location: class com.bench.model.AuditEntry, line 62 in /work/vault-b/t4/src/main/java/com/bench/api/UserRoleResource.java
-2026-07-20 11:36:39,981 ERROR [io.quarkus.deployment.dev.JavaCompilationProvider] (vert.x-worker-thread-1) cannot find symbol
-  symbol:   method id(java.lang.String)
-  location: class com.bench.model.AuditEntry, line 62 in /work/vault-b/t4/src/main/java/com/bench/api/UserRoleResource.java
-
-```
-
-Corrija e reenvie TODOS os blocos FILE, com o conteúdo completo de cada arquivo.
 
 ---
 
@@ -462,76 +345,221 @@ public class UserRoleResource {
     public Response changeRole(
             @PathParam("tenantId") String tenantId,
             @PathParam("userId") String userId,
-            RoleChangeRequest request) {
-        String actorId = getActorId();
-        User actor = store.findUser(actorId).orElse(null);
-        if (actor == null || !tenantId.equals(actor.tenantId)) {
-            return Response.status(404).entity(new ErrorResponse("NOT_FOUND", "Tenant or user not found")).build();
+            ChangeRoleRequest request,
+            @HeaderParam("X-Actor-Id") String actorId) {
+        
+        // Find the actor user
+        Optional<User> actorOpt = store.findUser(actorId);
+        if (actorOpt.isEmpty()) {
+            return Response.status(404).entity(new ErrorResponse("NOT_FOUND", "Actor not found")).build();
+        }
+        User actor = actorOpt.get();
+
+        // Verify actor belongs to the tenant
+        if (!tenantId.equals(actor.tenantId)) {
+            return Response.status(404).entity(new ErrorResponse("NOT_FOUND", "Actor not found")).build();
         }
 
-        User targetUser = store.findUser(userId).orElse(null);
-        if (targetUser == null || !tenantId.equals(targetUser.tenantId)) {
+        // Find the target user
+        Optional<User> targetUserOpt = store.findUser(userId);
+        if (targetUserOpt.isEmpty()) {
+            return Response.status(404).entity(new ErrorResponse("NOT_FOUND", "User not found")).build();
+        }
+        User targetUser = targetUserOpt.get();
+
+        // Verify target user belongs to the tenant
+        if (!tenantId.equals(targetUser.tenantId)) {
             return Response.status(404).entity(new ErrorResponse("NOT_FOUND", "User not found")).build();
         }
 
-        // Verificar permissões do ator
-        if (!hasPermission(actor, targetUser)) {
-            return Response.status(403)
-                    .entity(new ErrorResponse("FORBIDDEN_ROLE", "Insufficient role to change user role"))
-                    .build();
+        // Check permissions - ADMIN+ required
+        if (actor.role == UserStatus.INVITED || actor.role == UserStatus.SUSPENDED) {
+            return Response.status(403).entity(new ErrorResponse("FORBIDDEN_ROLE", "Insufficient role")).build();
         }
 
-        // Verificar proteção do owner
-        if (targetUser.role == Role.OWNER && actor.role != Role.OWNER) {
-            return Response.status(403)
-                    .entity(new ErrorResponse("OWNER_PROTECTED", "Cannot modify owner role by non-owner"))
-                    .build();
+        // Check if actor has sufficient privileges to change the target user's role
+        if (actor.role == Role.MEMBER) {
+            return Response.status(403).entity(new ErrorResponse("FORBIDDEN_ROLE", "Insufficient role")).build();
         }
 
-        // Verificar se é o último owner
-        if (targetUser.role == Role.OWNER && request.role != Role.OWNER && !canRemoveLastOwner(tenantId, userId)) {
-            return Response.status(409)
-                    .entity(new ErrorResponse("LAST_OWNER", "Cannot remove last owner"))
-                    .build();
+        // Check owner protection - ADMIN cannot modify OWNER
+        if (targetUser.role == Role.OWNER && actor.role == Role.ADMIN) {
+            return Response.status(403).entity(new ErrorResponse("OWNER_PROTECTED", "Cannot modify owner")).build();
         }
 
-        // Realizar mudança de papel
+        // Check last owner rule - prevent leaving tenant without owners
+        if (targetUser.role == Role.OWNER && request.role != Role.OWNER) {
+            long ownerCount = store.countOwners(tenantId);
+            if (ownerCount <= 1) {
+                return Response.status(409).entity(new ErrorResponse("LAST_OWNER", "Cannot remove last owner")).build();
+            }
+        }
+
+        // Validate role value
+        if (request.role == null) {
+            return Response.status(422).entity(new ErrorResponse("INVALID_ROLE", "Role is required")).build();
+        }
+
+        // Update the user's role
         targetUser.role = request.role;
 
-        // Registrar auditoria
-        AuditEntry auditEntry = new AuditEntry();
-        auditEntry.id = UUID.randomUUID().toString();
-        auditEntry.tenantId = tenantId;
-        auditEntry.actorId = actorId;
-        auditEntry.action = "USER_ROLE_CHANGED";
-        auditEntry.targetId = userId;
-        auditEntry.timestamp = Instant.now();
-        auditEntry.details = "Role changed to " + request.role;
-        store.auditLog.add(auditEntry);
+        // Create audit entry
+        AuditEntry audit = new AuditEntry();
+        audit.id = UUID.randomUUID().toString();
+        audit.tenantId = tenantId;
+        audit.actorId = actorId;
+        audit.action = "USER_ROLE_CHANGED";
+        audit.targetId = userId;
+        audit.timestamp = Instant.now();
+        audit.details = "Role changed from " + targetUser.role + " to " + request.role;
+
+        store.auditLog.add(audit);
 
         return Response.ok(targetUser).build();
     }
 
-    private boolean hasPermission(User actor, User targetUser) {
-        if (actor.role == Role.OWNER) return true;
-        if (actor.role == Role.ADMIN && targetUser.role != Role.OWNER) return true;
-        return false;
+    public static class ChangeRoleRequest {
+        public Role role;
     }
 
-    private boolean canRemoveLastOwner(String tenantId, String userId) {
-        List<User> owners = store.usersOfTenant(tenantId).stream()
-                .filter(u -> u.role == Role.OWNER && u.status != UserStatus.DELETED)
-                .toList();
-        return owners.size() > 1 || !owners.get(0).id.equals(userId);
+    public static class ErrorResponse {
+        public String code;
+        public String message;
+
+        public ErrorResponse(String code, String message) {
+            this.code = code;
+            this.message = message;
+        }
+    }
+}
+```
+
+---
+
+## user
+
+Compilation/verification of your code failed:
+
+```
+] (vert.x-worker-thread-1) incomparable types: com.bench.model.Role and com.bench.model.UserStatus, line 53 in /work/vault-b/t4/src/main/java/com/bench/api/UserRoleResource.java
+2026-07-20 23:27:17,719 ERROR [io.quarkus.deployment.dev.JavaCompilationProvider] (vert.x-worker-thread-1) incomparable types: com.bench.model.Role and com.bench.model.UserStatus, line 53 in /work/vault-b/t4/src/main/java/com/bench/api/UserRoleResource.java
+2026-07-20 23:27:19,774 ERROR [io.quarkus.deployment.dev.JavaCompilationProvider] (vert.x-worker-thread-1) incomparable types: com.bench.model.Role and com.bench.model.UserStatus, line 53 in /work/vault-b/t4/src/main/java/com/bench/api/UserRoleResource.java
+2026-07-20 23:27:19,774 ERROR [io.quarkus.deployment.dev.JavaCompilationProvider] (vert.x-worker-thread-1) incomparable types: com.bench.model.Role and com.bench.model.UserStatus, line 53 in /work/vault-b/t4/src/main/java/com/bench/api/UserRoleResource.java
+2026-07-20 23:27:21,829 ERROR [io.quarkus.deployment.dev.JavaCompilationProvider] (vert.x-worker-thread-1) incomparable types: com.bench.model.Role and com.bench.model.UserStatus, line 53 in /work/vault-b/t4/src/main/java/com/bench/api/UserRoleResource.java
+2026-07-20 23:27:21,830 ERROR [io.quarkus.deployment.dev.JavaCompilationProvider] (vert.x-worker-thread-1) incomparable types: com.bench.model.Role and com.bench.model.UserStatus, line 53 in /work/vault-b/t4/src/main/java/com/bench/api/UserRoleResource.java
+2026-07-20 23:27:23,888 ERROR [io.quarkus.deployment.dev.JavaCompilationProvider] (vert.x-worker-thread-1) incomparable types: com.bench.model.Role and com.bench.model.UserStatus, line 53 in /work/vault-b/t4/src/main/java/com/bench/api/UserRoleResource.java
+2026-07-20 23:27:23,889 ERROR [io.quarkus.deployment.dev.JavaCompilationProvider] (vert.x-worker-thread-1) incomparable types: com.bench.model.Role and com.bench.model.UserStatus, line 53 in /work/vault-b/t4/src/main/java/com/bench/api/UserRoleResource.java
+2026-07-20 23:27:25,964 ERROR [io.quarkus.deployment.dev.JavaCompilationProvider] (vert.x-worker-thread-1) incomparable types: com.bench.model.Role and com.bench.model.UserStatus, line 53 in /work/vault-b/t4/src/main/java/com/bench/api/UserRoleResource.java
+2026-07-20 23:27:25,964 ERROR [io.quarkus.deployment.dev.JavaCompilationProvider] (vert.x-worker-thread-1) incomparable types: com.bench.model.Role and com.bench.model.UserStatus, line 53 in /work/vault-b/t4/src/main/java/com/bench/api/UserRoleResource.java
+
+```
+
+Fix it and resend ALL FILE blocks with the complete content of each file.
+
+---
+
+## assistant
+
+FILE: src/main/java/com/bench/api/UserRoleResource.java
+```java
+package com.bench.api;
+
+import com.bench.model.*;
+import com.bench.store.InMemoryStore;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+
+import java.time.Instant;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+@Path("/tenants/{tenantId}/users/{userId}/role")
+public class UserRoleResource {
+
+    @Inject
+    InMemoryStore store;
+
+    @PATCH
+    public Response changeRole(
+            @PathParam("tenantId") String tenantId,
+            @PathParam("userId") String userId,
+            ChangeRoleRequest request,
+            @HeaderParam("X-Actor-Id") String actorId) {
+        
+        // Find the actor user
+        Optional<User> actorOpt = store.findUser(actorId);
+        if (actorOpt.isEmpty()) {
+            return Response.status(404).entity(new ErrorResponse("NOT_FOUND", "Actor not found")).build();
+        }
+        User actor = actorOpt.get();
+
+        // Verify actor belongs to the tenant
+        if (!tenantId.equals(actor.tenantId)) {
+            return Response.status(404).entity(new ErrorResponse("NOT_FOUND", "Actor not found")).build();
+        }
+
+        // Find the target user
+        Optional<User> targetUserOpt = store.findUser(userId);
+        if (targetUserOpt.isEmpty()) {
+            return Response.status(404).entity(new ErrorResponse("NOT_FOUND", "User not found")).build();
+        }
+        User targetUser = targetUserOpt.get();
+
+        // Verify target user belongs to the tenant
+        if (!tenantId.equals(targetUser.tenantId)) {
+            return Response.status(404).entity(new ErrorResponse("NOT_FOUND", "User not found")).build();
+        }
+
+        // Check permissions - ADMIN+ required
+        if (actor.role == Role.MEMBER) {
+            return Response.status(403).entity(new ErrorResponse("FORBIDDEN_ROLE", "Insufficient role")).build();
+        }
+
+        // Check if actor has sufficient privileges to change the target user's role
+        if (actor.role == Role.MEMBER) {
+            return Response.status(403).entity(new ErrorResponse("FORBIDDEN_ROLE", "Insufficient role")).build();
+        }
+
+        // Check owner protection - ADMIN cannot modify OWNER
+        if (targetUser.role == Role.OWNER && actor.role == Role.ADMIN) {
+            return Response.status(403).entity(new ErrorResponse("OWNER_PROTECTED", "Cannot modify owner")).build();
+        }
+
+        // Check last owner rule - prevent leaving tenant without owners
+        if (targetUser.role == Role.OWNER && request.role != Role.OWNER) {
+            long ownerCount = store.countOwners(tenantId);
+            if (ownerCount <= 1) {
+                return Response.status(409).entity(new ErrorResponse("LAST_OWNER", "Cannot remove last owner")).build();
+            }
+        }
+
+        // Validate role value
+        if (request.role == null) {
+            return Response.status(422).entity(new ErrorResponse("INVALID_ROLE", "Role is required")).build();
+        }
+
+        // Update the user's role
+        targetUser.role = request.role;
+
+        // Create audit entry
+        AuditEntry audit = new AuditEntry();
+        audit.id = UUID.randomUUID().toString();
+        audit.tenantId = tenantId;
+        audit.actorId = actorId;
+        audit.action = "USER_ROLE_CHANGED";
+        audit.targetId = userId;
+        audit.timestamp = Instant.now();
+        audit.details = "Role changed from " + targetUser.role + " to " + request.role;
+
+        store.auditLog.add(audit);
+
+        return Response.ok(targetUser).build();
     }
 
-    private String getActorId() {
-        // Em um ambiente real, isso viria do header HTTP
-        // Aqui estamos simulando com uma variável de ambiente ou configuração
-        return System.getenv("X_ACTOR_ID");
-    }
-
-    public static class RoleChangeRequest {
+    public static class ChangeRoleRequest {
         public Role role;
     }
 

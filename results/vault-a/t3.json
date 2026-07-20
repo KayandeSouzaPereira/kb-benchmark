@@ -10,9 +10,9 @@
   "repairs": 0,
   "eval_mode": "devmcp",
   "eval_times_s": [
-    10.3
+    10.6
   ],
-  "dev_boot_wait_s": 2.2,
+  "dev_boot_wait_s": 2.6,
   "error": null,
   "tests": [
     {
@@ -42,34 +42,33 @@
   "retrieval": {
     "actions": [
       "ls .",
-      "read INDEX.md",
-      "read dominio/convites.md",
-      "read dominio/papeis-e-permissoes.md",
-      "read dominio/limites-de-plano.md",
-      "read dominio/auditoria.md",
-      "read padroes-codigo/formato-de-erros-api.md"
+      "read domain/invitations.md",
+      "read domain/roles-and-permissions.md",
+      "read domain/audit-log.md",
+      "read code-standards/api-error-format.md",
+      "read domain/plan-limits.md",
+      "grep -r \"RESEND_LIMIT_REACHED\" ."
     ],
     "notes_read": [
-      "INDEX.md",
-      "dominio/auditoria.md",
-      "dominio/convites.md",
-      "dominio/limites-de-plano.md",
-      "dominio/papeis-e-permissoes.md",
-      "padroes-codigo/formato-de-erros-api.md"
+      "code-standards/api-error-format.md",
+      "domain/audit-log.md",
+      "domain/invitations.md",
+      "domain/plan-limits.md",
+      "domain/roles-and-permissions.md"
     ],
     "gold_notes": [
-      "dominio/convites.md",
-      "padroes-codigo/formato-de-erros-api.md"
+      "code-standards/api-error-format.md",
+      "domain/invitations.md"
     ],
     "gold_hits": [
-      "dominio/convites.md",
-      "padroes-codigo/formato-de-erros-api.md"
+      "code-standards/api-error-format.md",
+      "domain/invitations.md"
     ],
     "gold_hit_rate": 1.0
   },
   "tokens": {
-    "prompt_tokens": 19050,
-    "completion_tokens": 802
+    "prompt_tokens": 15561,
+    "completion_tokens": 704
   },
-  "duration_s": 70.8
+  "duration_s": 63.2
 }

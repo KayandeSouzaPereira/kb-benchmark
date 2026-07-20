@@ -3,16 +3,16 @@
   "title": "Criar convite",
   "case": "vault-a",
   "model": "qwen3-coder:30b",
-  "score": 0.5,
-  "passed": 3,
+  "score": 0.667,
+  "passed": 4,
   "total": 6,
   "compiled": true,
   "repairs": 0,
   "eval_mode": "devmcp",
   "eval_times_s": [
-    10.3
+    10.4
   ],
-  "dev_boot_wait_s": 2.2,
+  "dev_boot_wait_s": 2.3,
   "error": null,
   "tests": [
     {
@@ -21,6 +21,10 @@
     },
     {
       "name": "adminCriaConvitePersistido",
+      "passed": true
+    },
+    {
+      "name": "atorDeOutroTenantRecebe404",
       "passed": true
     },
     {
@@ -33,14 +37,9 @@
       "failure": "1 expectation failed.\nJSON path code doesn't match.\nExpected: FORBIDDEN_ROLE\n  Actual: null"
     },
     {
-      "name": "atorDeOutroTenantRecebe404",
-      "passed": false,
-      "failure": "1 expectation failed.\nExpected status code <404> but was <403>."
-    },
-    {
       "name": "limiteDoPlanoFreeContaConvitesPendentes",
       "passed": false,
-      "failure": "1 expectation failed.\nExpected status code <422> but was <201>."
+      "failure": "1 expectation failed.\nJSON path code doesn't match.\nExpected: PLAN_LIMIT_EXCEEDED\n  Actual: null"
     }
   ],
   "files_written": [
@@ -49,29 +48,34 @@
   "retrieval": {
     "actions": [
       "ls .",
-      "read produto/convites.md",
-      "grep -r \"convite\" .",
-      "grep -r \"invitation\" .",
-      "ls produto/",
-      "ls dominio/",
-      "read dominio/convites.md"
+      "read INDEX.md",
+      "read domain/invitations.md",
+      "read domain/roles-and-permissions.md",
+      "read domain/plan-limits.md",
+      "read domain/audit-log.md",
+      "ls src/main/java/com/bench/api/"
     ],
     "notes_read": [
-      "dominio/convites.md"
+      "INDEX.md",
+      "domain/audit-log.md",
+      "domain/invitations.md",
+      "domain/plan-limits.md",
+      "domain/roles-and-permissions.md"
     ],
     "gold_notes": [
-      "dominio/convites.md",
-      "dominio/limites-de-plano.md",
-      "padroes-codigo/formato-de-erros-api.md"
+      "code-standards/api-error-format.md",
+      "domain/invitations.md",
+      "domain/plan-limits.md"
     ],
     "gold_hits": [
-      "dominio/convites.md"
+      "domain/invitations.md",
+      "domain/plan-limits.md"
     ],
-    "gold_hit_rate": 0.333
+    "gold_hit_rate": 0.667
   },
   "tokens": {
-    "prompt_tokens": 11375,
-    "completion_tokens": 1202
+    "prompt_tokens": 16133,
+    "completion_tokens": 802
   },
-  "duration_s": 92.3
+  "duration_s": 66.5
 }

@@ -1,45 +1,45 @@
 ## system
 
-Você é um engenheiro de software sênior de um time de produto.
-Você NÃO tem acesso à documentação do time; use seu melhor julgamento para
-regras de negócio e convenções.
+You are a senior software engineer on a product team.
+You do NOT have access to the team's documentation; use your best judgment for
+business rules and conventions.
 
-Produza os arquivos finais neste formato exato (pode haver mais de um bloco
-FILE):
+Produce the final files in this exact format (there may be more than one FILE
+block):
 
-FILE: caminho/relativo/do/Arquivo.java
+FILE: relative/path/to/File.java
 ```java
-<conteúdo completo do arquivo>
+<complete file content>
 ```
 
-Escreva arquivos completos e compiláveis; não modifique os arquivos
-existentes do projeto.
+Write complete, compilable files; do not modify the project's existing
+files.
 
 ---
 
 ## user
 
-# Tarefa: excluir usuário
+# Task: delete user
 
-Implemente o endpoint de exclusão de usuário:
+Implement the user deletion endpoint:
 
 ```
 DELETE /tenants/{tenantId}/users/{userId}
-Sucesso: 204 No Content
+Success: 204 No Content
 ```
 
-Implemente TODAS as regras de negócio, permissões, validações e convenções de
-erro/auditoria que o time definiu para exclusão de usuários.
+Implement ALL the business rules, permissions, validations and error/audit
+conventions the team has defined for user deletion.
 
 
-## Projeto existente (Quarkus 3, Java 21) — NÃO reescreva estas classes
+## Existing project (Quarkus 3, Java 21) — do NOT rewrite these classes
 
-Pacote `com.bench.model`:
+Package `com.bench.model`:
 
 ```java
 public enum Role { OWNER, ADMIN, MEMBER }
 public enum UserStatus { INVITED, ACTIVE, SUSPENDED, DELETED }
-public enum Plan { FREE, PRO, ENTERPRISE }        // campo público: Integer maxUsers (null = ilimitado)
+public enum Plan { FREE, PRO, ENTERPRISE }        // public field: Integer maxUsers (null = unlimited)
 public enum InvitationStatus { PENDING, ACCEPTED, REVOKED }
 
 public class User { public String id, tenantId, email; public Role role;
@@ -52,7 +52,7 @@ public class AuditEntry { public String id, tenantId, actorId, action, targetId;
                           public java.time.Instant timestamp; public String details; }
 ```
 
-Pacote `com.bench.store` — injete com `@Inject`:
+Package `com.bench.store` — inject with `@Inject`:
 
 ```java
 @Singleton
@@ -64,29 +64,55 @@ public class InMemoryStore {
     public Optional<User> findUser(String id);
     public List<User> usersOfTenant(String tenantId);
     public List<Invitation> invitationsOfTenant(String tenantId);
-    public long countOwners(String tenantId);   // owners com status != DELETED
+    public long countOwners(String tenantId);   // owners with status != DELETED
     public void reset();
 }
 ```
 
-Contexto de autenticação: o id do usuário autenticado (ator) chega no header
-HTTP `X-Actor-Id` e corresponde a um `User` no store.
+Authentication context: the id of the authenticated user (the actor) arrives in
+the HTTP header `X-Actor-Id` and matches a `User` in the store. Read it as a
+method parameter, exactly like this:
 
-Crie seus recursos REST (jakarta.ws.rs) em `src/main/java/com/bench/api/`.
-Lembre-se dos imports: `com.bench.model.*`, `com.bench.store.InMemoryStore`,
-`jakarta.ws.rs.*`, `jakarta.ws.rs.core.*`, `jakarta.inject.Inject`. Use apenas
-classes e métodos que existem no scaffold acima.
+```java
+@POST
+public Response create(@PathParam("tenantId") String tenantId,
+                       SomeRequestBody body,
+                       @HeaderParam("X-Actor-Id") String actorId) { ... }
+```
 
-Armadilhas de API conhecidas:
-- Para status HTTP fora do enum padrão (ex.: 422, 410), use
-  `Response.status(422)` — `Response.Status` NÃO tem essas constantes.
-- `Instant` não tem `plusHours`/`plusDays`; use
+Create your REST resources (jakarta.ws.rs) under `src/main/java/com/bench/api/`.
+Remember the imports: `com.bench.model.*`, `com.bench.store.InMemoryStore`,
+`jakarta.ws.rs.*`, `jakarta.ws.rs.core.*`, `jakarta.inject.Inject`. Use only
+classes and methods that exist in the scaffold above.
+
+Known API traps:
+- For HTTP statuses outside the standard enum (e.g. 422, 410), use
+  `Response.status(422)` — `Response.Status` does NOT have those constants.
+- `Instant` has no `plusHours`/`plusDays`; use
   `instant.plus(java.time.Duration.ofHours(n))`.
 
 
 ---
 
 ## assistant
+
+# Implementation Plan
+
+I'll implement the user deletion endpoint with all required business rules, permissions, validations and audit conventions.
+
+Key requirements:
+1. DELETE /tenants/{tenantId}/users/{userId}
+2. Return 204 No Content on success
+3. Implement proper validation and permission checks
+4. Handle edge cases like owner deletion, tenant limits
+5. Log audit entries
+
+Let me analyze the business rules:
+- Only owners or admins can delete users
+- Cannot delete the last owner of a tenant
+- Cannot delete oneself
+- Users must exist and be active
+- Audit logging required
 
 FILE: src/main/java/com/bench/api/UserResource.java
 ```java
@@ -97,7 +123,6 @@ import com.bench.store.InMemoryStore;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
-
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -111,79 +136,86 @@ public class UserResource {
     @DELETE
     public Response deleteUser(
             @PathParam("tenantId") String tenantId,
-            @PathParam("userId") String userId) {
+            @PathParam("userId") String userId,
+            @HeaderParam("X-Actor-Id") String actorId) {
         
-        // Verificar se o usuário autenticado existe
-        String actorId = getActorId();
-        Optional<User> actorOpt = store.findUser(actorId);
-        if (actorOpt.isEmpty()) {
-            return Response.status(401).build(); // Unauthorized
-        }
-        User actor = actorOpt.get();
-
-        // Verificar se o tenant existe
+        // Validate tenant exists
         Optional<Tenant> tenantOpt = store.tenants.values().stream()
                 .filter(t -> t.id.equals(tenantId))
                 .findFirst();
-        if (tenantOpt.isEmpty()) {
-            return Response.status(404).build(); // Not Found
+        
+        if (!tenantOpt.isPresent()) {
+            return Response.status(404).build();
         }
+        
         Tenant tenant = tenantOpt.get();
-
-        // Verificar se o usuário a ser excluído existe
-        Optional<User> targetUserOpt = store.findUser(userId);
-        if (targetUserOpt.isEmpty()) {
-            return Response.status(404).build(); // Not Found
+        
+        // Validate actor exists
+        Optional<User> actorOpt = store.findUser(actorId);
+        if (!actorOpt.isPresent()) {
+            return Response.status(401).build();
         }
-        User targetUser = targetUserOpt.get();
-
-        // Verificar se o usuário pertence ao tenant
-        if (!targetUser.tenantId.equals(tenantId)) {
-            return Response.status(404).build(); // Not Found - usuário não pertence ao tenant
+        
+        User actor = actorOpt.get();
+        
+        // Validate actor is in the same tenant
+        if (!actor.tenantId.equals(tenantId)) {
+            return Response.status(403).build();
         }
-
-        // Verificar permissões do ator
-        if (!actor.id.equals(userId) && !actor.role.equals(Role.OWNER) && !actor.role.equals(Role.ADMIN)) {
-            return Response.status(403).build(); // Forbidden
+        
+        // Validate actor has permission (OWNER or ADMIN)
+        if (actor.role != Role.OWNER && actor.role != Role.ADMIN) {
+            return Response.status(403).build();
         }
-
-        // Verificar se o usuário é o único OWNER
-        if (targetUser.role == Role.OWNER && store.countOwners(tenantId) <= 1) {
+        
+        // Validate user exists
+        Optional<User> userOpt = store.findUser(userId);
+        if (!userOpt.isPresent()) {
+            return Response.status(404).build();
+        }
+        
+        User userToDelete = userOpt.get();
+        
+        // Validate user is in the same tenant
+        if (!userToDelete.tenantId.equals(tenantId)) {
+            return Response.status(404).build();
+        }
+        
+        // Validate user is not already deleted
+        if (userToDelete.status == UserStatus.DELETED) {
+            return Response.status(410).build(); // Gone - already deleted
+        }
+        
+        // Validate actor is not trying to delete themselves
+        if (actorId.equals(userId)) {
+            return Response.status(422).entity("Cannot delete yourself").build();
+        }
+        
+        // Validate user is not the last owner
+        if (userToDelete.role == Role.OWNER && store.countOwners(tenantId) <= 1) {
             return Response.status(422).entity("Cannot delete the last owner of the tenant").build();
         }
-
-        // Verificar se o usuário já está excluído
-        if (targetUser.status == UserStatus.DELETED) {
-            return Response.status(410).build(); // Gone
-        }
-
-        // Excluir o usuário
-        targetUser.status = UserStatus.DELETED;
-        targetUser.deletedAt = Instant.now();
         
-        // Definir data de purga (30 dias após exclusão)
-        targetUser.purgeAt = targetUser.deletedAt.plus(java.time.Duration.ofDays(30));
-
-        // Registrar auditoria
+        // Perform deletion
+        userToDelete.status = UserStatus.DELETED;
+        userToDelete.deletedAt = Instant.now();
+        
+        // Set purge time (30 days from now)
+        userToDelete.purgeAt = Instant.now().plus(java.time.Duration.ofDays(30));
+        
+        // Create audit entry
         AuditEntry auditEntry = new AuditEntry();
         auditEntry.id = java.util.UUID.randomUUID().toString();
         auditEntry.tenantId = tenantId;
         auditEntry.actorId = actorId;
-        auditEntry.action = "DELETE_USER";
+        auditEntry.action = "USER_DELETED";
         auditEntry.targetId = userId;
         auditEntry.timestamp = Instant.now();
         auditEntry.details = String.format("User %s deleted by %s", userId, actorId);
         
         store.auditLog.add(auditEntry);
-
+        
         return Response.noContent().build();
-    }
-
-    private String getActorId() {
-        // Simulando a leitura do header X-Actor-Id
-        // Em uma implementação real, isso seria feito com o framework de segurança
-        // Por enquanto, estamos retornando um valor fixo para demonstração
-        return "actor-user-id"; // Este valor deveria ser obtido do header HTTP
     }
 }
 ```

@@ -1,0 +1,86 @@
+{
+  "task": "t1",
+  "title": "Criar convite",
+  "case": "vault-b",
+  "model": "qwen3-coder:30b",
+  "score": 0.167,
+  "passed": 1,
+  "total": 6,
+  "compiled": true,
+  "repairs": 0,
+  "eval_mode": "devmcp",
+  "eval_times_s": [
+    8.3
+  ],
+  "dev_boot_wait_s": 2.2,
+  "error": null,
+  "tests": [
+    {
+      "name": "atorDeOutroTenantRecebe404",
+      "passed": true
+    },
+    {
+      "name": "memberNaoPodeConvidar",
+      "passed": false,
+      "failure": "1 expectation failed.\nExpected status code <403> but was <404>."
+    },
+    {
+      "name": "conviteExpiraEm72Horas",
+      "passed": false,
+      "failure": "1 expectation failed.\nExpected status code <201> but was <404>."
+    },
+    {
+      "name": "adminCriaConvitePersistido",
+      "passed": false,
+      "failure": "1 expectation failed.\nExpected status code <201> but was <404>."
+    },
+    {
+      "name": "auditoriaRegistraUserInvited",
+      "passed": false,
+      "failure": "1 expectation failed.\nExpected status code <201> but was <404>."
+    },
+    {
+      "name": "limiteDoPlanoFreeContaConvitesPendentes",
+      "passed": false,
+      "failure": "1 expectation failed.\nExpected status code <422> but was <404>."
+    }
+  ],
+  "files_written": [
+    "src/main/java/com/bench/api/InvitationResource.java"
+  ],
+  "retrieval": {
+    "actions": [
+      "ls .",
+      "read 202601050900-mapa-dominio-usuarios.md",
+      "read 202602041100-expiracao-de-convites-72h.md",
+      "read 202605021430-convites-pendentes-contam.md",
+      "read 202601201300-auditoria-de-mutacoes.md",
+      "read 202601051030-papeis-do-tenant.md",
+      "read 202601201330-codigos-de-erro-da-api.md"
+    ],
+    "notes_read": [
+      "202601050900-mapa-dominio-usuarios.md",
+      "202601051030-papeis-do-tenant.md",
+      "202601201300-auditoria-de-mutacoes.md",
+      "202601201330-codigos-de-erro-da-api.md",
+      "202602041100-expiracao-de-convites-72h.md",
+      "202605021430-convites-pendentes-contam.md"
+    ],
+    "gold_notes": [
+      "202601201330-codigos-de-erro-da-api.md",
+      "202602041100-expiracao-de-convites-72h.md",
+      "202605021430-convites-pendentes-contam.md"
+    ],
+    "gold_hits": [
+      "202601201330-codigos-de-erro-da-api.md",
+      "202602041100-expiracao-de-convites-72h.md",
+      "202605021430-convites-pendentes-contam.md"
+    ],
+    "gold_hit_rate": 1.0
+  },
+  "tokens": {
+    "prompt_tokens": 20045,
+    "completion_tokens": 1208
+  },
+  "duration_s": 90.6
+}

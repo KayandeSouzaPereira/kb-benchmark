@@ -1,0 +1,78 @@
+{
+  "task": "t4",
+  "title": "Alterar papel",
+  "case": "vault-a",
+  "model": "qwen3-coder:30b",
+  "score": 0.0,
+  "passed": 0,
+  "total": 6,
+  "compiled": true,
+  "repairs": 0,
+  "eval_mode": "devmcp",
+  "eval_times_s": [
+    8.3
+  ],
+  "dev_boot_wait_s": 2.3,
+  "error": null,
+  "tests": [
+    {
+      "name": "ultimoOwnerNaoPodeSerRebaixado",
+      "passed": false,
+      "failure": "1 expectation failed.\nExpected status code <409> but was <401>."
+    },
+    {
+      "name": "adminNaoAlteraPapelDeOwner",
+      "passed": false,
+      "failure": "1 expectation failed.\nExpected status code <403> but was <401>."
+    },
+    {
+      "name": "memberNaoAlteraPapeis",
+      "passed": false,
+      "failure": "1 expectation failed.\nExpected status code <403> but was <401>."
+    },
+    {
+      "name": "adminPromoveMember",
+      "passed": false,
+      "failure": "1 expectation failed.\nExpected status code <200> but was <401>."
+    },
+    {
+      "name": "ownerPodeRebaixarOutroOwner",
+      "passed": false,
+      "failure": "1 expectation failed.\nExpected status code <200> but was <401>."
+    },
+    {
+      "name": "auditoriaRegistraMudancaDePapel",
+      "passed": false,
+      "failure": "1 expectation failed.\nExpected status code <200> but was <401>."
+    }
+  ],
+  "files_written": [
+    "src/main/java/com/bench/api/UserRoleResource.java"
+  ],
+  "retrieval": {
+    "actions": [
+      "ls .",
+      "read produto/regras-papeis.md",
+      "grep -r \"role\" produto/",
+      "read dominio/papeis.md",
+      "read decisoes/roles.md",
+      "grep -r \"role\" .",
+      "ls produto/",
+      "read produto/planos-e-precos.md"
+    ],
+    "notes_read": [
+      "produto/planos-e-precos.md"
+    ],
+    "gold_notes": [
+      "dominio/papeis-e-permissoes.md",
+      "padroes-codigo/formato-de-erros-api.md"
+    ],
+    "gold_hits": [],
+    "gold_hit_rate": 0.0
+  },
+  "tokens": {
+    "prompt_tokens": 10332,
+    "completion_tokens": 1124
+  },
+  "duration_s": 84.5
+}

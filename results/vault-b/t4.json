@@ -3,48 +3,42 @@
   "title": "Alterar papel",
   "case": "vault-b",
   "model": "qwen3-coder:30b",
-  "score": 0.0,
-  "passed": 0,
+  "score": 1.0,
+  "passed": 6,
   "total": 6,
   "compiled": true,
   "repairs": 1,
   "eval_mode": "devmcp",
   "eval_times_s": [
-    120.2,
-    10.2
+    120.1,
+    10.6
   ],
-  "dev_boot_wait_s": 2.2,
+  "dev_boot_wait_s": 2.5,
   "error": null,
   "tests": [
     {
       "name": "ultimoOwnerNaoPodeSerRebaixado",
-      "passed": false,
-      "failure": "1 expectation failed.\nExpected status code <409> but was <500>."
+      "passed": true
     },
     {
       "name": "adminNaoAlteraPapelDeOwner",
-      "passed": false,
-      "failure": "1 expectation failed.\nExpected status code <403> but was <500>."
+      "passed": true
     },
     {
       "name": "memberNaoAlteraPapeis",
-      "passed": false,
-      "failure": "1 expectation failed.\nExpected status code <403> but was <500>."
+      "passed": true
     },
     {
       "name": "adminPromoveMember",
-      "passed": false,
-      "failure": "1 expectation failed.\nExpected status code <200> but was <500>."
+      "passed": true
     },
     {
       "name": "ownerPodeRebaixarOutroOwner",
-      "passed": false,
-      "failure": "1 expectation failed.\nExpected status code <200> but was <500>."
+      "passed": true
     },
     {
       "name": "auditoriaRegistraMudancaDePapel",
-      "passed": false,
-      "failure": "1 expectation failed.\nExpected status code <200> but was <500>."
+      "passed": true
     }
   ],
   "files_written": [
@@ -53,35 +47,36 @@
   "retrieval": {
     "actions": [
       "ls .",
-      "grep -i \"papel\\|role\" 202601051030-papeis-do-tenant.md",
-      "read 202601051030-papeis-do-tenant.md",
-      "read 202602101415-protecao-do-owner.md",
-      "read 202602101430-ultimo-owner.md",
-      "read 202601201330-codigos-de-erro-da-api.md",
-      "read 202602151100-isolamento-de-tenant-404.md"
+      "read 202601051030-tenant-roles.md",
+      "read 202602101415-owner-protection.md",
+      "read 202602101430-last-owner.md",
+      "read 202601201300-mutation-audit-log.md",
+      "read 202601201330-api-error-codes.md",
+      "read 202603150900-soft-delete-30-days.md"
     ],
     "notes_read": [
-      "202601051030-papeis-do-tenant.md",
-      "202601201330-codigos-de-erro-da-api.md",
-      "202602101415-protecao-do-owner.md",
-      "202602101430-ultimo-owner.md",
-      "202602151100-isolamento-de-tenant-404.md"
+      "202601051030-tenant-roles.md",
+      "202601201300-mutation-audit-log.md",
+      "202601201330-api-error-codes.md",
+      "202602101415-owner-protection.md",
+      "202602101430-last-owner.md",
+      "202603150900-soft-delete-30-days.md"
     ],
     "gold_notes": [
-      "202601201330-codigos-de-erro-da-api.md",
-      "202602101415-protecao-do-owner.md",
-      "202602101430-ultimo-owner.md"
+      "202601201330-api-error-codes.md",
+      "202602101415-owner-protection.md",
+      "202602101430-last-owner.md"
     ],
     "gold_hits": [
-      "202601201330-codigos-de-erro-da-api.md",
-      "202602101415-protecao-do-owner.md",
-      "202602101430-ultimo-owner.md"
+      "202601201330-api-error-codes.md",
+      "202602101415-owner-protection.md",
+      "202602101430-last-owner.md"
     ],
     "gold_hit_rate": 1.0
   },
   "tokens": {
-    "prompt_tokens": 19367,
-    "completion_tokens": 1801
+    "prompt_tokens": 19234,
+    "completion_tokens": 1857
   },
-  "duration_s": 247.0
+  "duration_s": 253.6
 }

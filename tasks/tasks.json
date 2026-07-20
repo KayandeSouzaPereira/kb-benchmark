@@ -9,14 +9,14 @@
       "expected_tests": 6,
       "gold_notes": {
         "vault-a": [
-          "dominio/convites.md",
-          "dominio/limites-de-plano.md",
-          "padroes-codigo/formato-de-erros-api.md"
+          "domain/invitations.md",
+          "domain/plan-limits.md",
+          "code-standards/api-error-format.md"
         ],
         "vault-b": [
-          "202602041100-expiracao-de-convites-72h.md",
-          "202605021430-convites-pendentes-contam.md",
-          "202601201330-codigos-de-erro-da-api.md"
+          "202602041100-invitation-72h-expiry.md",
+          "202605021430-pending-invitations-count.md",
+          "202601201330-api-error-codes.md"
         ]
       }
     },
@@ -29,14 +29,14 @@
       "expected_tests": 7,
       "gold_notes": {
         "vault-a": [
-          "dominio/exclusao-de-usuarios.md",
-          "dominio/papeis-e-permissoes.md",
-          "padroes-codigo/formato-de-erros-api.md"
+          "domain/user-deletion.md",
+          "domain/roles-and-permissions.md",
+          "code-standards/api-error-format.md"
         ],
         "vault-b": [
-          "202603150900-soft-delete-30-dias.md",
-          "202603150930-quem-pode-deletar.md",
-          "202601201330-codigos-de-erro-da-api.md"
+          "202603150900-soft-delete-30-days.md",
+          "202603150930-who-can-delete-users.md",
+          "202601201330-api-error-codes.md"
         ]
       }
     },
@@ -49,12 +49,12 @@
       "expected_tests": 5,
       "gold_notes": {
         "vault-a": [
-          "dominio/convites.md",
-          "padroes-codigo/formato-de-erros-api.md"
+          "domain/invitations.md",
+          "code-standards/api-error-format.md"
         ],
         "vault-b": [
-          "202602041130-reenvio-de-convites.md",
-          "202601201330-codigos-de-erro-da-api.md"
+          "202602041130-invitation-resend.md",
+          "202601201330-api-error-codes.md"
         ]
       }
     },
@@ -67,13 +67,13 @@
       "expected_tests": 6,
       "gold_notes": {
         "vault-a": [
-          "dominio/papeis-e-permissoes.md",
-          "padroes-codigo/formato-de-erros-api.md"
+          "domain/roles-and-permissions.md",
+          "code-standards/api-error-format.md"
         ],
         "vault-b": [
-          "202602101415-protecao-do-owner.md",
-          "202602101430-ultimo-owner.md",
-          "202601201330-codigos-de-erro-da-api.md"
+          "202602101415-owner-protection.md",
+          "202602101430-last-owner.md",
+          "202601201330-api-error-codes.md"
         ]
       }
     },
@@ -86,10 +86,10 @@
       "expected_tests": 7,
       "gold_notes": {
         "vault-a": [
-          "padroes-codigo/badges-de-status-frontend.md"
+          "code-standards/frontend-status-badges.md"
         ],
         "vault-b": [
-          "202604111600-badges-de-status-no-front.md"
+          "202604111600-frontend-status-badges.md"
         ]
       }
     }

@@ -3,47 +3,41 @@
   "title": "Alterar papel",
   "case": "vault-a",
   "model": "qwen3-coder:30b",
-  "score": 0.0,
-  "passed": 0,
+  "score": 1.0,
+  "passed": 6,
   "total": 6,
   "compiled": true,
   "repairs": 0,
   "eval_mode": "devmcp",
   "eval_times_s": [
-    8.3
+    10.9
   ],
-  "dev_boot_wait_s": 2.3,
+  "dev_boot_wait_s": 2.8,
   "error": null,
   "tests": [
     {
       "name": "ultimoOwnerNaoPodeSerRebaixado",
-      "passed": false,
-      "failure": "1 expectation failed.\nExpected status code <409> but was <401>."
+      "passed": true
     },
     {
       "name": "adminNaoAlteraPapelDeOwner",
-      "passed": false,
-      "failure": "1 expectation failed.\nExpected status code <403> but was <401>."
+      "passed": true
     },
     {
       "name": "memberNaoAlteraPapeis",
-      "passed": false,
-      "failure": "1 expectation failed.\nExpected status code <403> but was <401>."
+      "passed": true
     },
     {
       "name": "adminPromoveMember",
-      "passed": false,
-      "failure": "1 expectation failed.\nExpected status code <200> but was <401>."
+      "passed": true
     },
     {
       "name": "ownerPodeRebaixarOutroOwner",
-      "passed": false,
-      "failure": "1 expectation failed.\nExpected status code <200> but was <401>."
+      "passed": true
     },
     {
       "name": "auditoriaRegistraMudancaDePapel",
-      "passed": false,
-      "failure": "1 expectation failed.\nExpected status code <200> but was <401>."
+      "passed": true
     }
   ],
   "files_written": [
@@ -52,27 +46,32 @@
   "retrieval": {
     "actions": [
       "ls .",
-      "read produto/regras-papeis.md",
-      "grep -r \"role\" produto/",
-      "read dominio/papeis.md",
-      "read decisoes/roles.md",
-      "grep -r \"role\" .",
-      "ls produto/",
-      "read produto/planos-e-precos.md"
+      "read domain/roles.md",
+      "ls domain/",
+      "read domain/roles-and-permissions.md",
+      "read domain/audit-log.md",
+      "read domain/plan-limits.md",
+      "read code-standards/api-error-format.md"
     ],
     "notes_read": [
-      "produto/planos-e-precos.md"
+      "code-standards/api-error-format.md",
+      "domain/audit-log.md",
+      "domain/plan-limits.md",
+      "domain/roles-and-permissions.md"
     ],
     "gold_notes": [
-      "dominio/papeis-e-permissoes.md",
-      "padroes-codigo/formato-de-erros-api.md"
+      "code-standards/api-error-format.md",
+      "domain/roles-and-permissions.md"
     ],
-    "gold_hits": [],
-    "gold_hit_rate": 0.0
+    "gold_hits": [
+      "code-standards/api-error-format.md",
+      "domain/roles-and-permissions.md"
+    ],
+    "gold_hit_rate": 1.0
   },
   "tokens": {
-    "prompt_tokens": 10332,
-    "completion_tokens": 1124
+    "prompt_tokens": 11886,
+    "completion_tokens": 924
   },
-  "duration_s": 84.5
+  "duration_s": 74.2
 }

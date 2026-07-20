@@ -1,56 +1,55 @@
 ## system
 
-Você é um engenheiro de software sênior de um time de produto.
-O time mantém uma base de conhecimento em arquivos Markdown com as regras de
-negócio e convenções. Você DEVE consultá-la antes de escrever código, porque
-as regras específicas do produto não são óbvias.
+You are a senior software engineer on a product team.
+The team keeps a knowledge base of Markdown files with the business rules and
+conventions. You MUST consult it before writing code, because the
+product-specific rules are not obvious.
 
-Para explorar a base, responda com UMA única linha de comando por mensagem:
+To explore the knowledge base, reply with ONE single command line per message:
 
-ACTION: ls <caminho>      (lista arquivos de um diretório; use "." para a raiz)
-ACTION: grep <termo>      (busca textual em todas as notas)
-ACTION: read <arquivo>    (lê o conteúdo de uma nota)
+ACTION: ls <path>       (lists files in a directory; use "." for the root)
+ACTION: grep <term>     (text search across all notes)
+ACTION: read <file>     (reads the content of a note)
 
-Após cada ACTION você receberá o resultado. Você tem no máximo 8
-ações no total — use-as bem.
+After each ACTION you will receive the result. You have at most 8
+actions in total — use them well.
 
-Quando tiver o que precisa, produza os arquivos finais neste formato exato
-(pode haver mais de um bloco FILE):
+When you have what you need, produce the final files in this exact format
+(there may be more than one FILE block):
 
-FILE: caminho/relativo/do/Arquivo.java
+FILE: relative/path/to/File.java
 ```java
-<conteúdo completo do arquivo>
+<complete file content>
 ```
 
-Regras do formato: nunca misture ACTION e FILE na mesma resposta; escreva
-arquivos completos e compiláveis; não modifique os arquivos existentes do
-projeto.
+Format rules: never mix ACTION and FILE in the same reply; write complete,
+compilable files; do not modify the project's existing files.
 
 ---
 
 ## user
 
-# Tarefa: reenviar convite
+# Task: resend invitation
 
-Implemente o endpoint de reenvio de convite:
+Implement the invitation resend endpoint:
 
 ```
 POST /tenants/{tenantId}/invitations/{invitationId}/resend
-Sucesso: 200 com JSON { "resendCount": ..., "expiresAt": "..." }
+Success: 200 with JSON { "resendCount": ..., "expiresAt": "..." }
 ```
 
-Implemente TODAS as regras de negócio, permissões, validações e convenções de
-erro/auditoria que o time definiu para reenvio de convites.
+Implement ALL the business rules, permissions, validations and error/audit
+conventions the team has defined for invitation resends.
 
 
-## Projeto existente (Quarkus 3, Java 21) — NÃO reescreva estas classes
+## Existing project (Quarkus 3, Java 21) — do NOT rewrite these classes
 
-Pacote `com.bench.model`:
+Package `com.bench.model`:
 
 ```java
 public enum Role { OWNER, ADMIN, MEMBER }
 public enum UserStatus { INVITED, ACTIVE, SUSPENDED, DELETED }
-public enum Plan { FREE, PRO, ENTERPRISE }        // campo público: Integer maxUsers (null = ilimitado)
+public enum Plan { FREE, PRO, ENTERPRISE }        // public field: Integer maxUsers (null = unlimited)
 public enum InvitationStatus { PENDING, ACCEPTED, REVOKED }
 
 public class User { public String id, tenantId, email; public Role role;
@@ -63,7 +62,7 @@ public class AuditEntry { public String id, tenantId, actorId, action, targetId;
                           public java.time.Instant timestamp; public String details; }
 ```
 
-Pacote `com.bench.store` — injete com `@Inject`:
+Package `com.bench.store` — inject with `@Inject`:
 
 ```java
 @Singleton
@@ -75,23 +74,31 @@ public class InMemoryStore {
     public Optional<User> findUser(String id);
     public List<User> usersOfTenant(String tenantId);
     public List<Invitation> invitationsOfTenant(String tenantId);
-    public long countOwners(String tenantId);   // owners com status != DELETED
+    public long countOwners(String tenantId);   // owners with status != DELETED
     public void reset();
 }
 ```
 
-Contexto de autenticação: o id do usuário autenticado (ator) chega no header
-HTTP `X-Actor-Id` e corresponde a um `User` no store.
+Authentication context: the id of the authenticated user (the actor) arrives in
+the HTTP header `X-Actor-Id` and matches a `User` in the store. Read it as a
+method parameter, exactly like this:
 
-Crie seus recursos REST (jakarta.ws.rs) em `src/main/java/com/bench/api/`.
-Lembre-se dos imports: `com.bench.model.*`, `com.bench.store.InMemoryStore`,
-`jakarta.ws.rs.*`, `jakarta.ws.rs.core.*`, `jakarta.inject.Inject`. Use apenas
-classes e métodos que existem no scaffold acima.
+```java
+@POST
+public Response create(@PathParam("tenantId") String tenantId,
+                       SomeRequestBody body,
+                       @HeaderParam("X-Actor-Id") String actorId) { ... }
+```
 
-Armadilhas de API conhecidas:
-- Para status HTTP fora do enum padrão (ex.: 422, 410), use
-  `Response.status(422)` — `Response.Status` NÃO tem essas constantes.
-- `Instant` não tem `plusHours`/`plusDays`; use
+Create your REST resources (jakarta.ws.rs) under `src/main/java/com/bench/api/`.
+Remember the imports: `com.bench.model.*`, `com.bench.store.InMemoryStore`,
+`jakarta.ws.rs.*`, `jakarta.ws.rs.core.*`, `jakarta.inject.Inject`. Use only
+classes and methods that exist in the scaffold above.
+
+Known API traps:
+- For HTTP statuses outside the standard enum (e.g. 422, 410), use
+  `Response.status(422)` — `Response.Status` does NOT have those constants.
+- `Instant` has no `plusHours`/`plusDays`; use
   `instant.plus(java.time.Duration.ofHours(n))`.
 
 
@@ -106,201 +113,198 @@ ACTION: ls .
 
 ## user
 
-RESULT (7 ações restantes):
-202601050900-mapa-dominio-usuarios.md
-202601051030-papeis-do-tenant.md
-202601080800-lockout-e-senhas.md
-202601121000-limites-por-plano.md
-202601201300-auditoria-de-mutacoes.md
-202601201330-codigos-de-erro-da-api.md
-202602041100-expiracao-de-convites-72h.md
-202602041130-reenvio-de-convites.md
-202602101415-protecao-do-owner.md
-202602101430-ultimo-owner.md
-202602151100-isolamento-de-tenant-404.md
-202603121015-convites-e-limite-duvida.md
-202603150900-soft-delete-30-dias.md
-202603150930-quem-pode-deletar.md
-202604010900-mapa-api-e-convencoes.md
-202604111600-badges-de-status-no-front.md
-202605021430-convites-pendentes-contam.md
-202605190800-ideias-de-precos.md
+RESULT (7 actions left):
+202601050900-user-domain-map.md
+202601051030-tenant-roles.md
+202601080800-lockout-and-passwords.md
+202601121000-plan-seat-limits.md
+202601201300-mutation-audit-log.md
+202601201330-api-error-codes.md
+202602041100-invitation-72h-expiry.md
+202602041130-invitation-resend.md
+202602101415-owner-protection.md
+202602101430-last-owner.md
+202602151100-tenant-isolation-404.md
+202603121015-pending-invites-limit-doubt.md
+202603150900-soft-delete-30-days.md
+202603150930-who-can-delete-users.md
+202604010900-api-and-conventions-map.md
+202604111600-frontend-status-badges.md
+202605021430-pending-invitations-count.md
+202605190800-pricing-ideas.md
 
 ---
 
 ## assistant
 
-ACTION: read 202602041130-reenvio-de-convites.md
+ACTION: read 202602041130-invitation-resend.md
 ```
 
 ---
 
 ## user
 
-RESULT (6 ações restantes):
-# 202602041130 Reenvio de convites
+RESULT (6 actions left):
+# 202602041130 Invitation resend
 
-Reenvio é ADMIN+, como toda mutação ([[202601051030-papeis-do-tenant]]).
+Resend is ADMIN+, like every mutation ([[202601051030-tenant-roles]]).
 
-- **Máximo 3 reenvios por convite.** O 4º → 422 `RESEND_LIMIT_REACHED`,
-  sem alterar nada. (Anti-spam: reclamação de destinatários bombardeados.)
-- Cada reenvio incrementa `resendCount` e **reseta `expiresAt` para agora
-  + 72h** — a janela de [[202602041100-expiracao-de-convites-72h]] recomeça.
-- Reenviar convite já expirado é permitido e o **reativa** (nova janela).
-  Não faz sentido obrigar a recriar o convite.
-- Reenvio NÃO passa pela checagem de limite de plano — o assento já está
-  reservado ([[202605021430-convites-pendentes-contam]]).
-- Audita `INVITATION_RESENT` ([[202601201300-auditoria-de-mutacoes]]).
-
-
----
-
-## assistant
-
-ACTION: read 202602041100-expiracao-de-convites-72h.md
-```
-
----
-
-## user
-
-RESULT (5 ações restantes):
-# 202602041100 Convite expira em 72 horas
-
-Todo convite nasce PENDING com `resendCount = 0` e expira 72 horas depois
-da criação: `expiresAt = createdAt + 72h`.
-
-Por que 72 e não 24/48: dados do funil mostraram que 31% das aceitações
-acontecem no 2º ou 3º dia (convites corporativos esperam aprovação interna).
-
-Aceitar um convite já expirado → 410 `INVITATION_EXPIRED`. Aceitação cria o
-usuário ACTIVE e marca o convite ACCEPTED.
-
-Quem pode criar: ADMIN+ ([[202601051030-papeis-do-tenant]]), respeitando o
-limite de assentos ([[202605021430-convites-pendentes-contam]]).
-Toda criação audita `USER_INVITED` ([[202601201300-auditoria-de-mutacoes]]).
-Reenvio muda a expiração: [[202602041130-reenvio-de-convites]].
+- **Maximum 3 resends per invitation.** The 4th → 422 `RESEND_LIMIT_REACHED`,
+  nothing changes. (Anti-spam: recipients complained about being bombarded.)
+- Each resend increments `resendCount` and **resets `expiresAt` to now
+  + 72h** — the [[202602041100-invitation-72h-expiry]] window restarts.
+- Resending an already-expired invitation is allowed and **reactivates** it
+  (fresh window). Forcing people to recreate the invitation makes no sense.
+- Resend does NOT go through the plan limit check — the seat is already
+  reserved ([[202605021430-pending-invitations-count]]).
+- Audits `INVITATION_RESENT` ([[202601201300-mutation-audit-log]]).
 
 
 ---
 
 ## assistant
 
-ACTION: read 202601201300-auditoria-de-mutacoes.md
+ACTION: read 202601051030-tenant-roles.md
 ```
 
 ---
 
 ## user
 
-RESULT (4 ações restantes):
-# 202601201300 Auditoria de mutações
+RESULT (5 actions left):
+# 202601051030 Tenant roles
 
-Toda mutação EFETIVADA de usuário/convite/papel grava um AuditEntry no
-auditLog, na mesma operação (nada de "audito depois"). Tentativa negada
-(403/422) NÃO gera entrada.
+Three roles, strict hierarchy: OWNER > ADMIN > MEMBER.
 
-Campos: `id` (UUID novo), `tenantId`, `actorId` (o `X-Actor-Id`), `action`,
-`targetId` (id do recurso afetado), `timestamp` (Instant UTC), `details`
-(livre, opcional).
+Administrative mutations — inviting someone, deleting a user, changing a role —
+require ADMIN or OWNER ("ADMIN+"). A MEMBER who tries gets 403 with code
+`FORBIDDEN_ROLE` (codes in [[202601201330-api-error-codes]]).
 
-Ações válidas — não inventar strings fora desta lista, dashboards de
-compliance quebram:
+But hierarchy is not just "whoever is above rules": the owner has specific
+protections that an admin cannot cross → [[202602101415-owner-protection]].
 
-- `USER_INVITED` (targetId = id do convite)
-- `INVITATION_RESENT` (targetId = id do convite)
-- `USER_ROLE_CHANGED` (targetId = id do usuário)
-- `USER_SOFT_DELETED` (targetId = id do usuário)
-- `USER_RESTORED` (targetId = id do usuário)
-
-Liga com tudo: [[202602041100-expiracao-de-convites-72h]],
-[[202603150900-soft-delete-30-dias]], [[202601051030-papeis-do-tenant]].
+And the actor must belong to the tenant itself → [[202602151100-tenant-isolation-404]].
 
 
 ---
 
 ## assistant
 
-ACTION: read 202601051030-papeis-do-tenant.md
+ACTION: read 202601201300-mutation-audit-log.md
 ```
 
 ---
 
 ## user
 
-RESULT (3 ações restantes):
-# 202601051030 Papéis do tenant
+RESULT (4 actions left):
+# 202601201300 Mutation audit log
 
-Três papéis, hierarquia estrita: OWNER > ADMIN > MEMBER.
+Every EFFECTIVE mutation of a user/invitation/role writes an AuditEntry to the
+auditLog, in the same operation (no "I'll audit later"). Denied attempts
+(403/422) do NOT produce an entry.
 
-Mutações administrativas — convidar alguém, excluir usuário, mudar papel —
-pedem ADMIN ou OWNER ("ADMIN+"). Um MEMBER que tente recebe 403 com código
-`FORBIDDEN_ROLE` (códigos em [[202601201330-codigos-de-erro-da-api]]).
+Fields: `id` (new UUID), `tenantId`, `actorId` (the `X-Actor-Id`), `action`,
+`targetId` (id of the affected resource), `timestamp` (UTC Instant), `details`
+(free, optional).
 
-Mas hierarquia não é só "quem está acima manda": o owner tem proteções
-específicas que um admin não atravessa → [[202602101415-protecao-do-owner]].
+Valid actions — do not invent strings outside this list, compliance dashboards
+break:
 
-E o ator precisa ser do próprio tenant → [[202602151100-isolamento-de-tenant-404]].
+- `USER_INVITED` (targetId = invitation id)
+- `INVITATION_RESENT` (targetId = invitation id)
+- `USER_ROLE_CHANGED` (targetId = user id)
+- `USER_SOFT_DELETED` (targetId = user id)
+- `USER_RESTORED` (targetId = user id)
+
+Links to everything: [[202602041100-invitation-72h-expiry]],
+[[202603150900-soft-delete-30-days]], [[202601051030-tenant-roles]].
 
 
 ---
 
 ## assistant
 
-ACTION: read 202601201330-codigos-de-erro-da-api.md
+ACTION: read 202602151100-tenant-isolation-404.md
 ```
 
 ---
 
 ## user
 
-RESULT (2 ações restantes):
-# 202601201330 Códigos de erro da API
+RESULT (3 actions left):
+# 202602151100 Tenant isolation answers 404, not 403
 
-Envelope padrão de erro de negócio (o `code` é contrato estável, `message`
-é livre):
+The actor (comes in the `X-Actor-Id` header) must belong to the tenant in the
+URL.
+
+Detail we almost got wrong: when the actor is from ANOTHER tenant, the response
+is **404 `NOT_FOUND`**, not 403. A 403 would confirm to a stranger that the
+resource exists — information leak. 404 tells nothing.
+
+Applies to all user and invitation endpoints.
+Roles: [[202601051030-tenant-roles]].
+Codes: [[202601201330-api-error-codes]].
+
+
+---
+
+## assistant
+
+ACTION: read 202601201330-api-error-codes.md
+```
+
+---
+
+## user
+
+RESULT (2 actions left):
+# 202601201330 API error codes
+
+Standard business-error envelope (`code` is a stable contract, `message` is
+free):
 
 ```json
-{ "code": "CODIGO_ESTAVEL", "message": "texto humano" }
+{ "code": "STABLE_CODE", "message": "human text" }
 ```
 
-Códigos que já firmamos:
+Codes we've settled on:
 
-- 403 `FORBIDDEN_ROLE` — papel insuficiente ([[202601051030-papeis-do-tenant]])
-- 403 `OWNER_PROTECTED` — admin mexendo em owner ([[202602101415-protecao-do-owner]])
-- 409 `LAST_OWNER` — tenant ficaria sem owner ([[202602101430-ultimo-owner]])
-- 422 `PLAN_LIMIT_EXCEEDED` — limite de assentos ([[202605021430-convites-pendentes-contam]])
-- 422 `CANNOT_DELETE_SELF` — auto-exclusão ([[202603150930-quem-pode-deletar]])
-- 422 `RESEND_LIMIT_REACHED` — 4º reenvio ([[202602041130-reenvio-de-convites]])
-- 410 `INVITATION_EXPIRED` — aceitar convite vencido ([[202602041100-expiracao-de-convites-72h]])
-- 404 `NOT_FOUND` — inexistente OU ator de outro tenant ([[202602151100-isolamento-de-tenant-404]])
+- 403 `FORBIDDEN_ROLE` — insufficient role ([[202601051030-tenant-roles]])
+- 403 `OWNER_PROTECTED` — admin touching an owner ([[202602101415-owner-protection]])
+- 409 `LAST_OWNER` — tenant would be left ownerless ([[202602101430-last-owner]])
+- 422 `PLAN_LIMIT_EXCEEDED` — seat limit ([[202605021430-pending-invitations-count]])
+- 422 `CANNOT_DELETE_SELF` — self-deletion ([[202603150930-who-can-delete-users]])
+- 422 `RESEND_LIMIT_REACHED` — 4th resend ([[202602041130-invitation-resend]])
+- 410 `INVITATION_EXPIRED` — accepting an expired invite ([[202602041100-invitation-72h-expiry]])
+- 404 `NOT_FOUND` — nonexistent OR actor from another tenant ([[202602151100-tenant-isolation-404]])
 
-Sem stacktrace no body, nunca.
+No stacktraces in the body, ever.
 
 
 ---
 
 ## assistant
 
-ACTION: read 202602151100-isolamento-de-tenant-404.md
+ACTION: read 202602101415-owner-protection.md
 ```
 
 ---
 
 ## user
 
-RESULT (1 ações restantes):
-# 202602151100 Isolamento de tenant responde 404, não 403
+RESULT (1 actions left):
+# 202602101415 Owner protection
 
-O ator (vem no header `X-Actor-Id`) tem que pertencer ao tenant da URL.
+Realized today while discussing the Vetrix customer incident: if an ADMIN can
+demote or delete an OWNER, a malicious admin takes over the tenant.
 
-Detalhe que quase erramos: quando o ator é de OUTRO tenant, a resposta é
-**404 `NOT_FOUND`**, não 403. Um 403 confirmaria para um estranho que o
-recurso existe — vazamento de informação. 404 não conta nada.
+Rule we settled on: **an ADMIN never modifies nor deletes an OWNER** — neither
+role nor deletion. Response: 403 `OWNER_PROTECTED`. Only an OWNER touches
+another OWNER, and only an OWNER promotes someone to OWNER.
 
-Vale para todos os endpoints de usuários e convites.
-Papéis: [[202601051030-papeis-do-tenant]].
-Códigos: [[202601201330-codigos-de-erro-da-api]].
+This connects to the last-owner edge case: [[202602101430-last-owner]].
+Roles in general: [[202601051030-tenant-roles]].
 
 
 ---
@@ -319,54 +323,64 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
 import java.time.Instant;
+import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Path("/tenants/{tenantId}/invitations/{invitationId}/resend")
+@Produces(MediaType.APPLICATION_JSON)
+@Consumes(MediaType.APPLICATION_JSON)
 public class InvitationResource {
 
     @Inject
     InMemoryStore store;
 
     @POST
-    public Response resendInvitation(
+    public Response resend(
             @PathParam("tenantId") String tenantId,
             @PathParam("invitationId") String invitationId,
             @HeaderParam("X-Actor-Id") String actorId) {
 
-        // Verifica se o ator pertence ao tenant
-        User actor = store.findUser(actorId).orElse(null);
-        if (actor == null || !actor.tenantId.equals(tenantId)) {
-            return Response.status(404).entity(new ErrorResponse("NOT_FOUND", "Tenant or user not found")).build();
+        // Check if actor exists and belongs to the tenant
+        Optional<User> maybeActor = store.findUser(actorId);
+        if (maybeActor.isEmpty() || !maybeActor.get().tenantId.equals(tenantId)) {
+            return Response.status(404).entity(new ErrorResponse("NOT_FOUND", "Tenant not found")).build();
         }
 
-        // Verifica se o ator tem permissão ADMIN+
-        if (actor.role != Role.OWNER && actor.role != Role.ADMIN) {
-            return Response.status(403).entity(new ErrorResponse("FORBIDDEN_ROLE", "Insufficient role")).build();
-        }
+        User actor = maybeActor.get();
 
-        // Encontra o convite
-        Invitation invitation = store.invitations.get(invitationId);
-        if (invitation == null || !invitation.tenantId.equals(tenantId)) {
-            return Response.status(404).entity(new ErrorResponse("NOT_FOUND", "Invitation not found")).build();
-        }
-
-        // Verifica se o convite já foi aceito ou revogado
-        if (invitation.status == InvitationStatus.ACCEPTED || invitation.status == InvitationStatus.REVOKED) {
-            return Response.status(400).entity(new ErrorResponse("INVALID_INVITATION_STATUS", "Cannot resend accepted or revoked invitation")).build();
-        }
-
-        // Verifica o limite de reenvios
-        if (invitation.resendCount >= 3) {
-            return Response.status(422)
-                    .entity(new ErrorResponse("RESEND_LIMIT_REACHED", "Maximum number of resends reached"))
+        // Check if actor has ADMIN+ role
+        if (actor.role == Role.MEMBER) {
+            return Response.status(403)
+                    .entity(new ErrorResponse("FORBIDDEN_ROLE", "Insufficient role"))
                     .build();
         }
 
-        // Atualiza o convite: incrementa resendCount e redefine expiresAt para 72h a partir de agora
-        invitation.resendCount++;
+        // Find the invitation
+        Optional<Invitation> maybeInvitation = store.invitations.values().stream()
+                .filter(i -> i.id.equals(invitationId) && i.tenantId.equals(tenantId))
+                .findFirst();
+
+        if (maybeInvitation.isEmpty()) {
+            return Response.status(404)
+                    .entity(new ErrorResponse("NOT_FOUND", "Invitation not found"))
+                    .build();
+        }
+
+        Invitation invitation = maybeInvitation.get();
+
+        // Check resend limit
+        if (invitation.resendCount >= 3) {
+            return Response.status(422)
+                    .entity(new ErrorResponse("RESEND_LIMIT_REACHED", "Maximum resend attempts reached"))
+                    .build();
+        }
+
+        // Update invitation: increment resend count and reset expiration
+        invitation.resendCount += 1;
         invitation.expiresAt = Instant.now().plus(java.time.Duration.ofHours(72));
 
-        // Registra auditoria
+        // Create audit entry
         AuditEntry auditEntry = new AuditEntry();
         auditEntry.id = UUID.randomUUID().toString();
         auditEntry.tenantId = tenantId;
@@ -374,10 +388,15 @@ public class InvitationResource {
         auditEntry.action = "INVITATION_RESENT";
         auditEntry.targetId = invitationId;
         auditEntry.timestamp = Instant.now();
+        auditEntry.details = null;
+
         store.auditLog.add(auditEntry);
 
-        // Retorna resposta com resendCount e nova data de expiração
-        ResendResponse response = new ResendResponse(invitation.resendCount, invitation.expiresAt);
+        // Return success response
+        ResendResponse response = new ResendResponse();
+        response.resendCount = invitation.resendCount;
+        response.expiresAt = invitation.expiresAt;
+
         return Response.ok(response).build();
     }
 
@@ -394,11 +413,6 @@ public class InvitationResource {
     public static class ResendResponse {
         public int resendCount;
         public Instant expiresAt;
-
-        public ResendResponse(int resendCount, Instant expiresAt) {
-            this.resendCount = resendCount;
-            this.expiresAt = expiresAt;
-        }
     }
 }
 ```

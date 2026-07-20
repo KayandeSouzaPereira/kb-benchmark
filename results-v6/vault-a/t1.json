@@ -1,0 +1,77 @@
+{
+  "task": "t1",
+  "title": "Criar convite",
+  "case": "vault-a",
+  "model": "qwen3-coder:30b",
+  "score": 0.5,
+  "passed": 3,
+  "total": 6,
+  "compiled": true,
+  "repairs": 0,
+  "eval_mode": "devmcp",
+  "eval_times_s": [
+    10.3
+  ],
+  "dev_boot_wait_s": 2.2,
+  "error": null,
+  "tests": [
+    {
+      "name": "conviteExpiraEm72Horas",
+      "passed": true
+    },
+    {
+      "name": "adminCriaConvitePersistido",
+      "passed": true
+    },
+    {
+      "name": "auditoriaRegistraUserInvited",
+      "passed": true
+    },
+    {
+      "name": "memberNaoPodeConvidar",
+      "passed": false,
+      "failure": "1 expectation failed.\nJSON path code doesn't match.\nExpected: FORBIDDEN_ROLE\n  Actual: null"
+    },
+    {
+      "name": "atorDeOutroTenantRecebe404",
+      "passed": false,
+      "failure": "1 expectation failed.\nExpected status code <404> but was <403>."
+    },
+    {
+      "name": "limiteDoPlanoFreeContaConvitesPendentes",
+      "passed": false,
+      "failure": "1 expectation failed.\nExpected status code <422> but was <201>."
+    }
+  ],
+  "files_written": [
+    "src/main/java/com/bench/api/InvitationResource.java"
+  ],
+  "retrieval": {
+    "actions": [
+      "ls .",
+      "read produto/convites.md",
+      "grep -r \"convite\" .",
+      "grep -r \"invitation\" .",
+      "ls produto/",
+      "ls dominio/",
+      "read dominio/convites.md"
+    ],
+    "notes_read": [
+      "dominio/convites.md"
+    ],
+    "gold_notes": [
+      "dominio/convites.md",
+      "dominio/limites-de-plano.md",
+      "padroes-codigo/formato-de-erros-api.md"
+    ],
+    "gold_hits": [
+      "dominio/convites.md"
+    ],
+    "gold_hit_rate": 0.333
+  },
+  "tokens": {
+    "prompt_tokens": 11375,
+    "completion_tokens": 1202
+  },
+  "duration_s": 92.3
+}

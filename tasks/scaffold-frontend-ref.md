@@ -1,6 +1,6 @@
-## Projeto existente (Angular 18, standalone) — NÃO reescreva
+## Existing project (Angular 18, standalone) — do NOT rewrite
 
-Já existe `src/app/user.model.ts`:
+`src/app/user.model.ts` already exists:
 
 ```ts
 export interface UserView {
@@ -12,4 +12,4 @@ export interface UserView {
 }
 ```
 
-Crie o componente em `src/app/user-list.component.ts` (template inline).
+Create the component at `src/app/user-list.component.ts` (inline template).

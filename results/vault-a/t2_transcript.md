@@ -1,56 +1,55 @@
 ## system
 
-Você é um engenheiro de software sênior de um time de produto.
-O time mantém uma base de conhecimento em arquivos Markdown com as regras de
-negócio e convenções. Você DEVE consultá-la antes de escrever código, porque
-as regras específicas do produto não são óbvias.
+You are a senior software engineer on a product team.
+The team keeps a knowledge base of Markdown files with the business rules and
+conventions. You MUST consult it before writing code, because the
+product-specific rules are not obvious.
 
-Para explorar a base, responda com UMA única linha de comando por mensagem:
+To explore the knowledge base, reply with ONE single command line per message:
 
-ACTION: ls <caminho>      (lista arquivos de um diretório; use "." para a raiz)
-ACTION: grep <termo>      (busca textual em todas as notas)
-ACTION: read <arquivo>    (lê o conteúdo de uma nota)
+ACTION: ls <path>       (lists files in a directory; use "." for the root)
+ACTION: grep <term>     (text search across all notes)
+ACTION: read <file>     (reads the content of a note)
 
-Após cada ACTION você receberá o resultado. Você tem no máximo 8
-ações no total — use-as bem.
+After each ACTION you will receive the result. You have at most 8
+actions in total — use them well.
 
-Quando tiver o que precisa, produza os arquivos finais neste formato exato
-(pode haver mais de um bloco FILE):
+When you have what you need, produce the final files in this exact format
+(there may be more than one FILE block):
 
-FILE: caminho/relativo/do/Arquivo.java
+FILE: relative/path/to/File.java
 ```java
-<conteúdo completo do arquivo>
+<complete file content>
 ```
 
-Regras do formato: nunca misture ACTION e FILE na mesma resposta; escreva
-arquivos completos e compiláveis; não modifique os arquivos existentes do
-projeto.
+Format rules: never mix ACTION and FILE in the same reply; write complete,
+compilable files; do not modify the project's existing files.
 
 ---
 
 ## user
 
-# Tarefa: excluir usuário
+# Task: delete user
 
-Implemente o endpoint de exclusão de usuário:
+Implement the user deletion endpoint:
 
 ```
 DELETE /tenants/{tenantId}/users/{userId}
-Sucesso: 204 No Content
+Success: 204 No Content
 ```
 
-Implemente TODAS as regras de negócio, permissões, validações e convenções de
-erro/auditoria que o time definiu para exclusão de usuários.
+Implement ALL the business rules, permissions, validations and error/audit
+conventions the team has defined for user deletion.
 
 
-## Projeto existente (Quarkus 3, Java 21) — NÃO reescreva estas classes
+## Existing project (Quarkus 3, Java 21) — do NOT rewrite these classes
 
-Pacote `com.bench.model`:
+Package `com.bench.model`:
 
 ```java
 public enum Role { OWNER, ADMIN, MEMBER }
 public enum UserStatus { INVITED, ACTIVE, SUSPENDED, DELETED }
-public enum Plan { FREE, PRO, ENTERPRISE }        // campo público: Integer maxUsers (null = ilimitado)
+public enum Plan { FREE, PRO, ENTERPRISE }        // public field: Integer maxUsers (null = unlimited)
 public enum InvitationStatus { PENDING, ACCEPTED, REVOKED }
 
 public class User { public String id, tenantId, email; public Role role;
@@ -63,7 +62,7 @@ public class AuditEntry { public String id, tenantId, actorId, action, targetId;
                           public java.time.Instant timestamp; public String details; }
 ```
 
-Pacote `com.bench.store` — injete com `@Inject`:
+Package `com.bench.store` — inject with `@Inject`:
 
 ```java
 @Singleton
@@ -75,23 +74,31 @@ public class InMemoryStore {
     public Optional<User> findUser(String id);
     public List<User> usersOfTenant(String tenantId);
     public List<Invitation> invitationsOfTenant(String tenantId);
-    public long countOwners(String tenantId);   // owners com status != DELETED
+    public long countOwners(String tenantId);   // owners with status != DELETED
     public void reset();
 }
 ```
 
-Contexto de autenticação: o id do usuário autenticado (ator) chega no header
-HTTP `X-Actor-Id` e corresponde a um `User` no store.
+Authentication context: the id of the authenticated user (the actor) arrives in
+the HTTP header `X-Actor-Id` and matches a `User` in the store. Read it as a
+method parameter, exactly like this:
 
-Crie seus recursos REST (jakarta.ws.rs) em `src/main/java/com/bench/api/`.
-Lembre-se dos imports: `com.bench.model.*`, `com.bench.store.InMemoryStore`,
-`jakarta.ws.rs.*`, `jakarta.ws.rs.core.*`, `jakarta.inject.Inject`. Use apenas
-classes e métodos que existem no scaffold acima.
+```java
+@POST
+public Response create(@PathParam("tenantId") String tenantId,
+                       SomeRequestBody body,
+                       @HeaderParam("X-Actor-Id") String actorId) { ... }
+```
 
-Armadilhas de API conhecidas:
-- Para status HTTP fora do enum padrão (ex.: 422, 410), use
-  `Response.status(422)` — `Response.Status` NÃO tem essas constantes.
-- `Instant` não tem `plusHours`/`plusDays`; use
+Create your REST resources (jakarta.ws.rs) under `src/main/java/com/bench/api/`.
+Remember the imports: `com.bench.model.*`, `com.bench.store.InMemoryStore`,
+`jakarta.ws.rs.*`, `jakarta.ws.rs.core.*`, `jakarta.inject.Inject`. Use only
+classes and methods that exist in the scaffold above.
+
+Known API traps:
+- For HTTP statuses outside the standard enum (e.g. 422, 410), use
+  `Response.status(422)` — `Response.Status` does NOT have those constants.
+- `Instant` has no `plusHours`/`plusDays`; use
   `instant.plus(java.time.Duration.ofHours(n))`.
 
 
@@ -100,110 +107,239 @@ Armadilhas de API conhecidas:
 ## assistant
 
 ACTION: ls .
-FILE: caminho/relativo/do/Arquivo.java
-```java
-<conteúdo completo do arquivo>
 ```
 
-ACTION: grep -r "delete" .
-ACTION: read regras/negocio.md
-ACTION: read convencoes/erros.md
-ACTION: read convencoes/auditoria.md
-ACTION: read regras/usuarios.md
-ACTION: read regras/permissoes.md
-ACTION: read api/users.md
-ACTION: read modelo/dados.md
-
 ---
 
 ## user
 
-RESULT (7 ações restantes):
+RESULT (7 actions left):
 INDEX.md
-decisoes/
-dominio/
-padroes-codigo/
-produto/
+code-standards/
+decisions/
+domain/
+product/
 runbooks/
 
-(Seus blocos FILE foram IGNORADOS porque vieram junto com um ACTION. Termine a exploração e reenvie todos os FILE completos sozinhos na resposta final.)
-
 ---
 
 ## assistant
 
-ACTION: ls decisoes/
-ACTION: ls dominio/
-ACTION: ls padroes-codigo/
-ACTION: ls produto/
-ACTION: ls runbooks/
-ACTION: read produto/usuarios.md
-ACTION: read dominio/permissoes.md
-ACTION: read padroes-codigo/erros.md
+ACTION: read domain/user-deletion.md
+```
 
 ---
 
 ## user
 
-RESULT (6 ações restantes):
-adr-001-soft-delete-com-retencao.md
-adr-002-convites-pendentes-contam-no-limite.md
+RESULT (6 actions left):
+---
+type: business-rule
+system: user-management
+status: active
+updated: 2026-05-02
+---
+
+# User deletion (soft-delete)
+
+**There is no hard delete of users in this product.** Decision recorded in
+[adr-001](../decisions/adr-001-soft-delete-with-retention.md).
+
+## Rules
+
+- Deleting a user means: `status = DELETED`, `deletedAt = now`,
+  `purgeAt = now + 30 days`. The record **stays in the store**.
+- Only ADMIN+ deletes, and only users of their own tenant.
+- An ADMIN cannot delete an OWNER: `403 OWNER_PROTECTED`
+  (see [roles-and-permissions](roles-and-permissions.md)).
+- **Nobody deletes themselves**: `422 CANNOT_DELETE_SELF` — prevents accidental
+  orphan tenants and abuse of stolen sessions.
+- Success responds `204 No Content`.
+- Mandatory audit: action `USER_SOFT_DELETED` with `targetId` = id of the
+  deleted user (see [audit-log](audit-log.md)).
+
+## When to use / When NOT to use
+
+- Use for any user removal triggered by the UI or API.
+- Do NOT use for voluntarily leaving a tenant (the "leave" flow has its own
+  last-owner rule).
+
+## Anti-patterns already observed
+
+- `store.users.remove(id)` — loses history and breaks auditing. Never.
+- Forgetting `purgeAt` — the definitive purge job depends on that field.
+
+## Related
+
+- [../decisions/adr-001-soft-delete-with-retention.md](../decisions/adr-001-soft-delete-with-retention.md)
+- [roles-and-permissions](roles-and-permissions.md)
+- [audit-log](audit-log.md)
+
 
 ---
 
 ## assistant
 
-ACTION: read decisoes/adr-001-soft-delete-com-retencao.md
-ACTION: read decisoes/adr-002-convites-pendentes-contam-no-limite.md
-ACTION: read dominio/permissoes.md
-ACTION: read produto/usuarios.md
-ACTION: read padroes-codigo/erros.md
-ACTION: grep -r "DELETE" api/
-ACTION: read api/users.md
+ACTION: read domain/roles-and-permissions.md
+```
 
 ---
 
 ## user
 
-RESULT (5 ações restantes):
+RESULT (5 actions left):
 ---
-tipo: adr
-sistema: gestao-usuarios
-status: ativo
-atualizado: 2026-03-15
+type: business-rule
+system: user-management
+status: active
+updated: 2026-05-02
 ---
 
-# ADR-001 — Exclusão de usuário é sempre soft-delete com retenção de 30 dias
+# Roles and permissions
 
-## Decisão
+Hierarchy within a tenant: `OWNER > ADMIN > MEMBER`.
 
-Excluir usuário = `status DELETED` + `deletedAt = agora` + `purgeAt = agora + 30 dias`.
-O registro fica no store até o job de purge. Restauração dentro da janela é
-permitida (ação `USER_RESTORED`).
+## Rules
 
-## Contexto
+- **Inviting users, deleting users and changing roles requires ADMIN or OWNER**
+  (ADMIN+). A MEMBER who tries gets `403 FORBIDDEN_ROLE`.
+- **An ADMIN never modifies nor deletes an OWNER** (neither role nor deletion):
+  `403 OWNER_PROTECTED`. Only an OWNER may touch another OWNER or promote
+  someone to OWNER.
+- **A tenant can never be left without an OWNER**: demoting or removing the last
+  active OWNER returns `409 LAST_OWNER`. With two or more owners, one owner may
+  demote the other.
+- **Tenant isolation**: the actor (header `X-Actor-Id`) must belong to the
+  tenant in the URL. An actor from another tenant gets `404 NOT_FOUND` — never
+  403, so we do not leak the resource's existence.
 
-Clientes B2B excluem usuários por engano com frequência; compliance exige
-trilha de auditoria íntegra por no mínimo 30 dias.
+## When to use / When NOT to use
 
-## Alternativas descartadas — não propor novamente
+- Use on every mutation endpoint for users, invitations or roles.
+- Do NOT confuse with authentication (login/password) — see
+  [authentication-and-lockout](authentication-and-lockout.md).
 
-- **Hard delete imediato**: quebra auditoria e FK lógicas; rejeitado.
-- **Retenção de 90 dias**: conflita com pedidos de LGPD/erasure; 30 dias foi o
-  acordo com jurídico.
-- **Flag booleana `deleted`**: insuficiente — precisamos de `purgeAt` para o job
-  de purge e de `deletedAt` para relatórios.
+## Anti-patterns already observed
 
-## Relacionados
+- Checking the role after mutating state (ALWAYS validate before writing to the
+  store).
+- Returning 403 for an actor from another tenant (leaks existence; the correct
+  answer is 404).
 
-- [../dominio/exclusao-de-usuarios.md](../dominio/exclusao-de-usuarios.md)
+## Related
+
+- [user-deletion](user-deletion.md)
+- [invitations](invitations.md)
+- [../code-standards/api-error-format.md](../code-standards/api-error-format.md)
+- [audit-log](audit-log.md)
 
 
 ---
 
 ## assistant
 
-FILE: src/main/java/com/bench/api/UsersResource.java
+ACTION: read domain/audit-log.md
+```
+
+---
+
+## user
+
+RESULT (4 actions left):
+---
+type: business-rule
+system: user-management
+status: active
+updated: 2026-05-02
+---
+
+# Mutation audit log
+
+**Every mutation of a user, invitation or role writes an `AuditEntry`** to
+`store.auditLog`, in the same operation (never "later, async").
+
+## Mandatory format
+
+| Field | Value |
+|---|---|
+| `id` | new UUID |
+| `tenantId` | tenant where it happened |
+| `actorId` | who performed it (header `X-Actor-Id`) |
+| `action` | one of the actions below |
+| `targetId` | id of the affected resource (user or invitation) |
+| `timestamp` | `Instant.now()` (UTC) |
+| `details` | optional, free text |
+
+## Valid actions
+
+- `USER_INVITED` — invitation created (`targetId` = invitation id)
+- `INVITATION_RESENT` — invitation resent (`targetId` = invitation id)
+- `USER_ROLE_CHANGED` — role changed (`targetId` = user id)
+- `USER_SOFT_DELETED` — user deleted (`targetId` = user id)
+- `USER_RESTORED` — user restored within the retention window
+
+## Anti-patterns already observed
+
+- Audit only **effective** mutations. Denied attempts (403/422) do NOT produce
+  an audit entry.
+- Inventing action strings outside the enum above (breaks compliance
+  dashboards).
+
+## Related
+
+- [user-deletion](user-deletion.md)
+- [invitations](invitations.md)
+- [roles-and-permissions](roles-and-permissions.md)
+
+
+---
+
+## assistant
+
+ACTION: read product/error-codes.md
+```
+
+---
+
+## user
+
+RESULT (3 actions left):
+arquivo não encontrado: product/error-codes.md
+
+---
+
+## assistant
+
+ACTION: grep -r "CANNOT_DELETE_SELF\|OWNER_PROTECTED" .
+```
+
+---
+
+## user
+
+RESULT (2 actions left):
+nenhum resultado para: -r "CANNOT_DELETE_SELF\|OWNER_PROTECTED" .
+
+---
+
+## assistant
+
+ACTION: ls code-standards/
+```
+
+---
+
+## user
+
+RESULT (1 actions left):
+api-error-format.md
+frontend-status-badges.md
+
+---
+
+## assistant
+
+FILE: src/main/java/com/bench/api/UserResource.java
 ```java
 package com.bench.api;
 
@@ -214,92 +350,85 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
 
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Path("/tenants/{tenantId}/users/{userId}")
-public class UsersResource {
+public class UserResource {
 
     @Inject
     InMemoryStore store;
 
     @DELETE
-    public Response deleteUser(
+    public Response delete(
             @PathParam("tenantId") String tenantId,
             @PathParam("userId") String userId,
             @HeaderParam("X-Actor-Id") String actorId) {
-        
-        // Validação de parâmetros
-        if (tenantId == null || tenantId.isEmpty()) {
-            return Response.status(422).entity("tenantId é obrigatório").build();
+
+        // Find the user to be deleted
+        Optional<User> maybeUserToDelete = store.findUser(userId);
+        if (maybeUserToDelete.isEmpty()) {
+            return Response.status(404).build();
         }
-        if (userId == null || userId.isEmpty()) {
-            return Response.status(422).entity("userId é obrigatório").build();
-        }
-        if (actorId == null || actorId.isEmpty()) {
-            return Response.status(401).entity("X-Actor-Id header é obrigatório").build();
+        User userToDelete = maybeUserToDelete.get();
+
+        // Verify tenant isolation - actor must belong to the same tenant
+        if (!userToDelete.tenantId.equals(tenantId)) {
+            return Response.status(404).build();
         }
 
-        // Verifica se o usuário autenticado existe
-        Optional<User> actorOpt = store.findUser(actorId);
-        if (!actorOpt.isPresent()) {
-            return Response.status(401).entity("Usuário autenticado não encontrado").build();
+        // Find the actor
+        Optional<User> maybeActor = store.findUser(actorId);
+        if (maybeActor.isEmpty()) {
+            return Response.status(404).build();
         }
-        User actor = actorOpt.get();
+        User actor = maybeActor.get();
 
-        // Verifica se o usuário a ser excluído existe
-        Optional<User> userOpt = store.findUser(userId);
-        if (!userOpt.isPresent()) {
-            return Response.status(404).entity("Usuário não encontrado").build();
-        }
-        User user = userOpt.get();
-
-        // Verifica se o usuário pertence ao tenant correto
-        if (!user.tenantId.equals(tenantId)) {
-            return Response.status(403).entity("Acesso negado: usuário não pertence a este tenant").build();
-        }
-
-        // Verifica permissões do usuário autenticado
+        // Verify actor belongs to the same tenant
         if (!actor.tenantId.equals(tenantId)) {
-            return Response.status(403).entity("Acesso negado: usuário autenticado não pertence a este tenant").build();
+            return Response.status(404).build();
         }
 
-        // Verifica se o usuário autenticado tem permissão para excluir (OWNER ou ADMIN)
-        if (actor.role != Role.OWNER && actor.role != Role.ADMIN) {
-            return Response.status(403).entity("Acesso negado: permissão insuficiente").build();
+        // Check if actor is trying to delete themselves
+        if (actor.id.equals(userId)) {
+            return Response.status(422).entity("CANNOT_DELETE_SELF").build();
         }
 
-        // Verifica se o usuário a ser excluído é o próprio usuário autenticado
-        if (user.id.equals(actorId)) {
-            return Response.status(422).entity("Não é possível excluir o próprio usuário").build();
+        // Verify actor has permission to delete users (ADMIN+)
+        if (actor.role == Role.MEMBER) {
+            return Response.status(403).entity("FORBIDDEN_ROLE").build();
         }
 
-        // Verifica se o usuário já está deletado
-        if (user.status == UserStatus.DELETED) {
-            return Response.status(410).entity("Usuário já foi excluído").build();
+        // Verify actor cannot delete an OWNER
+        if (userToDelete.role == Role.OWNER && actor.role != Role.OWNER) {
+            return Response.status(403).entity("OWNER_PROTECTED").build();
         }
 
-        // Verifica se o usuário é o único OWNER do tenant
-        if (user.role == Role.OWNER && store.countOwners(tenantId) <= 1) {
-            return Response.status(422).entity("Não é possível excluir o único OWNER do tenant").build();
+        // Check if user is already deleted
+        if (userToDelete.status == UserStatus.DELETED) {
+            return Response.status(404).build();
         }
 
-        // Realiza a exclusão (soft delete)
+        // Perform the soft delete
         Instant now = Instant.now();
-        user.status = UserStatus.DELETED;
-        user.deletedAt = now;
-        user.purgeAt = now.plus(30, ChronoUnit.DAYS);
+        Instant purgeAt = now.plus(java.time.Duration.ofDays(30));
 
-        // Registra auditoria
-        AuditEntry audit = new AuditEntry();
-        audit.id = java.util.UUID.randomUUID().toString();
-        audit.tenantId = tenantId;
-        audit.actorId = actorId;
-        audit.action = "USER_DELETED";
-        audit.targetId = userId;
-        audit.timestamp = now;
-        audit.details = String.format("Usuário excluído. Motivo: Exclusão via API.");
-        store.auditLog.add(audit);
+        userToDelete.status = UserStatus.DELETED;
+        userToDelete.deletedAt = now;
+        userToDelete.purgeAt = purgeAt;
+
+        // Create audit entry
+        AuditEntry auditEntry = new AuditEntry();
+        auditEntry.id = UUID.randomUUID().toString();
+        auditEntry.tenantId = tenantId;
+        auditEntry.actorId = actorId;
+        auditEntry.action = "USER_SOFT_DELETED";
+        auditEntry.targetId = userId;
+        auditEntry.timestamp = now;
+        auditEntry.details = null;
+
+        store.auditLog.add(auditEntry);
 
         return Response.noContent().build();
     }

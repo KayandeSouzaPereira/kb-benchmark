@@ -1,0 +1,69 @@
+{
+  "task": "t2",
+  "title": "Excluir usuário (soft-delete)",
+  "case": "baseline",
+  "model": "qwen3-coder:30b",
+  "score": 0.0,
+  "passed": 0,
+  "total": 7,
+  "compiled": true,
+  "repairs": 0,
+  "eval_mode": "devmcp",
+  "eval_times_s": [
+    8.4
+  ],
+  "dev_boot_wait_s": 2.3,
+  "error": null,
+  "tests": [
+    {
+      "name": "adminFazSoftDelete",
+      "passed": false,
+      "failure": "1 expectation failed.\nExpected status code <204> but was <401>."
+    },
+    {
+      "name": "atorDeOutroTenantRecebe404",
+      "passed": false,
+      "failure": "1 expectation failed.\nExpected status code <404> but was <401>."
+    },
+    {
+      "name": "ninguemDeletaASiMesmo",
+      "passed": false,
+      "failure": "1 expectation failed.\nExpected status code <422> but was <401>."
+    },
+    {
+      "name": "memberNaoPodeDeletar",
+      "passed": false,
+      "failure": "1 expectation failed.\nExpected status code <403> but was <401>."
+    },
+    {
+      "name": "purgeAtEm30Dias",
+      "passed": false,
+      "failure": "1 expectation failed.\nExpected status code <204> but was <401>."
+    },
+    {
+      "name": "adminNaoPodeDeletarOwner",
+      "passed": false,
+      "failure": "1 expectation failed.\nExpected status code <403> but was <401>."
+    },
+    {
+      "name": "auditoriaRegistraSoftDelete",
+      "passed": false,
+      "failure": "1 expectation failed.\nExpected status code <204> but was <401>."
+    }
+  ],
+  "files_written": [
+    "src/main/java/com/bench/api/UserResource.java"
+  ],
+  "retrieval": {
+    "actions": [],
+    "notes_read": [],
+    "gold_notes": [],
+    "gold_hits": [],
+    "gold_hit_rate": null
+  },
+  "tokens": {
+    "prompt_tokens": 786,
+    "completion_tokens": 799
+  },
+  "duration_s": 58.8
+}

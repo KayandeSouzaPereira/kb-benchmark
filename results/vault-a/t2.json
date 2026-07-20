@@ -3,16 +3,16 @@
   "title": "Excluir usuário (soft-delete)",
   "case": "vault-a",
   "model": "qwen3-coder:30b",
-  "score": 0.286,
-  "passed": 2,
+  "score": 0.571,
+  "passed": 4,
   "total": 7,
   "compiled": true,
   "repairs": 0,
   "eval_mode": "devmcp",
   "eval_times_s": [
-    8.3
+    10.6
   ],
-  "dev_boot_wait_s": 2.2,
+  "dev_boot_wait_s": 2.6,
   "error": null,
   "tests": [
     {
@@ -20,58 +20,65 @@
       "passed": true
     },
     {
+      "name": "atorDeOutroTenantRecebe404",
+      "passed": true
+    },
+    {
       "name": "purgeAtEm30Dias",
       "passed": true
     },
     {
-      "name": "atorDeOutroTenantRecebe404",
-      "passed": false,
-      "failure": "1 expectation failed.\nExpected status code <404> but was <403>."
+      "name": "auditoriaRegistraSoftDelete",
+      "passed": true
     },
     {
       "name": "ninguemDeletaASiMesmo",
       "passed": false,
-      "failure": "Expected response body to be verified as JSON, HTML or XML but content-type 'text/plain' is not supported out of the box.\nTry registering a custom parser using:\n   RestAssured.registerParser(\"text/plain\", <parser type>);\nContent was:\nNão é possível excluir o próprio usuário"
+      "failure": "Expected response body to be verified as JSON, HTML or XML but content-type 'text/plain' is not supported out of the box.\nTry registering a custom parser using:\n   RestAssured.registerParser(\"text/plain\", <parser type>);\nContent was:\nCANNOT_DELETE_SELF"
     },
     {
       "name": "memberNaoPodeDeletar",
       "passed": false,
-      "failure": "Expected response body to be verified as JSON, HTML or XML but content-type 'text/plain' is not supported out of the box.\nTry registering a custom parser using:\n   RestAssured.registerParser(\"text/plain\", <parser type>);\nContent was:\nAcesso negado: permissão insuficiente"
+      "failure": "Expected response body to be verified as JSON, HTML or XML but content-type 'text/plain' is not supported out of the box.\nTry registering a custom parser using:\n   RestAssured.registerParser(\"text/plain\", <parser type>);\nContent was:\nFORBIDDEN_ROLE"
     },
     {
       "name": "adminNaoPodeDeletarOwner",
       "passed": false,
-      "failure": "1 expectation failed.\nExpected status code <403> but was <422>."
-    },
-    {
-      "name": "auditoriaRegistraSoftDelete",
-      "passed": false,
-      "failure": "audit log deve conter USER_SOFT_DELETED com target u-member2 ==> expected: <true> but was: <false>"
+      "failure": "Expected response body to be verified as JSON, HTML or XML but content-type 'text/plain' is not supported out of the box.\nTry registering a custom parser using:\n   RestAssured.registerParser(\"text/plain\", <parser type>);\nContent was:\nOWNER_PROTECTED"
     }
   ],
   "files_written": [
-    "src/main/java/com/bench/api/UsersResource.java"
+    "src/main/java/com/bench/api/UserResource.java"
   ],
   "retrieval": {
     "actions": [
       "ls .",
-      "ls decisoes/",
-      "read decisoes/adr-001-soft-delete-com-retencao.md"
+      "read domain/user-deletion.md",
+      "read domain/roles-and-permissions.md",
+      "read domain/audit-log.md",
+      "read product/error-codes.md",
+      "grep -r \"CANNOT_DELETE_SELF\\|OWNER_PROTECTED\" .",
+      "ls code-standards/"
     ],
     "notes_read": [
-      "decisoes/adr-001-soft-delete-com-retencao.md"
+      "domain/audit-log.md",
+      "domain/roles-and-permissions.md",
+      "domain/user-deletion.md"
     ],
     "gold_notes": [
-      "dominio/exclusao-de-usuarios.md",
-      "dominio/papeis-e-permissoes.md",
-      "padroes-codigo/formato-de-erros-api.md"
+      "code-standards/api-error-format.md",
+      "domain/roles-and-permissions.md",
+      "domain/user-deletion.md"
     ],
-    "gold_hits": [],
-    "gold_hit_rate": 0.0
+    "gold_hits": [
+      "domain/roles-and-permissions.md",
+      "domain/user-deletion.md"
+    ],
+    "gold_hit_rate": 0.667
   },
   "tokens": {
-    "prompt_tokens": 4975,
-    "completion_tokens": 1157
+    "prompt_tokens": 13660,
+    "completion_tokens": 734
   },
-  "duration_s": 84.1
+  "duration_s": 62.9
 }

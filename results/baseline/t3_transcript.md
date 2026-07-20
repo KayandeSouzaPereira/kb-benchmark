@@ -1,45 +1,45 @@
 ## system
 
-Você é um engenheiro de software sênior de um time de produto.
-Você NÃO tem acesso à documentação do time; use seu melhor julgamento para
-regras de negócio e convenções.
+You are a senior software engineer on a product team.
+You do NOT have access to the team's documentation; use your best judgment for
+business rules and conventions.
 
-Produza os arquivos finais neste formato exato (pode haver mais de um bloco
-FILE):
+Produce the final files in this exact format (there may be more than one FILE
+block):
 
-FILE: caminho/relativo/do/Arquivo.java
+FILE: relative/path/to/File.java
 ```java
-<conteúdo completo do arquivo>
+<complete file content>
 ```
 
-Escreva arquivos completos e compiláveis; não modifique os arquivos
-existentes do projeto.
+Write complete, compilable files; do not modify the project's existing
+files.
 
 ---
 
 ## user
 
-# Tarefa: reenviar convite
+# Task: resend invitation
 
-Implemente o endpoint de reenvio de convite:
+Implement the invitation resend endpoint:
 
 ```
 POST /tenants/{tenantId}/invitations/{invitationId}/resend
-Sucesso: 200 com JSON { "resendCount": ..., "expiresAt": "..." }
+Success: 200 with JSON { "resendCount": ..., "expiresAt": "..." }
 ```
 
-Implemente TODAS as regras de negócio, permissões, validações e convenções de
-erro/auditoria que o time definiu para reenvio de convites.
+Implement ALL the business rules, permissions, validations and error/audit
+conventions the team has defined for invitation resends.
 
 
-## Projeto existente (Quarkus 3, Java 21) — NÃO reescreva estas classes
+## Existing project (Quarkus 3, Java 21) — do NOT rewrite these classes
 
-Pacote `com.bench.model`:
+Package `com.bench.model`:
 
 ```java
 public enum Role { OWNER, ADMIN, MEMBER }
 public enum UserStatus { INVITED, ACTIVE, SUSPENDED, DELETED }
-public enum Plan { FREE, PRO, ENTERPRISE }        // campo público: Integer maxUsers (null = ilimitado)
+public enum Plan { FREE, PRO, ENTERPRISE }        // public field: Integer maxUsers (null = unlimited)
 public enum InvitationStatus { PENDING, ACCEPTED, REVOKED }
 
 public class User { public String id, tenantId, email; public Role role;
@@ -52,7 +52,7 @@ public class AuditEntry { public String id, tenantId, actorId, action, targetId;
                           public java.time.Instant timestamp; public String details; }
 ```
 
-Pacote `com.bench.store` — injete com `@Inject`:
+Package `com.bench.store` — inject with `@Inject`:
 
 ```java
 @Singleton
@@ -64,23 +64,31 @@ public class InMemoryStore {
     public Optional<User> findUser(String id);
     public List<User> usersOfTenant(String tenantId);
     public List<Invitation> invitationsOfTenant(String tenantId);
-    public long countOwners(String tenantId);   // owners com status != DELETED
+    public long countOwners(String tenantId);   // owners with status != DELETED
     public void reset();
 }
 ```
 
-Contexto de autenticação: o id do usuário autenticado (ator) chega no header
-HTTP `X-Actor-Id` e corresponde a um `User` no store.
+Authentication context: the id of the authenticated user (the actor) arrives in
+the HTTP header `X-Actor-Id` and matches a `User` in the store. Read it as a
+method parameter, exactly like this:
 
-Crie seus recursos REST (jakarta.ws.rs) em `src/main/java/com/bench/api/`.
-Lembre-se dos imports: `com.bench.model.*`, `com.bench.store.InMemoryStore`,
-`jakarta.ws.rs.*`, `jakarta.ws.rs.core.*`, `jakarta.inject.Inject`. Use apenas
-classes e métodos que existem no scaffold acima.
+```java
+@POST
+public Response create(@PathParam("tenantId") String tenantId,
+                       SomeRequestBody body,
+                       @HeaderParam("X-Actor-Id") String actorId) { ... }
+```
 
-Armadilhas de API conhecidas:
-- Para status HTTP fora do enum padrão (ex.: 422, 410), use
-  `Response.status(422)` — `Response.Status` NÃO tem essas constantes.
-- `Instant` não tem `plusHours`/`plusDays`; use
+Create your REST resources (jakarta.ws.rs) under `src/main/java/com/bench/api/`.
+Remember the imports: `com.bench.model.*`, `com.bench.store.InMemoryStore`,
+`jakarta.ws.rs.*`, `jakarta.ws.rs.core.*`, `jakarta.inject.Inject`. Use only
+classes and methods that exist in the scaffold above.
+
+Known API traps:
+- For HTTP statuses outside the standard enum (e.g. 422, 410), use
+  `Response.status(422)` — `Response.Status` does NOT have those constants.
+- `Instant` has no `plusHours`/`plusDays`; use
   `instant.plus(java.time.Duration.ofHours(n))`.
 
 
@@ -88,6 +96,7 @@ Armadilhas de API conhecidas:
 
 ## assistant
 
+```java
 FILE: src/main/java/com/bench/api/InvitationResource.java
 ```java
 package com.bench.api;
@@ -113,65 +122,55 @@ public class InvitationResource {
     InMemoryStore store;
 
     @POST
-    public Response resendInvitation(
-            @PathParam("tenantId") String tenantId,
-            @PathParam("invitationId") String invitationId) {
-
-        // Obter o usuário autenticado do header
-        String actorId = getActorId();
-        if (actorId == null) {
-            return Response.status(401).build();
-        }
-
-        // Verificar se o usuário existe e está ativo
-        Optional<User> actorOpt = store.findUser(actorId);
-        if (!actorOpt.isPresent() || actorOpt.get().status != UserStatus.ACTIVE) {
-            return Response.status(403).build();
-        }
-
-        // Verificar se o tenant existe
+    public Response resend(@PathParam("tenantId") String tenantId,
+                          @PathParam("invitationId") String invitationId,
+                          @HeaderParam("X-Actor-Id") String actorId) {
+        // Validate tenant exists
         Optional<Tenant> tenantOpt = Optional.ofNullable(store.tenants.get(tenantId));
         if (!tenantOpt.isPresent()) {
-            return Response.status(404).entity(new ErrorResponse("Tenant not found")).build();
+            return Response.status(404).entity("{\"error\":\"Tenant not found\"}").build();
         }
 
-        // Verificar se o convite existe
-        Invitation invitation = store.invitations.get(invitationId);
-        if (invitation == null) {
-            return Response.status(404).entity(new ErrorResponse("Invitation not found")).build();
+        // Validate actor exists and is part of the tenant
+        Optional<User> actorOpt = store.findUser(actorId);
+        if (!actorOpt.isPresent() || !actorOpt.get().tenantId.equals(tenantId)) {
+            return Response.status(403).entity("{\"error\":\"Forbidden\"}").build();
         }
 
-        // Verificar se o convite pertence ao tenant
+        // Validate invitation exists
+        Optional<Invitation> invitationOpt = Optional.ofNullable(store.invitations.get(invitationId));
+        if (!invitationOpt.isPresent()) {
+            return Response.status(404).entity("{\"error\":\"Invitation not found\"}").build();
+        }
+
+        Invitation invitation = invitationOpt.get();
+
+        // Validate invitation belongs to tenant
         if (!invitation.tenantId.equals(tenantId)) {
-            return Response.status(404).entity(new ErrorResponse("Invitation not found")).build();
+            return Response.status(404).entity("{\"error\":\"Invitation not found\"}").build();
         }
 
-        // Verificar permissões do usuário (deve ser OWNER ou ADMIN)
-        List<User> tenantUsers = store.usersOfTenant(tenantId);
+        // Validate invitation is still pending
+        if (invitation.status != InvitationStatus.PENDING) {
+            return Response.status(422).entity("{\"error\":\"Cannot resend invitation. Invitation is not pending\"}").build();
+        }
+
+        // Validate that actor has sufficient permissions (OWNER or ADMIN)
         User actor = actorOpt.get();
-        boolean hasPermission = tenantUsers.stream()
-                .filter(u -> u.id.equals(actorId))
-                .anyMatch(u -> u.role == Role.OWNER || u.role == Role.ADMIN);
-
-        if (!hasPermission) {
-            return Response.status(403).build();
+        if (actor.role != Role.OWNER && actor.role != Role.ADMIN) {
+            return Response.status(403).entity("{\"error\":\"Forbidden\"}").build();
         }
 
-        // Verificar se o convite já foi aceito ou revogado
-        if (invitation.status == InvitationStatus.ACCEPTED || invitation.status == InvitationStatus.REVOKED) {
-            return Response.status(422).entity(new ErrorResponse("Cannot resend an accepted or revoked invitation")).build();
-        }
-
-        // Verificar se o convite expirou
+        // Check if invitation is expired
         if (Instant.now().isAfter(invitation.expiresAt)) {
-            return Response.status(410).entity(new ErrorResponse("Invitation has expired")).build();
+            return Response.status(410).entity("{\"error\":\"Invitation has expired\"}").build();
         }
 
-        // Atualizar o contador de reenvios e a data de expiração
-        invitation.resendCount++;
-        invitation.expiresAt = Instant.now().plus(java.time.Duration.ofDays(7));
+        // Update invitation resend count and expiration
+        int newResendCount = invitation.resendCount + 1;
+        Instant newExpiresAt = invitation.expiresAt.plus(java.time.Duration.ofDays(7));
 
-        // Registrar na auditoria
+        // Create audit entry
         AuditEntry auditEntry = new AuditEntry();
         auditEntry.id = UUID.randomUUID().toString();
         auditEntry.tenantId = tenantId;
@@ -179,38 +178,17 @@ public class InvitationResource {
         auditEntry.action = "INVITATION_RESEND";
         auditEntry.targetId = invitationId;
         auditEntry.timestamp = Instant.now();
-        auditEntry.details = String.format("Invitation resent. New expiration: %s", invitation.expiresAt);
+        auditEntry.details = "{\"resendCount\":" + newResendCount + ",\"expiresAt\":\"" + newExpiresAt.toString() + "\"}";
+
+        // Update invitation
+        invitation.resendCount = newResendCount;
+        invitation.expiresAt = newExpiresAt;
+
+        // Add to audit log
         store.auditLog.add(auditEntry);
 
-        // Retornar resposta com o número de reenvios e nova data de expiração
-        ResendResponse response = new ResendResponse();
-        response.resendCount = invitation.resendCount;
-        response.expiresAt = invitation.expiresAt;
-
-        return Response.ok(response).build();
-    }
-
-    private String getActorId() {
-        // Em um ambiente real, você obteria isso do header HTTP
-        // Aqui estamos simulando com um valor fixo para demonstração
-        // Na prática, você usaria algo como:
-        // String actorId = request.getHeader("X-Actor-Id");
-        // return actorId;
-        return "actor-id"; // Placeholder - substituir conforme implementação real
-    }
-
-    // Classes auxiliares para resposta e erro
-    public static class ResendResponse {
-        public int resendCount;
-        public Instant expiresAt;
-    }
-
-    public static class ErrorResponse {
-        public String message;
-
-        public ErrorResponse(String message) {
-            this.message = message;
-        }
+        // Return success response
+        return Response.ok("{\"resendCount\":" + newResendCount + ",\"expiresAt\":\"" + newExpiresAt.toString() + "\"}").build();
     }
 }
 ```

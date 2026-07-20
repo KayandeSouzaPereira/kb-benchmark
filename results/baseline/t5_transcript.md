@@ -1,39 +1,39 @@
 ## system
 
-Você é um engenheiro de software sênior de um time de produto.
-Você NÃO tem acesso à documentação do time; use seu melhor julgamento para
-regras de negócio e convenções.
+You are a senior software engineer on a product team.
+You do NOT have access to the team's documentation; use your best judgment for
+business rules and conventions.
 
-Produza os arquivos finais neste formato exato (pode haver mais de um bloco
-FILE):
+Produce the final files in this exact format (there may be more than one FILE
+block):
 
-FILE: caminho/relativo/do/Arquivo.java
+FILE: relative/path/to/File.java
 ```java
-<conteúdo completo do arquivo>
+<complete file content>
 ```
 
-Escreva arquivos completos e compiláveis; não modifique os arquivos
-existentes do projeto.
+Write complete, compilable files; do not modify the project's existing
+files.
 
 ---
 
 ## user
 
-# Tarefa: listagem de usuários com badge de status (Angular)
+# Task: user list with status badges (Angular)
 
-Crie `src/app/user-list.component.ts`: componente standalone, selector
-`app-user-list`, com `@Input() users: UserView[]` (importe de
+Create `src/app/user-list.component.ts`: a standalone component, selector
+`app-user-list`, with `@Input() users: UserView[]` (import from
 `./user.model`).
 
-Renderize uma tabela com e-mail, papel e status de cada usuário. O status
-deve aparecer como **badge**, seguindo as convenções visuais e de texto que o
-time definiu (classes CSS, rótulos exibidos e informações extras por status).
-Use template inline.
+Render a table with each user's e-mail, role and status. The status must be
+displayed as a **badge**, following the visual and text conventions the team
+has defined (CSS classes, displayed labels and extra per-status information).
+Use an inline template.
 
 
-## Projeto existente (Angular 18, standalone) — NÃO reescreva
+## Existing project (Angular 18, standalone) — do NOT rewrite
 
-Já existe `src/app/user.model.ts`:
+`src/app/user.model.ts` already exists:
 
 ```ts
 export interface UserView {
@@ -45,7 +45,7 @@ export interface UserView {
 }
 ```
 
-Crie o componente em `src/app/user-list.component.ts` (template inline).
+Create the component at `src/app/user-list.component.ts` (inline template).
 
 
 ---
@@ -60,11 +60,11 @@ import { UserView } from './user.model';
 @Component({
   selector: 'app-user-list',
   template: `
-    <table class="table">
+    <table class="user-table">
       <thead>
         <tr>
           <th>Email</th>
-          <th>Papel</th>
+          <th>Role</th>
           <th>Status</th>
         </tr>
       </thead>
@@ -73,53 +73,81 @@ import { UserView } from './user.model';
           <td>{{ user.email }}</td>
           <td>{{ user.role }}</td>
           <td>
-            <span [class]="'badge badge-' + getUserStatusClass(user.status)"
-                  [title]="getUserStatusTooltip(user)">
-              {{ getUserStatusLabel(user.status) }}
+            <span [class]="'badge badge-' + user.status.toLowerCase()">
+              {{ getStatusLabel(user.status) }}
+            </span>
+            <span *ngIf="user.purgeAt" class="purge-info">
+              (purges {{ user.purgeAt }})
             </span>
           </td>
         </tr>
       </tbody>
     </table>
   `,
-  standalone: true
+  styles: [`
+    .user-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    
+    .user-table th,
+    .user-table td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+    
+    .user-table th {
+      background-color: #f5f5f5;
+      font-weight: bold;
+    }
+    
+    .badge {
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.8em;
+      font-weight: bold;
+      vertical-align: middle;
+    }
+    
+    .badge-invited {
+      background-color: #e3f2fd;
+      color: #1976d2;
+    }
+    
+    .badge-active {
+      background-color: #e8f5e9;
+      color: #388e3c;
+    }
+    
+    .badge-suspended {
+      background-color: #fff3e0;
+      color: #f57c00;
+    }
+    
+    .badge-deleted {
+      background-color: #ffebee;
+      color: #d32f2f;
+    }
+    
+    .purge-info {
+      font-size: 0.8em;
+      color: #666;
+      margin-left: 8px;
+    }
+  `]
 })
 export class UserListComponent {
   @Input() users: UserView[] = [];
 
-  getUserStatusClass(status: UserView['status']): string {
+  getStatusLabel(status: UserView['status']): string {
     switch (status) {
-      case 'ACTIVE':
-        return 'success';
-      case 'SUSPENDED':
-        return 'warning';
-      case 'DELETED':
-        return 'danger';
-      case 'INVITED':
-      default:
-        return 'info';
+      case 'INVITED': return 'Invited';
+      case 'ACTIVE': return 'Active';
+      case 'SUSPENDED': return 'Suspended';
+      case 'DELETED': return 'Deleted';
+      default: return status;
     }
-  }
-
-  getUserStatusLabel(status: UserView['status']): string {
-    switch (status) {
-      case 'ACTIVE':
-        return 'Ativo';
-      case 'SUSPENDED':
-        return 'Suspenso';
-      case 'DELETED':
-        return 'Excluído';
-      case 'INVITED':
-      default:
-        return 'Convidado';
-    }
-  }
-
-  getUserStatusTooltip(user: UserView): string {
-    if (user.status === 'SUSPENDED' && user.purgeAt) {
-      return `Suspenso até ${new Date(user.purgeAt).toLocaleDateString()}`;
-    }
-    return '';
   }
 }
 ```

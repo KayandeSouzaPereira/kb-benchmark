@@ -10,7 +10,7 @@
   "repairs": 0,
   "eval_mode": "frontend",
   "eval_times_s": [
-    0.7
+    0.9
   ],
   "dev_boot_wait_s": null,
   "error": null,
@@ -49,24 +49,20 @@
   ],
   "retrieval": {
     "actions": [
-      "ls .",
-      "read produto/usuario.md",
-      "read produto/usuarios.md",
-      "ls produto/",
-      "grep -r \"badge\" produto/usuario.md",
-      "grep -r \"badge\" padroes-codigo/css.md",
-      "read produto/usuario.md"
+      "read src/app/user.model.ts",
+      "ls src/app/",
+      "ls /"
     ],
     "notes_read": [],
     "gold_notes": [
-      "padroes-codigo/badges-de-status-frontend.md"
+      "code-standards/frontend-status-badges.md"
     ],
     "gold_hits": [],
     "gold_hit_rate": 0.0
   },
   "tokens": {
-    "prompt_tokens": 24431,
-    "completion_tokens": 4812
+    "prompt_tokens": 5824,
+    "completion_tokens": 2241
   },
-  "duration_s": 283.4
+  "duration_s": 132.4
 }
