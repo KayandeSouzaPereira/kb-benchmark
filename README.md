@@ -1,7 +1,10 @@
 # kb-benchmark
 
 Benchmark: qual organização de knowledge base (Obsidian/Markdown) serve melhor
-como fonte de contexto para um agente de código local (qwen3:8b via Ollama)?
+como fonte de contexto para um agente de código local (qwen3 via Ollama)?
+
+**Relatório completo:** [RELATORIO.md](RELATORIO.md) (português) ·
+[REPORT.md](REPORT.md) (English)
 
 ## Condições
 

@@ -1,7 +1,9 @@
 # Relatório final — Benchmark de Knowledge Base para agentes de código
 
-**Data:** 2026-07-19 · **Autor:** benchmark automatizado (Claude Code + Ollama local)
-**Local:** `C:\dev\kb-benchmark` · **Dados brutos:** `results/` (v5), `results-v2/`, `results-v3/`, `results-v4-invalid/`
+**Data:** 2026-07-19 a 2026-07-20 · **Autor:** benchmark automatizado (Claude Code + Ollama local)
+**Local:** `C:\dev\kb-benchmark` · **Dados brutos:** `results/` (v7), `results-v2/`, `results-v3/`, `results-v4-invalid/`, `results-v5/`, `results-v6/`, `results-v7-runs/` (confirmação estatística de 11 rodadas)
+
+*(Versão em inglês: [REPORT.md](REPORT.md). Os dois são mantidos sincronizados; em caso de divergência, este arquivo é a fonte da verdade.)*
 
 ---
 
