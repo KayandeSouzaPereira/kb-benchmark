@@ -1,0 +1,61 @@
+{
+  "task": "t4",
+  "title": "Alterar papel",
+  "case": "baseline",
+  "model": "qwen3-coder:30b",
+  "score": 0.5,
+  "passed": 3,
+  "total": 6,
+  "compiled": true,
+  "repairs": 0,
+  "eval_mode": "devmcp",
+  "eval_times_s": [
+    8.3
+  ],
+  "dev_boot_wait_s": 2.3,
+  "error": null,
+  "tests": [
+    {
+      "name": "adminPromoveMember",
+      "passed": true
+    },
+    {
+      "name": "ownerPodeRebaixarOutroOwner",
+      "passed": true
+    },
+    {
+      "name": "auditoriaRegistraMudancaDePapel",
+      "passed": true
+    },
+    {
+      "name": "ultimoOwnerNaoPodeSerRebaixado",
+      "passed": false,
+      "failure": "1 expectation failed.\nExpected status code <409> but was <422>."
+    },
+    {
+      "name": "adminNaoAlteraPapelDeOwner",
+      "passed": false,
+      "failure": "1 expectation failed.\nExpected status code <403> but was <422>."
+    },
+    {
+      "name": "memberNaoAlteraPapeis",
+      "passed": false,
+      "failure": "Expected response body to be verified as JSON, HTML or XML but content-type 'text/plain' is not supported out of the box.\nTry registering a custom parser using:\n   RestAssured.registerParser(\"text/plain\", <parser type>);\nContent was:\nInsufficient permissions"
+    }
+  ],
+  "files_written": [
+    "src/main/java/com/bench/api/UserRoleResource.java"
+  ],
+  "retrieval": {
+    "actions": [],
+    "notes_read": [],
+    "gold_notes": [],
+    "gold_hits": [],
+    "gold_hit_rate": null
+  },
+  "tokens": {
+    "prompt_tokens": 788,
+    "completion_tokens": 838
+  },
+  "duration_s": 60.6
+}

@@ -1,0 +1,74 @@
+{
+  "task": "t3",
+  "title": "Reenviar convite",
+  "case": "vault-a",
+  "model": "qwen3-coder:30b",
+  "score": 1.0,
+  "passed": 5,
+  "total": 5,
+  "compiled": true,
+  "repairs": 0,
+  "eval_mode": "devmcp",
+  "eval_times_s": [
+    10.4
+  ],
+  "dev_boot_wait_s": 2.3,
+  "error": null,
+  "tests": [
+    {
+      "name": "auditoriaRegistraReenvio",
+      "passed": true
+    },
+    {
+      "name": "reenvioIncrementaContadorEResetaExpiracao",
+      "passed": true
+    },
+    {
+      "name": "reenvioReativaConviteExpirado",
+      "passed": true
+    },
+    {
+      "name": "memberNaoPodeReenviar",
+      "passed": true
+    },
+    {
+      "name": "maximoDe3Reenvios",
+      "passed": true
+    }
+  ],
+  "files_written": [
+    "src/main/java/com/bench/api/InvitationResource.java"
+  ],
+  "retrieval": {
+    "actions": [
+      "ls .",
+      "read domain/invitations.md",
+      "read domain/roles-and-permissions.md",
+      "read domain/audit-log.md",
+      "read code-standards/api-error-format.md",
+      "read domain/plan-limits.md",
+      "grep -r \"RESEND_LIMIT_REACHED\" ."
+    ],
+    "notes_read": [
+      "code-standards/api-error-format.md",
+      "domain/audit-log.md",
+      "domain/invitations.md",
+      "domain/plan-limits.md",
+      "domain/roles-and-permissions.md"
+    ],
+    "gold_notes": [
+      "code-standards/api-error-format.md",
+      "domain/invitations.md"
+    ],
+    "gold_hits": [
+      "code-standards/api-error-format.md",
+      "domain/invitations.md"
+    ],
+    "gold_hit_rate": 1.0
+  },
+  "tokens": {
+    "prompt_tokens": 15561,
+    "completion_tokens": 697
+  },
+  "duration_s": 62.0
+}

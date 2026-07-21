@@ -1,0 +1,79 @@
+{
+  "task": "t4",
+  "title": "Alterar papel",
+  "case": "vault-a",
+  "model": "qwen3-coder:30b",
+  "score": 0.5,
+  "passed": 3,
+  "total": 6,
+  "compiled": true,
+  "repairs": 0,
+  "eval_mode": "devmcp",
+  "eval_times_s": [
+    8.3
+  ],
+  "dev_boot_wait_s": 2.3,
+  "error": null,
+  "tests": [
+    {
+      "name": "adminPromoveMember",
+      "passed": true
+    },
+    {
+      "name": "ownerPodeRebaixarOutroOwner",
+      "passed": true
+    },
+    {
+      "name": "auditoriaRegistraMudancaDePapel",
+      "passed": true
+    },
+    {
+      "name": "ultimoOwnerNaoPodeSerRebaixado",
+      "passed": false,
+      "failure": "Expected response body to be verified as JSON, HTML or XML but content-type 'text/plain' is not supported out of the box.\nTry registering a custom parser using:\n   RestAssured.registerParser(\"text/plain\", <parser type>);\nContent was:\nLAST_OWNER"
+    },
+    {
+      "name": "adminNaoAlteraPapelDeOwner",
+      "passed": false,
+      "failure": "Expected response body to be verified as JSON, HTML or XML but content-type 'text/plain' is not supported out of the box.\nTry registering a custom parser using:\n   RestAssured.registerParser(\"text/plain\", <parser type>);\nContent was:\nOWNER_PROTECTED"
+    },
+    {
+      "name": "memberNaoAlteraPapeis",
+      "passed": false,
+      "failure": "Expected response body to be verified as JSON, HTML or XML but content-type 'text/plain' is not supported out of the box.\nTry registering a custom parser using:\n   RestAssured.registerParser(\"text/plain\", <parser type>);\nContent was:\nFORBIDDEN_ROLE"
+    }
+  ],
+  "files_written": [
+    "src/main/java/com/bench/api/UserRoleResource.java"
+  ],
+  "retrieval": {
+    "actions": [
+      "ls .",
+      "read domain/roles.md",
+      "ls domain/",
+      "read domain/roles-and-permissions.md",
+      "read domain/audit-log.md",
+      "read domain/plan-limits.md",
+      "grep -r \"LAST_OWNER\\|OWNER_PROTECTED\\|FORBIDDEN_ROLE\" .",
+      "grep -r \"409\\|403\\|422\" domain/roles-and-permissions.md"
+    ],
+    "notes_read": [
+      "domain/audit-log.md",
+      "domain/plan-limits.md",
+      "domain/roles-and-permissions.md"
+    ],
+    "gold_notes": [
+      "code-standards/api-error-format.md",
+      "domain/roles-and-permissions.md"
+    ],
+    "gold_hits": [
+      "domain/roles-and-permissions.md"
+    ],
+    "gold_hit_rate": 0.5
+  },
+  "tokens": {
+    "prompt_tokens": 13835,
+    "completion_tokens": 775
+  },
+  "duration_s": 63.1
+}

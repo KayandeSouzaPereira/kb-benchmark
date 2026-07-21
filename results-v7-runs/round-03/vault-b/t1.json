@@ -1,0 +1,81 @@
+{
+  "task": "t1",
+  "title": "Criar convite",
+  "case": "vault-b",
+  "model": "qwen3-coder:30b",
+  "score": 0.833,
+  "passed": 5,
+  "total": 6,
+  "compiled": true,
+  "repairs": 0,
+  "eval_mode": "devmcp",
+  "eval_times_s": [
+    10.6
+  ],
+  "dev_boot_wait_s": 2.6,
+  "error": null,
+  "tests": [
+    {
+      "name": "memberNaoPodeConvidar",
+      "passed": true
+    },
+    {
+      "name": "conviteExpiraEm72Horas",
+      "passed": true
+    },
+    {
+      "name": "adminCriaConvitePersistido",
+      "passed": true
+    },
+    {
+      "name": "auditoriaRegistraUserInvited",
+      "passed": true
+    },
+    {
+      "name": "limiteDoPlanoFreeContaConvitesPendentes",
+      "passed": true
+    },
+    {
+      "name": "atorDeOutroTenantRecebe404",
+      "passed": false,
+      "failure": "1 expectation failed.\nExpected status code <404> but was <403>."
+    }
+  ],
+  "files_written": [
+    "src/main/java/com/bench/api/InvitationResource.java"
+  ],
+  "retrieval": {
+    "actions": [
+      "ls .",
+      "read 202602041100-invitation-72h-expiry.md",
+      "read 202602041130-invitation-resend.md",
+      "read 202602101415-owner-protection.md",
+      "read 202605021430-pending-invitations-count.md",
+      "read 202601051030-tenant-roles.md",
+      "read 202601201300-mutation-audit-log.md"
+    ],
+    "notes_read": [
+      "202601051030-tenant-roles.md",
+      "202601201300-mutation-audit-log.md",
+      "202602041100-invitation-72h-expiry.md",
+      "202602041130-invitation-resend.md",
+      "202602101415-owner-protection.md",
+      "202605021430-pending-invitations-count.md"
+    ],
+    "gold_notes": [
+      "202601201330-api-error-codes.md",
+      "202602041100-invitation-72h-expiry.md",
+      "202605021430-pending-invitations-count.md"
+    ],
+    "gold_hits": [
+      "202602041100-invitation-72h-expiry.md",
+      "202605021430-pending-invitations-count.md"
+    ],
+    "gold_hit_rate": 0.667
+  },
+  "tokens": {
+    "prompt_tokens": 15281,
+    "completion_tokens": 995
+  },
+  "duration_s": 77.5
+}

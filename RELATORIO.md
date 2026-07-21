@@ -135,6 +135,91 @@ tokens. Na v6 a exploração rasa do A ficou ainda mais evidente (1,8 notas por
 tarefa), e mesmo assim o score empatou — o modelo compensa parte do não-lido
 com bom senso, mas perde exatamente as regras não-adivinháveis.
 
+## 3.5. Confirmação estatística — 11 rodadas independentes (v7)
+
+Uma única rodada não separa efeito real de sorte de amostragem — um coder-model
+de 30B tem variância de sampling considerável. Para confirmar os números da
+v7, rodei **10 rodadas adicionais independentes** com exatamente a mesma
+configuração (qwen3-coder:30b, KB em inglês, avaliação via Dev MCP, dica de
+`@HeaderParam`), somadas à rodada já publicada (`round-00`) — 11 pontos de
+dados no total. Dados brutos em `results-v7-runs/`, agregação completa em
+[`results-v7-runs/AGGREGATE.md`](results-v7-runs/AGGREGATE.md).
+
+### Placar total por rodada (31 testes)
+
+| Rodada | C — Sem KB | A — Vault estruturado | B — Zettelkasten |
+|---|---|---|---|
+| round-00 | 8 | 21 | 15 |
+| round-01 | 8 | 21 | 17 |
+| round-02 | 8 | 23 | 25 |
+| round-03 | 8 | 23 | 16 |
+| round-04 | 6 | 26 | 15 |
+| round-05 | 8 | 23 | 20 |
+| round-06 | 6 | 26 | 18 |
+| round-07 | 8 | 21 | 22 |
+| round-08 | 7 | 26 | 15 |
+| round-09 | 8 | 23 | 21 |
+| round-10 | 8 | 23 | 23 |
+| **Média ± desvio** | **7,5 ± 0,8** | **23,3 ± 1,9** | **18,8 ± 3,4** |
+| **Min–Max** | 6–8 | 21–26 | 15–25 |
+
+### O que a amostra maior confirma e corrige
+
+1. **O efeito da KB é inquestionável.** Em 11 rodadas independentes, o
+   intervalo do baseline (6–8) e o da pior vault (15–25 para B, 21–26 para A)
+   **nunca se sobrepõem**. Não é sorte de uma rodada — é um efeito de ~3× que
+   se repete sempre.
+
+2. **A vault estruturada (A) é consistentemente melhor que o Zettelkasten (B)
+   — isso corrige a conclusão de "empate técnico" da v7 original.** Com só
+   uma rodada, A=21 e B=15 pareciam ruído; com 11, A nunca caiu abaixo de 21
+   e B nunca passou de 25, com médias de 23,3 vs 18,8 (diferença de +4,5
+   pontos, tamanho de efeito ≈1,6 desvios-padrão combinados — grande pela
+   convenção estatística usual). B tem quase o dobro do desvio-padrão de A
+   (3,4 vs 1,9): A não é só melhor, é mais **previsível**.
+
+3. **A vantagem de A não é retrieval — as duas acham as notas certas quase
+   igualmente bem** (gold-hit médio: A 0,69, B 0,68, quase idêntico ao longo
+   das 11 rodadas). A diferença está a jusante, na geração de código a partir
+   do que foi lido.
+
+4. **Padrão por tarefa é estável e revela uma divisão de forças real:**
+
+   | Tarefa | A (média±dp) | B (média±dp) | Quem vence |
+   |---|---|---|---|
+   | t1 — Criar convite | 5,5±0,9/6 | 4,3±1,1/6 | **A**, folgado |
+   | t2 — Excluir usuário | 6,7±0,9/7 | 3,9±0,3/7 | **A**, folgado |
+   | t3 — Reenviar convite | **5,0±0,0/5** | 2,7±2,5/5 | **A**, e sem nenhuma variância |
+   | t4 — Alterar papel | 4,1±1,4/6 | **5,5±1,7/6** | **B** |
+   | t5 — Badges Angular | 2,0±0,0/7 | 2,5±1,4/7 | B, levemente |
+
+5. **Achado extra: o t3 da vault-b é literalmente bimodal — 0/5 ou 5/5, nunca
+   meio-termo** (6 rodadas em 5/5, 5 em 0/5). Investigado: em **100% das
+   rodadas** o modelo leu as duas notas-ouro corretas do reenvio. A causa é um
+   coin-flip de geração de código — em algumas rodadas o modelo anota o
+   `@Path` do reenvio com `@Consumes(APPLICATION_JSON)` herdado da classe,
+   que rejeita com `415` o `POST` de reenvio (que não tem corpo). Não é falha
+   de conhecimento; é inconsistência de sintaxe JAX-RS specífica desse
+   endpoint. Explica sozinho o desvio-padrão gigante de B no t3 (2,5) contra
+   zero de A.
+
+6. **O t5 (Angular) do vault A é suspeitosamente flat**: exatos 2/7 em
+   **todas as 11 rodadas**, zero variância — indício de um teto sistemático
+   (provavelmente o mesmo padrão de resposta incompleta visto na v5/vault-b,
+   agora reproduzido de forma consistente pelo lado A) mais do que uma
+   coincidência estatística.
+
+### Veredito revisado
+
+A conclusão "empate técnico A≈B" das rodadas anteriores **não se sustenta**
+com 11 amostras: **A vence com folga e mais consistência** no agregado, muito
+por causa de dois pontos fortes (t2, t3) onde A é quase perfeito e B sofre com
+um bug de sintaxe reproduzível. B ainda vence claramente em t4 e levemente em
+t5. Isto é: a organização da KB não é neutra para este modelo — o vault
+estruturado com `INDEX.md` produz resultados melhores e mais estáveis na
+maioria das tarefas deste benchmark, mesmo com acerto de retrieval
+equivalente ao Zettelkasten.
+
 ## 4. Conclusões
 
 0. **O idioma da KB importa — muito.** Traduzir vaults (conteúdo e nomes de
@@ -160,14 +245,20 @@ com bom senso, mas perde exatamente as regras não-adivinháveis.
    de regra de negócio para código. O baseline nunca acerta o que não dá para
    adivinhar (72h, códigos de erro, retenção de 30 dias).
 
-3. **Zettelkasten vs. vault estruturado: empate técnico no score, perfis opostos.**
-   - **B (Zettelkasten)** maximiza *recall*: os wikilinks funcionam como GPS — o
-     modelo segue `[[link]]` e chega na regra, inclusive atravessando a nota
-     contraditória até a correção. Foi o que lhe deu o t5 (achou a nota de badges;
-     A não achou). Custo: mais notas lidas, mais tokens, mais tempo.
-   - **A (estruturado)** maximiza *eficiência*: o `INDEX.md` roteia bem e barato,
-     mas induz **exploração rasa** — o modelo lê 2–3 notas e para (no t1 leu
-     limites de plano mas não convites, e chutou expiração de 7 dias).
+3. **Zettelkasten vs. vault estruturado: com 1 rodada parecia empate; com 11
+   independentes (§3.5), o vault estruturado vence com folga e mais
+   consistência.**
+   - **A (estruturado)** venceu 3 das 5 tarefas por margens grandes (t1, t2,
+     t3) e com desvio-padrão bem menor no total (1,9 vs 3,4) — é a opção mais
+     previsível.
+   - **B (Zettelkasten)** venceu t4 e levemente t5, mas com o dobro da
+     variância de A — inclusive um caso bimodal no t3 (0/5 ou 5/5, nunca
+     meio-termo) causado por um bug reproduzível de anotação JAX-RS, não por
+     falha de conhecimento.
+   - A diferença **não é retrieval**: as duas acham as notas-ouro certas quase
+     igualmente bem (gold-hit ~0,68–0,69 nas 11 rodadas). A vantagem de A está
+     inteiramente a jusante, na tradução de "li a regra certa" para "gerei
+     código correto de primeira".
 
 4. **O gargalo é o modelo, não a organização.** O qwen3:8b morria em sintaxe Java
    (72% das tarefas com vault não compilavam); o coder:30b compila tudo, mas comete

@@ -1,0 +1,57 @@
+{
+  "task": "t4",
+  "title": "Alterar papel",
+  "case": "vault-b",
+  "model": "qwen3-coder:30b",
+  "score": 0.0,
+  "passed": 0,
+  "total": 6,
+  "compiled": false,
+  "repairs": 2,
+  "eval_mode": "devmcp",
+  "eval_times_s": [
+    120.2,
+    121.4
+  ],
+  "dev_boot_wait_s": null,
+  "error": "dev mode nao subiu (compilacao?):\nDev MCP nao respondeu:\n-thread-1) incomparable types: com.bench.model.Role and com.bench.model.UserStatus, line 53 in /work/vault-b/t4/src/main/java/com/bench/api/UserRoleResource.java\n2026-07-21 11:38:42,738 ERROR [io.quarkus.deployment.dev.JavaCompilationProvider] (vert.x-worker-thread-1) incomparable types: com.bench.model.Role and com.bench.model.UserStatus, line 53 in /work/vault-b/t4/src/main/java/com/bench/api/UserRoleResource.java\n2026-07-21 11:38:42,738 ERROR [io.quarkus.deployment.dev.JavaCompilationProvider] (vert.x-worker-thread-1) incomparable types: com.bench.model.Role and com.bench.model.UserStatus, line 53 in /work/vault-b/t4/src/main/java/com/bench/api/UserRoleResource.java\n2026-07-21 11:38:44,795 ERROR [io.quarkus.deployment.dev.JavaCompilationProvider] (vert.x-worker-thread-1) incomparable types: com.bench.model.Role and com.bench.model.UserStatus, line 53 in /work/vault-b/t4/src/main/java/com/bench/api/UserRoleResource.java\n2026-07-21 11:38:44,795 ERROR [io.quarkus.deployment.dev.JavaCompilationProvider] (vert.x-worker-thread-1) incomparable types: com.bench.model.Role and com.bench.model.UserStatus, line 53 in /work/vault-b/t4/src/main/java/com/bench/api/UserRoleResource.java\n2026-07-21 11:38:44,795 ERROR [io.quarkus.deployment.dev.JavaCompilationProvider] (vert.x-worker-thread-1) incomparable types: com.bench.model.Role and com.bench.model.UserStatus, line 53 in /work/vault-b/t4/src/main/java/com/bench/api/UserRoleResource.java\n2026-07-21 11:38:46,858 ERROR [io.quarkus.deployment.dev.JavaCompilationProvider] (vert.x-worker-thread-1) incomparable types: com.bench.model.Role and com.bench.model.UserStatus, line 53 in /work/vault-b/t4/src/main/java/com/bench/api/UserRoleResource.java\n2026-07-21 11:38:46,859 ERROR [io.quarkus.deployment.dev.JavaCompilationProvider] (vert.x-worker-thread-1) incomparable types: com.bench.model.Role and com.bench.model.UserStatus, line 53 in /work/vault-b/t4/src/main/java/com/bench/api/UserRoleResource.java\n2026-07-21 11:38:46,859 ERROR [io.quarkus.deployment.dev.JavaCompilationProvider] (vert.x-worker-thread-1) incomparable types: com.bench.model.Role and com.bench.model.UserStatus, line 53 in /work/vault-b/t4/src/main/java/com/bench/api/UserRoleResource.java\n2026-07-21 11:38:48,924 ERROR [io.quarkus.deployment.dev.JavaCompilationProvider] (vert.x-worker-thread-1) incomparable types: com.bench.model.Role and com.bench.model.UserStatus, line 53 in /work/vault-b/t4/src/main/java/com/bench/api/UserRoleResource.java\n2026-07-21 11:38:48,924 ERROR [io.quarkus.deployment.dev.JavaCompilationProvider] (vert.x-worker-thread-1) incomparable types: com.bench.model.Role and com.bench.model.UserStatus, line 53 in /work/vault-b/t4/src/main/java/com/bench/api/UserRoleResource.java\n2026-07-21 11:38:48,924 ERROR [io.quarkus.deployment.dev.JavaCompilationProvider] (vert.x-worker-thread-1) incomparable types: com.bench.model.Role and com.bench.model.UserStatus, line 53 in /work/vault-b/t4/src/main/java/com/bench/api/UserRoleResource.java\n",
+  "tests": [],
+  "files_written": [
+    "src/main/java/com/bench/api/UserRoleResource.java"
+  ],
+  "retrieval": {
+    "actions": [
+      "ls .",
+      "read 202601051030-tenant-roles.md",
+      "read 202602101415-owner-protection.md",
+      "read 202602101430-last-owner.md",
+      "read 202601201300-mutation-audit-log.md",
+      "read 202601201330-api-error-codes.md",
+      "read 202603150900-soft-delete-30-days.md"
+    ],
+    "notes_read": [
+      "202601051030-tenant-roles.md",
+      "202601201300-mutation-audit-log.md",
+      "202601201330-api-error-codes.md",
+      "202602101415-owner-protection.md",
+      "202602101430-last-owner.md",
+      "202603150900-soft-delete-30-days.md"
+    ],
+    "gold_notes": [
+      "202601201330-api-error-codes.md",
+      "202602101415-owner-protection.md",
+      "202602101430-last-owner.md"
+    ],
+    "gold_hits": [
+      "202601201330-api-error-codes.md",
+      "202602101415-owner-protection.md",
+      "202602101430-last-owner.md"
+    ],
+    "gold_hit_rate": 1.0
+  },
+  "tokens": {
+    "prompt_tokens": 25321,
+    "completion_tokens": 1866
+  },
+  "duration_s": 363.9
+}

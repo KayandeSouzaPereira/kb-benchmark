@@ -1,0 +1,59 @@
+{
+  "task": "t3",
+  "title": "Reenviar convite",
+  "case": "baseline",
+  "model": "qwen3-coder:30b",
+  "score": 0.0,
+  "passed": 0,
+  "total": 5,
+  "compiled": true,
+  "repairs": 0,
+  "eval_mode": "devmcp",
+  "eval_times_s": [
+    8.5
+  ],
+  "dev_boot_wait_s": 2.4,
+  "error": null,
+  "tests": [
+    {
+      "name": "auditoriaRegistraReenvio",
+      "passed": false,
+      "failure": "1 expectation failed.\nExpected status code <200> but was <415>."
+    },
+    {
+      "name": "reenvioIncrementaContadorEResetaExpiracao",
+      "passed": false,
+      "failure": "1 expectation failed.\nExpected status code <200> but was <415>."
+    },
+    {
+      "name": "reenvioReativaConviteExpirado",
+      "passed": false,
+      "failure": "1 expectation failed.\nExpected status code <200> but was <415>."
+    },
+    {
+      "name": "memberNaoPodeReenviar",
+      "passed": false,
+      "failure": "1 expectation failed.\nExpected status code <403> but was <415>."
+    },
+    {
+      "name": "maximoDe3Reenvios",
+      "passed": false,
+      "failure": "1 expectation failed.\nExpected status code <422> but was <415>."
+    }
+  ],
+  "files_written": [
+    "src/main/java/com/bench/api/InvitationResource.java"
+  ],
+  "retrieval": {
+    "actions": [],
+    "notes_read": [],
+    "gold_notes": [],
+    "gold_hits": [],
+    "gold_hit_rate": null
+  },
+  "tokens": {
+    "prompt_tokens": 780,
+    "completion_tokens": 868
+  },
+  "duration_s": 64.0
+}

@@ -1,0 +1,79 @@
+{
+  "task": "t4",
+  "title": "Alterar papel",
+  "case": "vault-a",
+  "model": "qwen3-coder:30b",
+  "score": 0.5,
+  "passed": 3,
+  "total": 6,
+  "compiled": true,
+  "repairs": 0,
+  "eval_mode": "devmcp",
+  "eval_times_s": [
+    10.5
+  ],
+  "dev_boot_wait_s": 2.4,
+  "error": null,
+  "tests": [
+    {
+      "name": "adminPromoveMember",
+      "passed": true
+    },
+    {
+      "name": "ownerPodeRebaixarOutroOwner",
+      "passed": true
+    },
+    {
+      "name": "auditoriaRegistraMudancaDePapel",
+      "passed": true
+    },
+    {
+      "name": "ultimoOwnerNaoPodeSerRebaixado",
+      "passed": false,
+      "failure": "1 expectation failed.\nJSON path code doesn't match.\nExpected: LAST_OWNER\n  Actual: null"
+    },
+    {
+      "name": "adminNaoAlteraPapelDeOwner",
+      "passed": false,
+      "failure": "1 expectation failed.\nJSON path code doesn't match.\nExpected: OWNER_PROTECTED\n  Actual: null"
+    },
+    {
+      "name": "memberNaoAlteraPapeis",
+      "passed": false,
+      "failure": "1 expectation failed.\nJSON path code doesn't match.\nExpected: FORBIDDEN_ROLE\n  Actual: null"
+    }
+  ],
+  "files_written": [
+    "src/main/java/com/bench/api/UserRoleResource.java"
+  ],
+  "retrieval": {
+    "actions": [
+      "ls .",
+      "read domain/roles.md",
+      "ls domain/",
+      "read domain/roles-and-permissions.md",
+      "read domain/audit-log.md",
+      "read domain/plan-limits.md",
+      "grep -r \"LAST_OWNER\\|OWNER_PROTECTED\\|FORBIDDEN_ROLE\" .",
+      "grep -r \"409\\|403\\|422\" domain/roles-and-permissions.md"
+    ],
+    "notes_read": [
+      "domain/audit-log.md",
+      "domain/plan-limits.md",
+      "domain/roles-and-permissions.md"
+    ],
+    "gold_notes": [
+      "code-standards/api-error-format.md",
+      "domain/roles-and-permissions.md"
+    ],
+    "gold_hits": [
+      "domain/roles-and-permissions.md"
+    ],
+    "gold_hit_rate": 0.5
+  },
+  "tokens": {
+    "prompt_tokens": 13835,
+    "completion_tokens": 886
+  },
+  "duration_s": 75.1
+}

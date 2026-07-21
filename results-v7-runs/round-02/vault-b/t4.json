@@ -1,0 +1,83 @@
+{
+  "task": "t4",
+  "title": "Alterar papel",
+  "case": "vault-b",
+  "model": "qwen3-coder:30b",
+  "score": 1.0,
+  "passed": 6,
+  "total": 6,
+  "compiled": true,
+  "repairs": 0,
+  "eval_mode": "devmcp",
+  "eval_times_s": [
+    10.2
+  ],
+  "dev_boot_wait_s": 2.2,
+  "error": null,
+  "tests": [
+    {
+      "name": "ultimoOwnerNaoPodeSerRebaixado",
+      "passed": true
+    },
+    {
+      "name": "adminNaoAlteraPapelDeOwner",
+      "passed": true
+    },
+    {
+      "name": "memberNaoAlteraPapeis",
+      "passed": true
+    },
+    {
+      "name": "adminPromoveMember",
+      "passed": true
+    },
+    {
+      "name": "ownerPodeRebaixarOutroOwner",
+      "passed": true
+    },
+    {
+      "name": "auditoriaRegistraMudancaDePapel",
+      "passed": true
+    }
+  ],
+  "files_written": [
+    "src/main/java/com/bench/api/UserRoleResource.java"
+  ],
+  "retrieval": {
+    "actions": [
+      "ls .",
+      "read 202601051030-tenant-roles.md",
+      "read 202602101415-owner-protection.md",
+      "read 202602101430-last-owner.md",
+      "read 202601201300-mutation-audit-log.md",
+      "read 202601201330-api-error-codes.md",
+      "read 202603150900-soft-delete-30-days.md",
+      "read 202603150930-who-can-delete-users.md"
+    ],
+    "notes_read": [
+      "202601051030-tenant-roles.md",
+      "202601201300-mutation-audit-log.md",
+      "202601201330-api-error-codes.md",
+      "202602101415-owner-protection.md",
+      "202602101430-last-owner.md",
+      "202603150900-soft-delete-30-days.md",
+      "202603150930-who-can-delete-users.md"
+    ],
+    "gold_notes": [
+      "202601201330-api-error-codes.md",
+      "202602101415-owner-protection.md",
+      "202602101430-last-owner.md"
+    ],
+    "gold_hits": [
+      "202601201330-api-error-codes.md",
+      "202602101415-owner-protection.md",
+      "202602101430-last-owner.md"
+    ],
+    "gold_hit_rate": 1.0
+  },
+  "tokens": {
+    "prompt_tokens": 17767,
+    "completion_tokens": 939
+  },
+  "duration_s": 72.9
+}

@@ -1,0 +1,83 @@
+{
+  "task": "t1",
+  "title": "Criar convite",
+  "case": "vault-b",
+  "model": "qwen3-coder:30b",
+  "score": 0.5,
+  "passed": 3,
+  "total": 6,
+  "compiled": true,
+  "repairs": 0,
+  "eval_mode": "devmcp",
+  "eval_times_s": [
+    10.5
+  ],
+  "dev_boot_wait_s": 2.5,
+  "error": null,
+  "tests": [
+    {
+      "name": "conviteExpiraEm72Horas",
+      "passed": true
+    },
+    {
+      "name": "adminCriaConvitePersistido",
+      "passed": true
+    },
+    {
+      "name": "auditoriaRegistraUserInvited",
+      "passed": true
+    },
+    {
+      "name": "memberNaoPodeConvidar",
+      "passed": false,
+      "failure": "Expected response body to be verified as JSON, HTML or XML but no content-type was defined in the response.\nTry registering a default parser using:\n   RestAssured.defaultParser(<parser type>);\nContent was:"
+    },
+    {
+      "name": "atorDeOutroTenantRecebe404",
+      "passed": false,
+      "failure": "1 expectation failed.\nExpected status code <404> but was <403>."
+    },
+    {
+      "name": "limiteDoPlanoFreeContaConvitesPendentes",
+      "passed": false,
+      "failure": "1 expectation failed.\nExpected status code <422> but was <201>."
+    }
+  ],
+  "files_written": [
+    "src/main/java/com/bench/api/InvitationResource.java"
+  ],
+  "retrieval": {
+    "actions": [
+      "ls .",
+      "grep -r \"invitation\" 202601051030-tenant-roles.md",
+      "grep -r \"Invitation\" 202602041100-invitation-72h-expiry.md",
+      "read 202602041100-invitation-72h-expiry.md",
+      "read 202602041130-invitation-resend.md",
+      "read 202605021430-pending-invitations-count.md",
+      "read 202601121000-plan-seat-limits.md",
+      "read 202601201300-mutation-audit-log.md"
+    ],
+    "notes_read": [
+      "202601121000-plan-seat-limits.md",
+      "202601201300-mutation-audit-log.md",
+      "202602041100-invitation-72h-expiry.md",
+      "202602041130-invitation-resend.md",
+      "202605021430-pending-invitations-count.md"
+    ],
+    "gold_notes": [
+      "202601201330-api-error-codes.md",
+      "202602041100-invitation-72h-expiry.md",
+      "202605021430-pending-invitations-count.md"
+    ],
+    "gold_hits": [
+      "202602041100-invitation-72h-expiry.md",
+      "202605021430-pending-invitations-count.md"
+    ],
+    "gold_hit_rate": 0.667
+  },
+  "tokens": {
+    "prompt_tokens": 16231,
+    "completion_tokens": 1059
+  },
+  "duration_s": 86.1
+}
