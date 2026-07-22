@@ -366,6 +366,16 @@ porque o protocolo reenvia o histórico completo a cada ação (crescimento
 ~quadrático). Vale investigar formas de conter isso numa próxima rodada
 (resumir leituras antigas, ou separar exploração de geração).
 
+> ⚠️ **Pendente de validação**: este pico de custo/latência foi observado em
+> uma única tarefa, numa única rodada. Não sabemos ainda se é um padrão
+> sistemático (ex.: toda vez que o modelo usa perto do orçamento máximo de
+> ações) ou um outlier isolado desta execução específica. **Antes de agir
+> sobre isso** (mexer em `MAX_ACTIONS`, mudar o protocolo de histórico
+> etc.), rodar a v8 mais algumas vezes — como se fez na confirmação de 11
+> rodadas da v7 (§3.5) — para confirmar se o problema se repete e com que
+> frequência. Tarefa de investigação já sinalizada separadamente
+> (`task_445c5d96`).
+
 **Ressalva importante**: esta é uma rodada única — o t1 caiu para 1/6 na
 vault A apesar de gold-hit perfeito (a falha foi na geração de código, não
 no retrieval), o que é o tipo exato de ruído de amostragem que a confirmação

@@ -375,6 +375,15 @@ resends the full history on every action (~quadratic growth). Worth taming
 in a future round (summarizing old reads, or separating exploration from
 generation).
 
+> ⚠️ **Pending validation**: this cost/latency spike was observed in a single
+> task, in a single run. We don't yet know whether it's a systematic pattern
+> (e.g., it happens whenever the model uses close to the max action budget)
+> or a one-off outlier from this specific execution. **Before acting on it**
+> (touching `MAX_ACTIONS`, changing the history protocol, etc.), rerun v8 a
+> few more times — the same way the v7 11-round confirmation was done
+> (§3.5) — to confirm whether the problem recurs and how often. Investigation
+> already flagged as a separate task (`task_445c5d96`).
+
 **Important caveat**: this is a single run — vault A's t1 dropped to 1/6
 despite perfect gold-hit (the failure was in code generation, not
 retrieval), exactly the kind of sampling noise the v7 11-round confirmation
