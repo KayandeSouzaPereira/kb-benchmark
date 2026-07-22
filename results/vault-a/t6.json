@@ -57,17 +57,16 @@
       "read billing/payment-retry-and-webhooks.md",
       "read notifications/email-template-mapping.md",
       "read notifications/digest-mode-preferences.md",
-      "read domain/tenant.md",
-      "grep -r \"billing contact\" .",
-      "grep -r \"tenant.*contact\" .",
-      "read INDEX.md"
+      "read domain/tenants.md",
+      "grep -r \"payment.failed\" .",
+      "read webhooks/event-type-catalog.md"
     ],
     "notes_read": [
-      "INDEX.md",
       "billing/payment-retry-and-webhooks.md",
       "notifications/digest-mode-preferences.md",
       "notifications/email-template-mapping.md",
       "rate-limiting/outbound-webhook-rate-limit.md",
+      "webhooks/event-type-catalog.md",
       "webhooks/retry-backoff-policy.md",
       "webhooks/webhook-signing.md"
     ],
@@ -90,8 +89,8 @@
     "gold_hit_rate": 1.0
   },
   "tokens": {
-    "prompt_tokens": 38635,
-    "completion_tokens": 1242
+    "prompt_tokens": 34585,
+    "completion_tokens": 1370
   },
-  "duration_s": 115.8
+  "duration_s": 115.0
 }

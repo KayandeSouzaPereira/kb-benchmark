@@ -1,0 +1,95 @@
+{
+  "task": "t1",
+  "title": "Criar convite",
+  "case": "vault-b",
+  "model": "qwen3-coder:30b",
+  "score": 0.5,
+  "passed": 3,
+  "total": 6,
+  "compiled": true,
+  "repairs": 1,
+  "eval_mode": "devmcp",
+  "eval_times_s": [
+    120.3,
+    11.2
+  ],
+  "dev_boot_wait_s": 3.1,
+  "error": null,
+  "tests": [
+    {
+      "name": "conviteExpiraEm72Horas",
+      "passed": true
+    },
+    {
+      "name": "adminCriaConvitePersistido",
+      "passed": true
+    },
+    {
+      "name": "atorDeOutroTenantRecebe404",
+      "passed": true
+    },
+    {
+      "name": "memberNaoPodeConvidar",
+      "passed": false,
+      "failure": "1 expectation failed.\nExpected status code <403> but was <201>."
+    },
+    {
+      "name": "auditoriaRegistraUserInvited",
+      "passed": false,
+      "failure": "audit log deve conter USER_INVITED do ator u-admin ==> expected: <true> but was: <false>"
+    },
+    {
+      "name": "limiteDoPlanoFreeContaConvitesPendentes",
+      "passed": false,
+      "failure": "1 expectation failed.\nJSON path code doesn't match.\nExpected: PLAN_LIMIT_EXCEEDED\n  Actual: null"
+    }
+  ],
+  "files_written": [
+    "src/main/java/com/bench/api/InvitationResource.java"
+  ],
+  "retrieval": {
+    "actions": [
+      "ls .",
+      "read 202602041100-invitation-72h-expiry.md",
+      "read 202602041130-invitation-resend.md",
+      "read 202605021430-pending-invitations-count.md",
+      "read 202601121000-plan-seat-limits.md",
+      "read 202605190800-pricing-ideas.md",
+      "read 202601050900-user-domain-map.md",
+      "read 202602151100-tenant-isolation-404.md",
+      "read 202606020900-webhooks-map.md",
+      "read 202606021000-webhook-retry-backoff.md",
+      "read 202606021300-endpoint-disabling-on-failures.md",
+      "read 202603150900-soft-delete-30-days.md",
+      "read 202602041130-invitation-resend.md"
+    ],
+    "notes_read": [
+      "202601050900-user-domain-map.md",
+      "202601121000-plan-seat-limits.md",
+      "202602041100-invitation-72h-expiry.md",
+      "202602041130-invitation-resend.md",
+      "202602151100-tenant-isolation-404.md",
+      "202603150900-soft-delete-30-days.md",
+      "202605021430-pending-invitations-count.md",
+      "202605190800-pricing-ideas.md",
+      "202606020900-webhooks-map.md",
+      "202606021000-webhook-retry-backoff.md",
+      "202606021300-endpoint-disabling-on-failures.md"
+    ],
+    "gold_notes": [
+      "202601201330-api-error-codes.md",
+      "202602041100-invitation-72h-expiry.md",
+      "202605021430-pending-invitations-count.md"
+    ],
+    "gold_hits": [
+      "202602041100-invitation-72h-expiry.md",
+      "202605021430-pending-invitations-count.md"
+    ],
+    "gold_hit_rate": 0.667
+  },
+  "tokens": {
+    "prompt_tokens": 191206,
+    "completion_tokens": 25205
+  },
+  "duration_s": 1974.2
+}

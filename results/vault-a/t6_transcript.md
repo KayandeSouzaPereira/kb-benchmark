@@ -465,7 +465,7 @@ send immediately regardless of digest mode — see
 
 ## assistant
 
-ACTION: read domain/tenant.md
+ACTION: read domain/tenants.md
 ```
 
 ---
@@ -473,13 +473,13 @@ ACTION: read domain/tenant.md
 ## user
 
 RESULT (3 actions left):
-file not found: domain/tenant.md
+file not found: domain/tenants.md
 
 ---
 
 ## assistant
 
-ACTION: grep -r "billing contact" .
+ACTION: grep -r "payment.failed" .
 ```
 
 ---
@@ -487,13 +487,16 @@ ACTION: grep -r "billing contact" .
 ## user
 
 RESULT (2 actions left):
-billing/payment-retry-and-webhooks.md:18: 2. **Notify the tenant's billing contact.** Template and delivery timing are
+billing/payment-retry-and-webhooks.md:13: 1. **Record and send a webhook delivery** with event type `payment.failed`
+notifications/digest-mode-preferences.md:19: like `payment.failed` — see
+notifications/email-template-mapping.md:16: | `payment.failed` | `payment_failed_v2` |
+webhooks/event-type-catalog.md:11: `user.invited`, `user.deleted`, `payment.failed`, `payment.succeeded`,
 
 ---
 
 ## assistant
 
-ACTION: grep -r "tenant.*contact" .
+ACTION: read webhooks/event-type-catalog.md
 ```
 
 ---
@@ -501,64 +504,19 @@ ACTION: grep -r "tenant.*contact" .
 ## user
 
 RESULT (1 actions left):
-no results for: tenant.*contact
-
+---
+type: technical-convention
+system: webhooks
+status: active
+updated: 2026-04-01
 ---
 
-## assistant
+# Event type catalog
 
-ACTION: read INDEX.md
-```
-
----
-
-## user
-
-RESULT (0 actions left):
-# INDEX — Team knowledge base (SaaS user management)
-
-Read this file first. It maps what lives in each folder and when to consult it.
-
-| Folder | Contents | When to consult |
-|---|---|---|
-| `domain/` | Product business rules: roles and permissions, plan limits, invitations, user deletion, audit log, authentication | Before implementing ANY endpoint or screen that touches users, invitations or roles |
-| `billing/` | Subscriptions, payment failures, proration, refunds, invoicing, trials | Before implementing anything related to charges, plans, invoices or payment events |
-| `webhooks/` | Webhook signing, retry/backoff, event catalog, endpoint lifecycle | Before creating or delivering any `WebhookDelivery` |
-| `notifications/` | Email/in-app notification templates, digest mode, bounce handling | Before sending or queueing any notification |
-| `rate-limiting/` | API and webhook rate limits, API keys, abuse detection | Before creating a `WebhookDelivery` or any rate-limited resource |
-| `sso/` | SAML/SCIM identity federation, JIT provisioning, break-glass access | Only for SSO/identity-federation work — not needed for billing, webhooks or notifications |
-| `code-standards/` | Team technical conventions: API error format, frontend status badges | Whenever returning an HTTP error or rendering status in the UI |
-| `decisions/` | ADRs — architectural decisions with discarded alternatives | When a rule seems odd or you want to propose something different |
-| `product/` | Product material: plans and pricing | Commercial context; rarely needed for code |
-| `runbooks/` | Operational procedures (deploy etc.) | Operations, not development |
-
-**Cross-cutting events** (e.g. a payment failure that must trigger a webhook
-AND a notification AND respect a rate limit) touch multiple folders at once —
-each relevant note links to the others it depends on under "Related". Follow
-those links; do not assume one folder is self-contained for such flows.
-
-## Files in the core folders (domain, code-standards, decisions, product, runbooks)
-
-- `domain/roles-and-permissions.md` — OWNER/ADMIN/MEMBER hierarchy, who can do what, owner protections
-- `domain/plan-limits.md` — how many users each plan allows and what counts toward the limit
-- `domain/invitations.md` — invitation lifecycle: expiry, resend, acceptance
-- `domain/user-deletion.md` — soft-delete, retention, who can delete
-- `domain/audit-log.md` — what to audit and the mandatory AuditEntry format
-- `domain/authentication-and-lockout.md` — password policy and account lockout
-- `code-standards/api-error-format.md` — JSON error envelope + table of codes and HTTP statuses
-- `code-standards/frontend-status-badges.md` — CSS classes and pt-BR labels per user status
-- `decisions/adr-001-soft-delete-with-retention.md` — why there is never a hard delete
-- `decisions/adr-002-pending-invitations-count-toward-limit.md` — why a pending invite occupies a seat
-- `product/plans-and-pricing.md` — Free / Pro / Enterprise
-- `runbooks/production-deploy.md` — deploy pipeline
-
-## billing/, webhooks/, notifications/, rate-limiting/, sso/
-
-These folders grew fast and are **not exhaustively indexed here** — each has
-around 10 notes. `ls` the specific folder you need; every note's "Related"
-section links to the other notes it depends on, so once you find one
-relevant note in a folder you can usually navigate to the rest from there
-instead of reading the whole folder.
+Dot-separated, present tense on the resource, past tense on the action:
+`user.invited`, `user.deleted`, `payment.failed`, `payment.succeeded`,
+`subscription.cancelled`. Never reuse a retired event name — add a new one
+and deprecate the old.
 
 
 ---
@@ -594,34 +552,51 @@ public class BillingPaymentFailureResource {
     @Path("/payment-failures")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response create(
-            @PathParam("tenantId") String tenantId,
-            PaymentFailureRequest body,
-            @HeaderParam("X-Actor-Id") String actorId) {
-
+    public Response create(@PathParam("tenantId") String tenantId,
+                           PaymentFailureRequest body,
+                           @HeaderParam("X-Actor-Id") String actorId) {
         // Validate request
         if (body.invoiceId == null || body.amountCents <= 0) {
             return Response.status(422).build();
         }
 
+        // Get tenant
         Tenant tenant = store.tenants.get(tenantId);
         if (tenant == null) {
             return Response.status(404).build();
         }
 
-        // Check webhook rate limit
+        // Check webhook config exists for tenant
+        WebhookConfig webhookConfig = store.webhookConfigs.get(tenantId);
+        if (webhookConfig == null) {
+            // If no webhook config, we still create the delivery but with status FAILED
+            // This is a valid case - no webhook endpoint configured
+            WebhookDelivery delivery = new WebhookDelivery();
+            delivery.id = UUID.randomUUID().toString();
+            delivery.tenantId = tenantId;
+            delivery.eventType = "payment.failed";
+            delivery.status = WebhookDeliveryStatus.FAILED;
+            delivery.attemptCount = 0;
+            delivery.maxAttempts = 5;
+            delivery.createdAt = Instant.now();
+            
+            store.webhookDeliveries.put(delivery.id, delivery);
+            
+            return Response.status(201).entity(delivery).build();
+        }
+
+        // Check rate limit
         Instant windowStart = Instant.now().minus(60, ChronoUnit.MINUTES);
         long recentCount = store.countRecentWebhookDeliveries(tenantId, windowStart);
-
+        
         WebhookDeliveryStatus initialStatus = WebhookDeliveryStatus.PENDING;
         if (recentCount >= 10) {
             initialStatus = WebhookDeliveryStatus.DEFERRED;
         }
 
         // Create webhook delivery
-        String deliveryId = "webhook_" + UUID.randomUUID().toString();
         WebhookDelivery delivery = new WebhookDelivery();
-        delivery.id = deliveryId;
+        delivery.id = UUID.randomUUID().toString();
         delivery.tenantId = tenantId;
         delivery.eventType = "payment.failed";
         delivery.status = initialStatus;
@@ -629,33 +604,22 @@ public class BillingPaymentFailureResource {
         delivery.maxAttempts = 5;
         delivery.createdAt = Instant.now();
 
-        // Sign the webhook
-        String payload = "{\"event\":\"payment.failed\",\"invoiceId\":\"" + body.invoiceId +
-                "\",\"amountCents\":" + body.amountCents + ",\"timestamp\":\"" + delivery.createdAt.toString() + "\"}";
-        String signature = signPayload(payload, tenantId);
-        delivery.signature = signature;
+        // Sign the delivery
+        String payload = "{\"invoiceId\":\"" + body.invoiceId + "\",\"amountCents\":" + body.amountCents + "}";
+        delivery.signature = signPayload(payload, webhookConfig.secret);
 
-        // Store the delivery
-        store.webhookDeliveries.put(deliveryId, delivery);
+        store.webhookDeliveries.put(delivery.id, delivery);
 
-        // Notify billing contact
-        notifyBillingContact(tenant, body.invoiceId, body.amountCents);
+        // Send notification to billing contact
+        sendNotification(tenant, body.invoiceId, body.amountCents);
 
         return Response.status(201).entity(delivery).build();
     }
 
-    private String signPayload(String payload, String tenantId) {
-        WebhookConfig config = store.webhookConfigs.get(tenantId);
-        if (config == null || config.secret == null) {
-            // Return empty signature if no secret is configured
-            return "";
-        }
-
+    private String signPayload(String payload, String secret) {
         try {
             Mac mac = Mac.getInstance("HmacSHA256");
-            SecretKeySpec secretKey = new SecretKeySpec(
-                    config.secret.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
-            mac.init(secretKey);
+            mac.init(new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), "HmacSHA256"));
             byte[] raw = mac.doFinal(payload.getBytes(StandardCharsets.UTF_8));
             StringBuilder hex = new StringBuilder();
             for (byte b : raw) {
@@ -663,13 +627,12 @@ public class BillingPaymentFailureResource {
             }
             return hex.toString();
         } catch (Exception e) {
-            // In a real system, we might want to handle this more gracefully
-            return "";
+            throw new RuntimeException("Failed to sign payload", e);
         }
     }
 
-    private void notifyBillingContact(Tenant tenant, String invoiceId, int amountCents) {
-        // Find billing contact - typically the first owner with active status
+    private void sendNotification(Tenant tenant, String invoiceId, int amountCents) {
+        // Find billing contact - typically the owner
         User billingContact = null;
         for (User user : store.usersOfTenant(tenant.id)) {
             if (user.role == Role.OWNER && user.status == UserStatus.ACTIVE) {
@@ -678,10 +641,20 @@ public class BillingPaymentFailureResource {
             }
         }
 
+        // If no owner, try to find any active admin
         if (billingContact == null) {
-            // If no owner found, use the first active user
             for (User user : store.usersOfTenant(tenant.id)) {
-                if (user.status == UserStatus.ACTIVE) {
+                if (user.role == Role.ADMIN && user.status == UserStatus.ACTIVE) {
+                    billingContact = user;
+                    break;
+                }
+            }
+        }
+
+        // If no owner or admin, try any active member
+        if (billingContact == null) {
+            for (User user : store.usersOfTenant(tenant.id)) {
+                if (user.role == Role.MEMBER && user.status == UserStatus.ACTIVE) {
                     billingContact = user;
                     break;
                 }
@@ -689,14 +662,14 @@ public class BillingPaymentFailureResource {
         }
 
         if (billingContact == null) {
-            return; // No contact to notify
+            // No active contact found - no notification sent
+            return;
         }
 
-        String templateId = "payment_failed_v2";
         NotificationLog log = new NotificationLog();
-        log.id = "notif_" + UUID.randomUUID().toString();
+        log.id = UUID.randomUUID().toString();
         log.tenantId = tenant.id;
-        log.templateId = templateId;
+        log.templateId = "payment_failed_v2";
         log.createdAt = Instant.now();
 
         if (tenant.notificationDigestMode == NotificationDigestMode.DAILY_DIGEST) {

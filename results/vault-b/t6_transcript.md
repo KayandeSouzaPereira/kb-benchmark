@@ -354,25 +354,6 @@ Related: [[202606020930-webhook-signing]].
 
 ## assistant
 
-ACTION: read 202606021030-event-type-catalog.md
-```
-
----
-
-## user
-
-RESULT (8 actions left):
-# 202606021030 Event type catalog
-
-Dot-separated, resource present-tense + action past-tense: `user.invited`,
-`user.deleted`, `payment.failed`, `payment.succeeded`,
-`subscription.cancelled`. Never reuse a retired name.
-
-
----
-
-## assistant
-
 ACTION: read 202606030930-email-template-mapping.md
 ```
 
@@ -380,7 +361,7 @@ ACTION: read 202606030930-email-template-mapping.md
 
 ## user
 
-RESULT (7 actions left):
+RESULT (8 actions left):
 # 202606030930 Email template mapping
 
 Payment failure → **`templateId = "payment_failed_v2"`**. NOT
@@ -405,7 +386,7 @@ ACTION: read 202606031000-digest-mode-preferences.md
 
 ## user
 
-RESULT (6 actions left):
+RESULT (7 actions left):
 # 202606031000 Digest mode preferences
 
 Tenant has `notificationDigestMode`: `IMMEDIATE` (default) or
@@ -435,7 +416,7 @@ ACTION: read 202606040930-outbound-webhook-rate-limit.md
 
 ## user
 
-RESULT (5 actions left):
+RESULT (6 actions left):
 # 202606040930 Outbound webhook rate limit
 
 Max **10 webhook deliveries created per tenant in a rolling 60-minute
@@ -456,59 +437,19 @@ API, this one is flat 10/hour regardless of plan — don't mix them up).
 
 ## assistant
 
-ACTION: read 202606021100-endpoint-registration.md
+ACTION: read 202606021030-event-type-catalog.md
 ```
 
 ---
 
 ## user
 
-RESULT (4 actions left):
-# 202606021100 Webhook endpoint registration
+RESULT (5 actions left):
+# 202606021030 Event type catalog
 
-ADMIN+ only. URL must be HTTPS (HTTP rejected). One endpoint per tenant
-today, no per-event routing yet.
-
-
----
-
-## assistant
-
-ACTION: read 202606021300-endpoint-disabling-on-failures.md
-```
-
----
-
-## user
-
-RESULT (3 actions left):
-# 202606021300 Disabling endpoints after repeated failures
-
-3 consecutive `FAILED` deliveries (retries exhausted) → endpoint
-auto-disabled, in-app notification to admins. Re-enable requires explicit
-admin action.
-
-Related: [[202606021000-webhook-retry-backoff]].
-
-
----
-
-## assistant
-
-ACTION: read 202606031230-critical-vs-marketing.md
-```
-
----
-
-## user
-
-RESULT (2 actions left):
-# 202606031230 Critical vs marketing classification
-
-Critical: security alerts, password reset, payment failure, invitation.
-Marketing: product updates, newsletters, upsell. Only marketing respects the
-unsubscribe list; critical always sends (subject to digest mode, see
-[[202606031000-digest-mode-preferences]]).
+Dot-separated, resource present-tense + action past-tense: `user.invited`,
+`user.deleted`, `payment.failed`, `payment.succeeded`,
+`subscription.cancelled`. Never reuse a retired name.
 
 
 ---
@@ -522,7 +463,7 @@ ACTION: read 202604010900-api-and-conventions-map.md
 
 ## user
 
-RESULT (1 actions left):
+RESULT (4 actions left):
 # 202604010900 Map — API and team conventions
 
 Index note for the technical conventions we've settled on.
@@ -532,6 +473,77 @@ Index note for the technical conventions we've settled on.
 - Frontend status badges: [[202604111600-frontend-status-badges]]
 
 See also the domain map: [[202601050900-user-domain-map]].
+
+
+---
+
+## assistant
+
+ACTION: read 202601201330-api-error-codes.md
+```
+
+---
+
+## user
+
+RESULT (3 actions left):
+# 202601201330 API error codes
+
+Standard business-error envelope (`code` is a stable contract, `message` is
+free):
+
+```json
+{ "code": "STABLE_CODE", "message": "human text" }
+```
+
+Codes we've settled on:
+
+- 403 `FORBIDDEN_ROLE` — insufficient role ([[202601051030-tenant-roles]])
+- 403 `OWNER_PROTECTED` — admin touching an owner ([[202602101415-owner-protection]])
+- 409 `LAST_OWNER` — tenant would be left ownerless ([[202602101430-last-owner]])
+- 422 `PLAN_LIMIT_EXCEEDED` — seat limit ([[202605021430-pending-invitations-count]])
+- 422 `CANNOT_DELETE_SELF` — self-deletion ([[202603150930-who-can-delete-users]])
+- 422 `RESEND_LIMIT_REACHED` — 4th resend ([[202602041130-invitation-resend]])
+- 410 `INVITATION_EXPIRED` — accepting an expired invite ([[202602041100-invitation-72h-expiry]])
+- 404 `NOT_FOUND` — nonexistent OR actor from another tenant ([[202602151100-tenant-isolation-404]])
+
+No stacktraces in the body, ever.
+
+
+---
+
+## assistant
+
+ACTION: read 202606021200-delivery-log-retention.md
+```
+
+---
+
+## user
+
+RESULT (2 actions left):
+# 202606021200 Webhook delivery log retention
+
+30 days, then purged (including failed-attempt bodies). ENTERPRISE gets 90
+days.
+
+
+---
+
+## assistant
+
+ACTION: read 202606031200-dedup-window.md
+```
+
+---
+
+## user
+
+RESULT (1 actions left):
+# 202606031200 Notification dedup window
+
+Same template + recipient suppressed if already sent in the last 10 minutes
+— avoids dupes from retried event processing.
 
 
 ---
@@ -549,14 +561,11 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Map;
-import java.util.UUID;
-import java.util.Base64;
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
-import java.nio.charset.StandardCharsets;
+import java.util.*;
 
 @Path("/tenants/{tenantId}/billing")
 public class BillingResource {
@@ -572,101 +581,117 @@ public class BillingResource {
             @PathParam("tenantId") String tenantId,
             PaymentFailureRequest body,
             @HeaderParam("X-Actor-Id") String actorId) {
+        
+        // Validate request
+        if (body.invoiceId == null || body.amountCents <= 0) {
+            return Response.status(422)
+                    .entity(Map.of("code", "INVALID_REQUEST", "message", "Invalid invoiceId or amount"))
+                    .build();
+        }
 
-        // Find the tenant
         Tenant tenant = store.tenants.get(tenantId);
         if (tenant == null) {
-            return Response.status(404).build();
+            return Response.status(404)
+                    .entity(Map.of("code", "NOT_FOUND", "message", "Tenant not found"))
+                    .build();
         }
 
-        // Get webhook config for this tenant
-        WebhookConfig webhookConfig = store.webhookConfigs.get(tenantId);
-        if (webhookConfig == null) {
-            // If no webhook config, we still create the notification but don't send webhook
-            createNotification(tenant, body);
-            return Response.status(201).build();
-        }
+        // Check webhook rate limit
+        Instant windowStart = Instant.now().minus(60, ChronoUnit.MINUTES);
+        long recentDeliveries = store.countRecentWebhookDeliveries(tenantId, windowStart);
 
-        // Check rate limit
-        Instant oneHourAgo = Instant.now().minus(1, ChronoUnit.HOURS);
-        long recentCount = store.countRecentWebhookDeliveries(tenantId, oneHourAgo);
-
-        WebhookDeliveryStatus status = WebhookDeliveryStatus.PENDING;
-        if (recentCount >= 10) {
-            status = WebhookDeliveryStatus.DEFERRED;
-        }
+        boolean isOverLimit = recentDeliveries >= 10;
 
         // Create webhook delivery
-        String deliveryId = "webhook_" + UUID.randomUUID().toString();
         WebhookDelivery delivery = new WebhookDelivery();
-        delivery.id = deliveryId;
+        delivery.id = "webhook_" + UUID.randomUUID().toString();
         delivery.tenantId = tenantId;
         delivery.eventType = "payment.failed";
-        delivery.status = status;
+        delivery.status = isOverLimit ? WebhookDeliveryStatus.DEFERRED : WebhookDeliveryStatus.PENDING;
         delivery.attemptCount = 0;
         delivery.maxAttempts = 5;
         delivery.createdAt = Instant.now();
 
+        // Prepare payload
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("invoiceId", body.invoiceId);
+        payload.put("amountCents", body.amountCents);
+        payload.put("tenantId", tenantId);
+        payload.put("timestamp", delivery.createdAt.toString());
+
+        String payloadJson = payload.toString(); // Simplified for this example
+
         // Sign the payload
-        String payload = "{\n" +
-                "  \"invoiceId\": \"" + body.invoiceId + "\",\n" +
-                "  \"amountCents\": " + body.amountCents + "\n" +
-                "}";
-        String signature = signPayload(payload, webhookConfig.secret);
-        delivery.signature = signature;
+        WebhookConfig config = store.webhookConfigs.get(tenantId);
+        if (config != null && config.secret != null) {
+            try {
+                delivery.signature = calculateHmacSha256(payloadJson, config.secret);
+            } catch (Exception e) {
+                return Response.status(500)
+                        .entity(Map.of("code", "SIGNING_ERROR", "message", "Failed to sign webhook"))
+                        .build();
+            }
+        }
 
         // Store the delivery
-        store.webhookDeliveries.put(deliveryId, delivery);
+        store.webhookDeliveries.put(delivery.id, delivery);
 
-        // Create notification
-        createNotification(tenant, body);
+        // Notify billing contact
+        notifyBillingContact(tenant, body.invoiceId, body.amountCents);
 
-        // Audit log entry
-        AuditEntry audit = new AuditEntry();
-        audit.id = "audit_" + UUID.randomUUID().toString();
-        audit.tenantId = tenantId;
-        audit.actorId = actorId;
-        audit.action = "payment_failure_created";
-        audit.targetId = deliveryId;
-        audit.timestamp = Instant.now();
-        audit.details = "Payment failure for invoice " + body.invoiceId;
-        store.auditLog.add(audit);
-
-        // Return the created delivery
-        return Response.status(201).entity(delivery).build();
+        return Response.status(201)
+                .entity(delivery)
+                .build();
     }
 
-    private void createNotification(Tenant tenant, PaymentFailureRequest body) {
-        String templateId = "payment_failed_v2";
-        NotificationLog log = new NotificationLog();
-        log.id = "notif_" + UUID.randomUUID().toString();
-        log.tenantId = tenant.id;
-        log.templateId = templateId;
-        log.createdAt = Instant.now();
-
-        if (tenant.notificationDigestMode == NotificationDigestMode.DAILY_DIGEST) {
-            log.status = NotificationStatus.QUEUED;
-        } else {
-            log.status = NotificationStatus.SENT;
-        }
-
-        store.notificationLogs.put(log.id, log);
-    }
-
-    private String signPayload(String payload, String secret) {
-        try {
-            Mac mac = Mac.getInstance("HmacSHA256");
-            SecretKeySpec secretKeySpec = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
-            mac.init(secretKeySpec);
-            byte[] raw = mac.doFinal(payload.getBytes(StandardCharsets.UTF_8));
-            StringBuilder hex = new StringBuilder();
-            for (byte b : raw) {
-                hex.append(String.format("%02x", b));
+    private void notifyBillingContact(Tenant tenant, String invoiceId, int amountCents) {
+        // Find billing contact (owner or admin user)
+        List<User> users = store.usersOfTenant(tenant.id);
+        User billingContact = null;
+        
+        for (User user : users) {
+            if (user.status == UserStatus.ACTIVE && 
+                (user.role == Role.OWNER || user.role == Role.ADMIN)) {
+                billingContact = user;
+                break;
             }
-            return hex.toString();
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to sign payload", e);
         }
+
+        if (billingContact == null) {
+            // No active owner or admin found, skip notification
+            return;
+        }
+
+        // Check for duplicate within 10 minutes
+        Instant windowStart = Instant.now().minus(10, ChronoUnit.MINUTES);
+        for (NotificationLog log : store.notificationLogs.values()) {
+            if (log.tenantId.equals(tenant.id) && 
+                log.templateId.equals("payment_failed_v2") &&
+                log.createdAt.isAfter(windowStart)) {
+                return; // Duplicate notification within window
+            }
+        }
+
+        NotificationLog notification = new NotificationLog();
+        notification.id = "notif_" + UUID.randomUUID().toString();
+        notification.tenantId = tenant.id;
+        notification.templateId = "payment_failed_v2";
+        notification.status = tenant.notificationDigestMode == NotificationDigestMode.DAILY_DIGEST ?
+                NotificationStatus.QUEUED : NotificationStatus.SENT;
+        notification.createdAt = Instant.now();
+
+        store.notificationLogs.put(notification.id, notification);
+    }
+
+    private String calculateHmacSha256(String payload, String secret) throws Exception {
+        javax.crypto.Mac mac = javax.crypto.Mac.getInstance("HmacSHA256");
+        mac.init(new javax.crypto.spec.SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), "HmacSHA256"));
+        byte[] raw = mac.doFinal(payload.getBytes(StandardCharsets.UTF_8));
+        StringBuilder hex = new StringBuilder();
+        for (byte b : raw) {
+            hex.append(String.format("%02x", b));
+        }
+        return hex.toString();
     }
 
     public static class PaymentFailureRequest {

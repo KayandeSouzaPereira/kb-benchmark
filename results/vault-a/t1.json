@@ -1,0 +1,94 @@
+{
+  "task": "t1",
+  "title": "Criar convite",
+  "case": "vault-a",
+  "model": "qwen3-coder:30b",
+  "score": 0.167,
+  "passed": 1,
+  "total": 6,
+  "compiled": true,
+  "repairs": 0,
+  "eval_mode": "devmcp",
+  "eval_times_s": [
+    9.5
+  ],
+  "dev_boot_wait_s": 1.5,
+  "error": null,
+  "tests": [
+    {
+      "name": "atorDeOutroTenantRecebe404",
+      "passed": true
+    },
+    {
+      "name": "memberNaoPodeConvidar",
+      "passed": false,
+      "failure": "1 expectation failed.\nExpected status code <403> but was <404>."
+    },
+    {
+      "name": "conviteExpiraEm72Horas",
+      "passed": false,
+      "failure": "1 expectation failed.\nExpected status code <201> but was <404>."
+    },
+    {
+      "name": "adminCriaConvitePersistido",
+      "passed": false,
+      "failure": "1 expectation failed.\nExpected status code <201> but was <404>."
+    },
+    {
+      "name": "auditoriaRegistraUserInvited",
+      "passed": false,
+      "failure": "1 expectation failed.\nExpected status code <201> but was <404>."
+    },
+    {
+      "name": "limiteDoPlanoFreeContaConvitesPendentes",
+      "passed": false,
+      "failure": "1 expectation failed.\nExpected status code <422> but was <404>."
+    }
+  ],
+  "files_written": [
+    "com/bench/api/InvitationResource.java"
+  ],
+  "retrieval": {
+    "actions": [
+      "ls .",
+      "read INDEX.md",
+      "read domain/invitations.md",
+      "read domain/roles-and-permissions.md",
+      "read domain/plan-limits.md",
+      "read domain/audit-log.md",
+      "read code-standards/api-error-format.md",
+      "grep -r \"INVITATION\" domain/",
+      "grep -r \"USER_INVITED\\|INVITATION_RESENT\" domain/",
+      "read product/plans-and-pricing.md",
+      "ls com/bench/api/",
+      "ls src/main/java/com/bench/",
+      "ls src/main/java/",
+      "ls src/"
+    ],
+    "notes_read": [
+      "INDEX.md",
+      "code-standards/api-error-format.md",
+      "domain/audit-log.md",
+      "domain/invitations.md",
+      "domain/plan-limits.md",
+      "domain/roles-and-permissions.md",
+      "product/plans-and-pricing.md"
+    ],
+    "gold_notes": [
+      "code-standards/api-error-format.md",
+      "domain/invitations.md",
+      "domain/plan-limits.md"
+    ],
+    "gold_hits": [
+      "code-standards/api-error-format.md",
+      "domain/invitations.md",
+      "domain/plan-limits.md"
+    ],
+    "gold_hit_rate": 1.0
+  },
+  "tokens": {
+    "prompt_tokens": 51912,
+    "completion_tokens": 1029
+  },
+  "duration_s": 99.3
+}

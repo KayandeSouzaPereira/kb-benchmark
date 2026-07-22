@@ -10,28 +10,23 @@
   "repairs": 0,
   "eval_mode": "devmcp",
   "eval_times_s": [
-    10.7
+    10.6
   ],
   "dev_boot_wait_s": 2.6,
   "error": null,
   "tests": [
     {
-      "name": "notImpactedByDeliveriesOutsideRollingWindow",
+      "name": "deferredWhenTenantOverRateLimit",
       "passed": true
     },
     {
-      "name": "setsMaxAttemptsAndPendingStatusWhenUnderLimit",
+      "name": "notImpactedByDeliveriesOutsideRollingWindow",
       "passed": true
     },
     {
       "name": "createsSignedWebhookDelivery",
       "passed": false,
-      "failure": "expected: <payment.failed> but was: <billing.payment_failure>"
-    },
-    {
-      "name": "deferredWhenTenantOverRateLimit",
-      "passed": false,
-      "failure": "tenant already has 10 deliveries in the last 60 minutes; new one must be DEFERRED ==> expected: <DEFERRED> but was: <PENDING>"
+      "failure": "expected: <payment.failed> but was: <payment_failure>"
     },
     {
       "name": "sendsImmediateNotificationWithCorrectTemplateByDefault",
@@ -42,6 +37,11 @@
       "name": "queuesNotificationWhenTenantPrefersDailyDigest",
       "passed": false,
       "failure": "exactly one new NotificationLog should be created, found: 0 ==> expected: <1> but was: <0>"
+    },
+    {
+      "name": "setsMaxAttemptsAndPendingStatusWhenUnderLimit",
+      "passed": false,
+      "failure": "maxAttempts must follow the team's retry policy ==> expected: <5> but was: <3>"
     }
   ],
   "files_written": [
@@ -56,7 +56,7 @@
   },
   "tokens": {
     "prompt_tokens": 1339,
-    "completion_tokens": 1329
+    "completion_tokens": 1437
   },
-  "duration_s": 123.6
+  "duration_s": 108.3
 }

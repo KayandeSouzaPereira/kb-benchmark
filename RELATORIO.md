@@ -288,9 +288,90 @@ nem abandonar a hierarquia de pastas). O Zettelkasten puro (B) permanece
 uma escolha defensável apenas num cenário específico que este benchmark
 **não testou**: uma KB grande o suficiente para que um índice mantido à mão
 deixe de ser prático e a navegação por links vire a única forma viável de
-achar a regra certa. Esse experimento (KB muito maior, com uma tarefa cuja
-regra exige sintetizar notas espalhadas por várias subáreas do domínio) está
-em desenho como próxima rodada do benchmark.
+achar a regra certa. Esse experimento foi construído e rodado — ver §4.5.
+
+## 4.5. v8 — KB estendida (~65 notas) e tarefa multi-hop
+
+**Desenho**: as duas vaults foram estendidas in-place de ~15 para ~63–73
+notas cada, com 5 subdomínios novos (`billing/`, `webhooks/`,
+`notifications/`, `rate-limiting/`, `sso/` — este último é ruído puro,
+nenhuma tarefa usa notas de lá). Nova tarefa **t6**: um endpoint interno de
+falha de pagamento cuja implementação correta exige sintetizar **6 notas-ouro
+espalhadas em 4 subdomínios** (assinatura HMAC-SHA256 do webhook, política de
+retry, rate limit de 10 entregas/60min com janela rolante, template de
+notificação, modo de digest do tenant) — nenhuma delas isolada basta.
+`MAX_ACTIONS` subiu de 8 para 14 para dar orçamento de exploração compatível
+com o tamanho novo da KB.
+
+No caminho, dois bugs reais do harness foram encontrados e corrigidos durante
+o sanity check (não eram achados de comportamento do modelo): as mensagens de
+erro dos tools `ls/grep/read` ainda estavam em português (resíduo esquecido
+da tradução da v7 — contaminava um harness que devia ser 100% inglês), e o
+`grep` não tolerava sintaxe realista tipo `grep -r "termo" .` (o parser
+tratava tudo, incluindo as flags, como termo literal, retornando sempre zero
+resultados). Antes do fix, a vault-a fez 1/6 no t6 (queimou o orçamento
+inteiro adivinhando nomes de arquivo errados); depois do fix, subiu pra 4/6
+lendo as 6 notas certas.
+
+### Resultado (rodada única, qwen3-coder:30b)
+
+| Tarefa | A — Vault estruturado | B — Zettelkasten | C — Sem KB |
+|---|---|---|---|
+| t1 | 1/6 | 3/6 | 1/6 |
+| t2 | **7/7** | **7/7** | 2/7 |
+| t3 | **5/5** | **5/5** | 0/5 |
+| t4 | **6/6** | **6/6** | 3/6 |
+| t5 | **7/7** | **7/7** | 2/7 |
+| t6 (novo, multi-hop) | 4/6 | 4/6 | 2/6 |
+| **Total** | **30/37 (81%)** | **32/37 (86%)** | **10/37 (27%)** |
+
+| Métrica | A | B | C |
+|---|---|---|---|
+| Notas lidas (média) | 5,83 | 9,83 | 0 |
+| **Acerto de notas-ouro** | **1,00** | **0,94** | — |
+| Tokens de prompt (média) | 33.627 | 72.628 | 1.023 |
+| Duração por tarefa (média) | 83 s | 407 s | 77 s |
+
+### O que isso responde sobre a hipótese do KB gigante
+
+**A resposta direta à pergunta que motivou este experimento — "o Zettelkasten
+ganha quando o índice manual não escala mais?" — é não, pelo menos não em
+~65 notas com este modelo.** No t6, a tarefa desenhada especificamente para
+estressar navegação multi-hop numa KB grande, **as duas condições acertaram
+100% e 94% de gold-hit e empataram exatamente em 4/6** — inclusive errando as
+duas MESMAS duas verificações (`sendsImmediateNotificationWithCorrectTemplateByDefault`,
+`queuesNotificationWhenTenantPrefersDailyDigest`). Investigando: os dois casos
+leram as 6 notas-ouro corretamente mas **nenhum dos dois criou o
+`NotificationLog`** — não é lacuna de conhecimento, é o modelo perdendo o 3º
+requisito da tarefa (notificar) depois de implementar os dois primeiros
+(assinar o webhook, aplicar o rate limit). Falha de execução idêntica nos
+dois casos, não de organização de KB.
+
+Mais: o `INDEX.md` do vault A **continuou funcionando bem em 65 notas** —
+gold-hit de 1,00, o melhor de toda a série de rodadas. A previsão de que um
+índice mantido à mão "para de escalar" não se confirmou nesta escala; talvez
+precise de uma KB bem maior (200+ notas) para o efeito aparecer, ou talvez
+simplesmente não apareça com um `INDEX.md` bem escrito e seções "Related"
+por nota.
+
+O padrão de custo se manteve e ficou mais extremo: B leu quase o dobro de
+notas (9,83 vs 5,83) e gastou **mais que o dobro de tokens** (72.628 vs
+33.627) para uma acurácia estatisticamente indistinguível da de A. Em um
+caso (vault-b, t1) o histórico acumulado da conversa chegou a **191 mil
+tokens cumulativos** ao longo de 13 ações + 1 reparo, e a tarefa levou 33
+minutos — 15–20× mais que o normal. Isso é efeito colateral direto de ter
+subido `MAX_ACTIONS`: mais orçamento de exploração ajuda a achar a nota
+certa, mas se o modelo usa o orçamento inteiro, o custo de latência dispara
+porque o protocolo reenvia o histórico completo a cada ação (crescimento
+~quadrático). Vale investigar formas de conter isso numa próxima rodada
+(resumir leituras antigas, ou separar exploração de geração).
+
+**Ressalva importante**: esta é uma rodada única — o t1 caiu para 1/6 na
+vault A apesar de gold-hit perfeito (a falha foi na geração de código, não
+no retrieval), o que é o tipo exato de ruído de amostragem que a confirmação
+de 11 rodadas da v7 mostrou ser normal para este modelo. Não dá para
+promover "A ≈ B mesmo em KB grande" a conclusão estatística sem repetir a
+v8 múltiplas vezes — fica como próximo passo natural.
 
 ## 5. Respostas às perguntas originais
 
@@ -299,8 +380,12 @@ em desenho como próxima rodada do benchmark.
   (workspace/KB/toolchain por condição). Com 8 GB de VRAM não se roda 3 instâncias
   do modelo; compartilhar o modelo do host é também o desenho mais justo
   cientificamente.
-- **"Zettelkasten ou por tema?"** Para agentes, empate em qualidade final nesta
-  classe de modelo; escolha pelo custo (A) ou pelo recall (B) — ou o híbrido acima.
+- **"Zettelkasten ou por tema?"** Com 11 rodadas confirmadas (§3.5), por tema
+  (A) vence com folga e o dobro da consistência. Testamos também a hipótese
+  de que o Zettelkasten viraria o jogo numa KB grande demais para um índice
+  manual (§4.5): não confirmou, pelo menos em ~65 notas — A e B empataram
+  exatamente na tarefa multi-hop, com A gastando menos da metade dos tokens.
+  Recomendação: use por tema (A) como padrão.
 
 ## 6. Achados de engenharia no caminho
 

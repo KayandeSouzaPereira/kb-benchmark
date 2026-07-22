@@ -297,9 +297,90 @@ abandoning the folder hierarchy). Pure Zettelkasten (B) remains a defensible
 choice only in a specific scenario this benchmark **did not test**: a KB
 large enough that a hand-maintained index stops being practical and
 link-following becomes the only viable way to find the right rule. That
-experiment (a much larger KB, with a task whose rule requires synthesizing
-notes scattered across several domain sub-areas) is being designed as the
-benchmark's next round.
+experiment was built and run — see §4.5.
+
+## 4.5. v8 — Extended KB (~65 notes) and a multi-hop task
+
+**Design**: both vaults were extended in place from ~15 to ~63–73 notes
+each, with 5 new sub-areas (`billing/`, `webhooks/`, `notifications/`,
+`rate-limiting/`, `sso/` — the last one is pure noise, no task uses notes
+from there). New task **t6**: an internal payment-failure endpoint whose
+correct implementation requires synthesizing **6 gold notes spread across 4
+sub-areas** (HMAC-SHA256 webhook signing, retry policy, a 10-delivery/60-min
+rolling-window rate limit, notification template, tenant digest mode) — no
+single one is sufficient on its own. `MAX_ACTIONS` went from 8 to 14 to give
+an exploration budget matching the new KB size.
+
+Along the way, two real harness bugs were found and fixed during sanity
+testing (not model-behavior findings): the `ls/grep/read` tool error
+messages were still in Portuguese (a leftover from before the v7 English
+translation — contaminating a harness that was supposed to be 100% English),
+and `grep` couldn't parse realistic invocations like `grep -r "term" .` (the
+parser treated everything, flags included, as the literal search term,
+always returning zero results). Before the fix, vault-a scored 1/6 on t6
+(it burned its whole budget guessing wrong file names); after the fix, it
+rose to 4/6, correctly reading all 6 gold notes.
+
+### Result (single run, qwen3-coder:30b)
+
+| Task | A — Structured vault | B — Zettelkasten | C — No KB |
+|---|---|---|---|
+| t1 | 1/6 | 3/6 | 1/6 |
+| t2 | **7/7** | **7/7** | 2/7 |
+| t3 | **5/5** | **5/5** | 0/5 |
+| t4 | **6/6** | **6/6** | 3/6 |
+| t5 | **7/7** | **7/7** | 2/7 |
+| t6 (new, multi-hop) | 4/6 | 4/6 | 2/6 |
+| **Total** | **30/37 (81%)** | **32/37 (86%)** | **10/37 (27%)** |
+
+| Metric | A | B | C |
+|---|---|---|---|
+| Notes read (avg) | 5.83 | 9.83 | 0 |
+| **Gold-note hit rate** | **1.00** | **0.94** | — |
+| Prompt tokens (avg) | 33,627 | 72,628 | 1,023 |
+| Duration per task (avg) | 83 s | 407 s | 77 s |
+
+### What this says about the giant-KB hypothesis
+
+**The direct answer to the question that motivated this experiment —
+"does the Zettelkasten win once a hand-maintained index stops scaling?" —
+is no, at least not at ~65 notes with this model.** On t6, the task
+purpose-built to stress multi-hop navigation in a large KB, **both
+conditions hit 100% and 94% gold-hit and tied exactly at 4/6** — including
+failing the exact same two checks
+(`sendsImmediateNotificationWithCorrectTemplateByDefault`,
+`queuesNotificationWhenTenantPrefersDailyDigest`). Digging in: both cases
+read all 6 gold notes correctly but **neither created the
+`NotificationLog`** — not a knowledge gap, but the model dropping the task's
+3rd requirement (notify) after implementing the first two (sign the
+webhook, apply the rate limit). An identical execution failure in both
+conditions, not a KB-organization issue.
+
+Further: vault A's `INDEX.md` **kept working well at 65 notes** —
+gold-hit of 1.00, the best of the entire series. The prediction that a
+hand-maintained index "stops scaling" did not hold at this size; it may
+take a much larger KB (200+ notes) for the effect to show, or it may simply
+not show up at all with a well-written `INDEX.md` plus a "Related" section
+per note.
+
+The cost pattern held and got more extreme: B read almost twice as many
+notes (9.83 vs 5.83) and spent **more than double the tokens** (72,628 vs
+33,627) for accuracy statistically indistinguishable from A's. In one case
+(vault-b, t1) the accumulated conversation history reached **191,000
+cumulative tokens** across 13 actions + 1 repair, and the task took 33
+minutes — 15–20× normal. This is a direct side effect of raising
+`MAX_ACTIONS`: more exploration budget helps find the right note, but if the
+model uses the whole budget, latency cost explodes because the protocol
+resends the full history on every action (~quadratic growth). Worth taming
+in a future round (summarizing old reads, or separating exploration from
+generation).
+
+**Important caveat**: this is a single run — vault A's t1 dropped to 1/6
+despite perfect gold-hit (the failure was in code generation, not
+retrieval), exactly the kind of sampling noise the v7 11-round confirmation
+showed to be normal for this model. "A ≈ B even at large KB scale" cannot be
+promoted to a statistical conclusion without repeating v8 multiple times —
+a natural next step.
 
 ## 5. Answers to the original questions
 
@@ -308,11 +389,12 @@ benchmark's next round.
   clients (workspace/KB/toolchain per condition). With 8 GB of VRAM you
   can't run 3 model instances; sharing the host's model is also the more
   scientifically fair design.
-- **"Zettelkasten or by-topic?"** For agents in this model class, the
-  original single-round read was a tie; the 11-round confirmation (§3.5)
-  shows the structured (by-topic-with-index) vault wins on both score and
-  consistency, though the Zettelkasten's link-following recall remains a
-  real strength worth borrowing — hence the hybrid recommendation above.
+- **"Zettelkasten or by-topic?"** With 11 confirmed rounds (§3.5), by-topic
+  (A) wins comfortably and twice as consistently. We also tested whether the
+  Zettelkasten would turn the tables once the KB gets too large for a
+  hand-maintained index (§4.5): it didn't, at least at ~65 notes — A and B
+  tied exactly on the multi-hop task, with A spending less than half the
+  tokens. Recommendation: use by-topic (A) as the default.
 
 ## 6. Engineering findings along the way
 

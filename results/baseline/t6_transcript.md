@@ -145,22 +145,15 @@ Known API traps:
 
 # Implementation Plan
 
-I'll implement the internal endpoint for handling subscription payment failures. Based on the requirements, I need to:
+I'll implement the subscription payment failure endpoint according to the requirements. Let me break down what needs to be done:
 
 1. Create a REST endpoint at `POST /tenants/{tenantId}/billing/payment-failures`
-2. Process payment failure events by:
-   - Creating and signing a WebhookDelivery
-   - Respecting webhook delivery rate limits
-   - Notifying the tenant's billing contact via appropriate channel
+2. Handle the request body with invoiceId and amountCents
+3. Create a WebhookDelivery for the tenant
+4. Check webhook delivery rate limits
+5. Send notification to billing contact
 
-Let me analyze the requirements:
-- The endpoint should be internal-only (no permission checks)
-- Need to create a WebhookDelivery with proper signing
-- Must respect rate limiting for webhook deliveries
-- Must notify billing contacts according to their notification preferences
-- Use existing models and store classes
-
-Here's my implementation:
+Let me implement this step by step:
 
 FILE: src/main/java/com/bench/api/BillingResource.java
 ```java
@@ -172,11 +165,15 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-
-import java.nio.charset.StandardCharsets;
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.time.Duration;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.List;
+import java.util.UUID;
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
+import java.nio.charset.StandardCharsets;
 
 @Path("/tenants/{tenantId}/billing")
 public class BillingResource {
@@ -192,70 +189,91 @@ public class BillingResource {
             @PathParam("tenantId") String tenantId,
             PaymentFailureRequest body,
             @HeaderParam("X-Actor-Id") String actorId) {
+        
+        // Validate request
+        if (body.invoiceId == null || body.amountCents <= 0) {
+            return Response.status(422).build();
+        }
 
-        // Validate tenant exists
         Tenant tenant = store.tenants.get(tenantId);
         if (tenant == null) {
             return Response.status(404).build();
         }
 
-        // Create webhook delivery
-        WebhookDelivery delivery = createWebhookDelivery(tenantId, body);
-
-        // Check rate limit for webhook deliveries
-        Instant since = Instant.now().minus(1, ChronoUnit.HOURS);
-        long recentDeliveries = store.countRecentWebhookDeliveries(tenantId, since);
+        // Check rate limiting - 10 deliveries per hour
+        Instant oneHourAgo = Instant.now().minus(Duration.ofHours(1));
+        long recentDeliveries = store.countRecentWebhookDeliveries(tenantId, oneHourAgo);
         
-        // Rate limit threshold - assuming 100 deliveries per hour as a common limit
-        if (recentDeliveries >= 100) {
-            // Mark as deferred instead of pending when over rate limit
-            delivery.status = WebhookDeliveryStatus.DEFERRED;
-        } else {
-            delivery.status = WebhookDeliveryStatus.PENDING;
+        if (recentDeliveries >= 10) {
+            // Create a deferred delivery instead of a normal one
+            WebhookDelivery delivery = createDeferredDelivery(tenantId, "payment_failure", body);
+            return Response.status(201).entity(delivery).build();
         }
 
-        // Add to store
-        store.webhookDeliveries.put(delivery.id, delivery);
-
+        // Create and sign webhook delivery
+        WebhookDelivery delivery = createSignedWebhookDelivery(tenantId, "payment_failure", body);
+        
         // Send notification to billing contact
-        sendNotification(tenantId, body);
+        sendNotificationToBillingContact(tenant, body);
 
         return Response.status(201).entity(delivery).build();
     }
 
-    private WebhookDelivery createWebhookDelivery(String tenantId, PaymentFailureRequest body) {
-        String id = UUID.randomUUID().toString();
-        Instant now = Instant.now();
-        
-        // Create webhook delivery
-        WebhookDelivery delivery = new WebhookDelivery();
-        delivery.id = id;
-        delivery.tenantId = tenantId;
-        delivery.eventType = "billing.payment_failure";
-        delivery.status = WebhookDeliveryStatus.PENDING;
-        delivery.attemptCount = 0;
-        delivery.maxAttempts = 5; // Assuming standard retry count
-        delivery.createdAt = now;
-
-        // Sign the webhook delivery
-        String payload = "{\"id\":\"" + id + "\",\"tenantId\":\"" + tenantId + 
-                        "\",\"eventType\":\"billing.payment_failure\",\"invoiceId\":\"" + body.invoiceId + 
-                        "\",\"amountCents\":" + body.amountCents + ",\"createdAt\":\"" + now.toString() + "\"}";
-        
-        // Get webhook config for signing
+    private WebhookDelivery createSignedWebhookDelivery(String tenantId, String eventType, PaymentFailureRequest body) {
+        // Get webhook config for tenant
         WebhookConfig config = store.webhookConfigs.get(tenantId);
-        if (config != null && config.secret != null) {
-            String signature = signPayload(payload, config.secret);
-            delivery.signature = signature;
+        if (config == null) {
+            // If no webhook config, still create delivery but with no signature
+            return createBasicWebhookDelivery(tenantId, eventType, body, null);
         }
 
+        // Create payload
+        String payload = "{\"invoiceId\":\"" + body.invoiceId + "\",\"amountCents\":" + body.amountCents + "}";
+        
+        // Sign payload
+        String signature = signPayload(payload, config.secret);
+        
+        return createBasicWebhookDelivery(tenantId, eventType, body, signature);
+    }
+
+    private WebhookDelivery createDeferredDelivery(String tenantId, String eventType, PaymentFailureRequest body) {
+        // Create a delivery with DEFERRED status instead of PENDING
+        WebhookDelivery delivery = new WebhookDelivery();
+        delivery.id = "webhook_" + UUID.randomUUID().toString();
+        delivery.tenantId = tenantId;
+        delivery.eventType = eventType;
+        delivery.status = WebhookDeliveryStatus.DEFERRED;
+        delivery.attemptCount = 0;
+        delivery.maxAttempts = 3;
+        delivery.createdAt = Instant.now();
+        
+        // Store the delivery
+        store.webhookDeliveries.put(delivery.id, delivery);
+        
+        return delivery;
+    }
+
+    private WebhookDelivery createBasicWebhookDelivery(String tenantId, String eventType, PaymentFailureRequest body, String signature) {
+        WebhookDelivery delivery = new WebhookDelivery();
+        delivery.id = "webhook_" + UUID.randomUUID().toString();
+        delivery.tenantId = tenantId;
+        delivery.eventType = eventType;
+        delivery.signature = signature;
+        delivery.status = WebhookDeliveryStatus.PENDING;
+        delivery.attemptCount = 0;
+        delivery.maxAttempts = 3;
+        delivery.createdAt = Instant.now();
+        
+        // Store the delivery
+        store.webhookDeliveries.put(delivery.id, delivery);
+        
         return delivery;
     }
 
     private String signPayload(String payload, String secret) {
         try {
-            javax.crypto.Mac mac = javax.crypto.Mac.getInstance("HmacSHA256");
-            mac.init(new javax.crypto.spec.SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), "HmacSHA256"));
+            Mac mac = Mac.getInstance("HmacSHA256");
+            mac.init(new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), "HmacSHA256"));
             byte[] raw = mac.doFinal(payload.getBytes(StandardCharsets.UTF_8));
             StringBuilder hex = new StringBuilder();
             for (byte b : raw) {
@@ -263,14 +281,14 @@ public class BillingResource {
             }
             return hex.toString();
         } catch (Exception e) {
-            // In a real implementation, we'd want to handle this more gracefully
+            // In a real system, we'd handle this more gracefully
             throw new RuntimeException("Failed to sign payload", e);
         }
     }
 
-    private void sendNotification(String tenantId, PaymentFailureRequest body) {
-        // Find billing contact - typically the owner or admin user
-        List<User> users = store.usersOfTenant(tenantId);
+    private void sendNotificationToBillingContact(Tenant tenant, PaymentFailureRequest body) {
+        // Find billing contact (owner or admin)
+        List<User> users = store.usersOfTenant(tenant.id);
         User billingContact = null;
         
         for (User user : users) {
@@ -281,34 +299,25 @@ public class BillingResource {
             }
         }
         
-        // If no owner/admin found, use any active user
         if (billingContact == null) {
-            for (User user : users) {
-                if (user.status == UserStatus.ACTIVE) {
-                    billingContact = user;
-                    break;
-                }
-            }
-        }
-        
-        if (billingContact == null) {
-            // No valid user found, cannot send notification
+            // No suitable contact found, skip notification
             return;
         }
 
-        // Get tenant for notification preferences
-        Tenant tenant = store.tenants.get(tenantId);
-        if (tenant == null) {
-            return;
+        // Determine notification template based on tenant's plan
+        String templateId;
+        if (tenant.plan == Plan.FREE) {
+            templateId = "payment_failure_free";
+        } else if (tenant.plan == Plan.PRO) {
+            templateId = "payment_failure_pro";
+        } else {
+            templateId = "payment_failure_enterprise";
         }
 
-        // Determine notification template and timing based on tenant settings
-        String templateId = "billing_payment_failure"; // Assuming this is the template ID
-        
-        // Create notification log entry
+        // Create notification log
         NotificationLog log = new NotificationLog();
-        log.id = UUID.randomUUID().toString();
-        log.tenantId = tenantId;
+        log.id = "notification_" + UUID.randomUUID().toString();
+        log.tenantId = tenant.id;
         log.templateId = templateId;
         log.status = NotificationStatus.QUEUED;
         log.createdAt = Instant.now();
