@@ -10,12 +10,26 @@ public enum InvitationStatus { PENDING, ACCEPTED, REVOKED }
 
 public class User { public String id, tenantId, email; public Role role;
                     public UserStatus status; public java.time.Instant deletedAt, purgeAt; }
-public class Tenant { public String id, name; public Plan plan; }
+public class Tenant { public String id, name; public Plan plan;
+                      public NotificationDigestMode notificationDigestMode; } // default IMMEDIATE
 public class Invitation { public String id, tenantId, email; public Role role;
                           public java.time.Instant createdAt, expiresAt;
                           public int resendCount; public InvitationStatus status; }
 public class AuditEntry { public String id, tenantId, actorId, action, targetId;
                           public java.time.Instant timestamp; public String details; }
+
+public enum WebhookDeliveryStatus { PENDING, DEFERRED, DELIVERED, FAILED }
+public enum NotificationStatus { SENT, QUEUED }
+public enum NotificationDigestMode { IMMEDIATE, DAILY_DIGEST }
+
+public class WebhookConfig { public String tenantId, url, secret; }
+public class WebhookDelivery { public String id, tenantId, eventType, signature;
+                               public WebhookDeliveryStatus status;
+                               public int attemptCount, maxAttempts;
+                               public java.time.Instant createdAt; }
+public class NotificationLog { public String id, tenantId, templateId;
+                               public NotificationStatus status;
+                               public java.time.Instant createdAt; }
 ```
 
 Package `com.bench.store` — inject with `@Inject`:
@@ -31,6 +45,10 @@ public class InMemoryStore {
     public List<User> usersOfTenant(String tenantId);
     public List<Invitation> invitationsOfTenant(String tenantId);
     public long countOwners(String tenantId);   // owners with status != DELETED
+    public Map<String, WebhookConfig> webhookConfigs;
+    public Map<String, WebhookDelivery> webhookDeliveries;
+    public Map<String, NotificationLog> notificationLogs;
+    public long countRecentWebhookDeliveries(String tenantId, java.time.Instant since);
     public void reset();
 }
 ```
@@ -56,3 +74,13 @@ Known API traps:
   `Response.status(422)` — `Response.Status` does NOT have those constants.
 - `Instant` has no `plusHours`/`plusDays`; use
   `instant.plus(java.time.Duration.ofHours(n))`.
+- To compute an HMAC-SHA256 hex digest, use the JDK's built-in
+  `javax.crypto.Mac`, no extra dependency needed:
+  ```java
+  Mac mac = Mac.getInstance("HmacSHA256");
+  mac.init(new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), "HmacSHA256"));
+  byte[] raw = mac.doFinal(payload.getBytes(StandardCharsets.UTF_8));
+  StringBuilder hex = new StringBuilder();
+  for (byte b : raw) hex.append(String.format("%02x", b));
+  String signature = hex.toString(); // lowercase hex, 64 chars
+  ```

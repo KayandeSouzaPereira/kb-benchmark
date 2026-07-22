@@ -92,6 +92,32 @@
           "202604111600-frontend-status-badges.md"
         ]
       }
+    },
+    {
+      "id": "t6",
+      "title": "Payment failure webhook + notification (multi-hop, large KB)",
+      "type": "backend",
+      "prompt_file": "t6.md",
+      "eval_file": "T6PaymentFailureTest.java",
+      "expected_tests": 6,
+      "gold_notes": {
+        "vault-a": [
+          "billing/payment-retry-and-webhooks.md",
+          "webhooks/webhook-signing.md",
+          "webhooks/retry-backoff-policy.md",
+          "notifications/email-template-mapping.md",
+          "notifications/digest-mode-preferences.md",
+          "rate-limiting/outbound-webhook-rate-limit.md"
+        ],
+        "vault-b": [
+          "202606010930-payment-failure-handling.md",
+          "202606020930-webhook-signing.md",
+          "202606021000-webhook-retry-backoff.md",
+          "202606030930-email-template-mapping.md",
+          "202606031000-digest-mode-preferences.md",
+          "202606040930-outbound-webhook-rate-limit.md"
+        ]
+      }
     }
   ]
 }

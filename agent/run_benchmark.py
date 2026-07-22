@@ -38,7 +38,7 @@ RESULTS = BENCH / "results" / CASE
 TASKS_DIR = BENCH / "tasks"
 EVAL_DIR = BENCH / "eval"
 
-MAX_ACTIONS = 8
+MAX_ACTIONS = 14
 MAX_NUDGES = 2
 MAX_REPAIRS = 3
 # devmcp: avaliacao via Quarkus dev mode + continuous testing (Dev MCP);
@@ -143,18 +143,30 @@ def safe_vault_path(rel):
 def tool_ls(arg):
     p = safe_vault_path(arg)
     if not p.exists():
-        return f"não existe: {arg}"
+        return f"does not exist: {arg}"
     if not p.is_dir():
-        return f"não é um diretório: {arg}"
+        return f"not a directory: {arg}"
     entries = sorted(
         e.name + ("/" if e.is_dir() else "") for e in p.iterdir())
-    return "\n".join(entries) or "(vazio)"
+    return "\n".join(entries) or "(empty)"
+
+
+def _clean_grep_term(raw):
+    # tolerate real-world `grep -r "term" .` style invocations: strip leading
+    # short/long flags (-r, -i, --recursive...) and a trailing bare "." path
+    tokens = raw.strip().split()
+    while tokens and tokens[0].startswith("-"):
+        tokens.pop(0)
+    if tokens and tokens[-1] in (".", "./"):
+        tokens.pop()
+    term = " ".join(tokens).strip()
+    return term.strip('"').strip("'")
 
 
 def tool_grep(term):
-    term = term.strip().strip('"').strip("'")
+    term = _clean_grep_term(term)
     if not term:
-        return "uso: ACTION: grep <termo>"
+        return "usage: ACTION: grep <term>  (no flags, no path — searches all notes)"
     hits = []
     for f in sorted(VAULT.rglob("*.md")):
         try:
@@ -165,21 +177,21 @@ def tool_grep(term):
             if term.lower() in line.lower():
                 hits.append(f"{f.relative_to(VAULT).as_posix()}:{n}: {line.strip()[:160]}")
     if not hits:
-        return f"nenhum resultado para: {term}"
+        return f"no results for: {term}"
     out = hits[:40]
     if len(hits) > 40:
-        out.append(f"... ({len(hits) - 40} resultados omitidos)")
+        out.append(f"... ({len(hits) - 40} results omitted)")
     return "\n".join(out)
 
 
 def tool_read(arg, notes_read):
     p = safe_vault_path(arg)
     if not p.exists() or not p.is_file():
-        return f"arquivo não encontrado: {arg}"
+        return f"file not found: {arg}"
     notes_read.add(p.resolve().relative_to(VAULT.resolve()).as_posix())
     content = p.read_text(encoding="utf-8")
     if len(content) > 8000:
-        content = content[:8000] + "\n... (truncado)"
+        content = content[:8000] + "\n... (truncated)"
     return content
 
 

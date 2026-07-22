@@ -12,3 +12,10 @@ Index note for everything I've thought through about the product's user domain.
 - Authentication (separate from user management): [[202601080800-lockout-and-passwords]]
 
 Code conventions live in another map: [[202604010900-api-and-conventions-map]].
+
+Newer areas that grew big enough for their own maps (not really part of
+"user management" anymore, but worth linking from here since payment
+failures do touch user-adjacent stuff like notifications):
+[[202606010900-billing-map]], [[202606020900-webhooks-map]],
+[[202606030900-notifications-map]], [[202606040900-rate-limiting-map]],
+[[202606050900-sso-map]].

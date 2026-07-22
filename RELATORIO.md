@@ -268,13 +268,29 @@ equivalente ao Zettelkasten.
    inventada). Com modelos locais desta faixa, a KB melhora muito o resultado, mas
    não fecha o gap até "produção".
 
-### Recomendação prática
+### Recomendação prática (revisada após a confirmação de 11 rodadas)
 
-Para um time de engenharia montar KB para agentes: **híbrido A+B** — a estrutura de
-pastas + INDEX do método A (controla custo de contexto e dá roteamento rápido) com a
-disciplina de links densos do Zettelkasten (garante que o agente *chegue* na regra).
-Toda nota deve linkar suas relacionadas; o índice existe para entrar, os links para
-não sair cedo demais.
+A recomendação original deste relatório era um "híbrido A+B" — pastas + INDEX
+de A com a disciplina de links densos do Zettelkasten. Os dados de 11 rodadas
+(§3.5) **não sustentam essa recomendação**: a premissa era que A precisava
+"emprestar" o mecanismo de B porque errava mais o retrieval (era verdade na
+v6, com gold-hit de 0,27 para A); mas isso já não era verdade desde a própria
+v7 (0,67×0,67) e a confirmação de 11 rodadas fecha a questão (0,69×0,68,
+praticamente idênticos). Sem essa lacuna de retrieval para justificar o
+empréstimo, o híbrido formal perde sentido — e A já vence B com folga e o
+dobro da consistência.
+
+**Recomendação atual: use o método A como padrão** — pastas semânticas +
+`INDEX.md` roteador + frontmatter + seção "Related" com links relativos ao
+fim de cada nota (o vault A já inclui isso; é o pedaço mais útil do
+mecanismo de grafo do Zettelkasten, sem precisar adotar IDs por timestamp
+nem abandonar a hierarquia de pastas). O Zettelkasten puro (B) permanece
+uma escolha defensável apenas num cenário específico que este benchmark
+**não testou**: uma KB grande o suficiente para que um índice mantido à mão
+deixe de ser prático e a navegação por links vire a única forma viável de
+achar a regra certa. Esse experimento (KB muito maior, com uma tarefa cuja
+regra exige sintetizar notas espalhadas por várias subáreas do domínio) está
+em desenho como próxima rodada do benchmark.
 
 ## 5. Respostas às perguntas originais
 

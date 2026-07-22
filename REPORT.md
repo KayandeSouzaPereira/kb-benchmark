@@ -277,13 +277,29 @@ the Zettelkasten's.
    the KB improves the result a lot, but does not close the gap to
    "production."
 
-### Practical recommendation
+### Practical recommendation (revised after the 11-round confirmation)
 
-For an engineering team building a KB for agents: **an A+B hybrid** — method
-A's folder structure + INDEX (controls context cost and gives fast routing)
-combined with Zettelkasten's discipline of dense links (ensures the agent
-*actually arrives* at the rule). Every note should link its related notes;
-the index exists to get in, the links exist so you don't leave too early.
+This report's original recommendation was an "A+B hybrid" — A's folders +
+INDEX combined with the Zettelkasten's dense-linking discipline. The 11-round
+data (§3.5) **does not support that recommendation**: the premise was that A
+needed to "borrow" B's mechanism because it retrieved worse (true in v6,
+where A's gold-hit was 0.27); but that was already untrue by the single v7
+run (0.67×0.67), and the 11-round confirmation settles it (0.69×0.68,
+essentially identical). Without that retrieval gap to justify borrowing, the
+formal hybrid loses its rationale — and A already beats B comfortably, with
+twice the consistency.
+
+**Current recommendation: use method A as the default** — semantic folders +
+a routing `INDEX.md` + frontmatter + a "Related" section with relative links
+at the end of each note (vault A already includes this; it's the most useful
+part of the Zettelkasten's graph mechanism, without needing timestamp IDs or
+abandoning the folder hierarchy). Pure Zettelkasten (B) remains a defensible
+choice only in a specific scenario this benchmark **did not test**: a KB
+large enough that a hand-maintained index stops being practical and
+link-following becomes the only viable way to find the right rule. That
+experiment (a much larger KB, with a task whose rule requires synthesizing
+notes scattered across several domain sub-areas) is being designed as the
+benchmark's next round.
 
 ## 5. Answers to the original questions
 

@@ -1,0 +1,99 @@
+{
+  "task": "t6",
+  "title": "Payment failure webhook + notification (multi-hop, large KB)",
+  "case": "vault-b",
+  "model": "qwen3-coder:30b",
+  "score": 1.0,
+  "passed": 6,
+  "total": 6,
+  "compiled": true,
+  "repairs": 0,
+  "eval_mode": "devmcp",
+  "eval_times_s": [
+    10.9
+  ],
+  "dev_boot_wait_s": 2.9,
+  "error": null,
+  "tests": [
+    {
+      "name": "createsSignedWebhookDelivery",
+      "passed": true
+    },
+    {
+      "name": "deferredWhenTenantOverRateLimit",
+      "passed": true
+    },
+    {
+      "name": "sendsImmediateNotificationWithCorrectTemplateByDefault",
+      "passed": true
+    },
+    {
+      "name": "notImpactedByDeliveriesOutsideRollingWindow",
+      "passed": true
+    },
+    {
+      "name": "queuesNotificationWhenTenantPrefersDailyDigest",
+      "passed": true
+    },
+    {
+      "name": "setsMaxAttemptsAndPendingStatusWhenUnderLimit",
+      "passed": true
+    }
+  ],
+  "files_written": [
+    "src/main/java/com/bench/api/BillingResource.java"
+  ],
+  "retrieval": {
+    "actions": [
+      "ls .",
+      "read 202606010900-billing-map.md",
+      "read 202606010930-payment-failure-handling.md",
+      "read 202606020930-webhook-signing.md",
+      "read 202606021000-webhook-retry-backoff.md",
+      "read 202606021030-event-type-catalog.md",
+      "read 202606030930-email-template-mapping.md",
+      "read 202606031000-digest-mode-preferences.md",
+      "read 202606040930-outbound-webhook-rate-limit.md",
+      "read 202606021100-endpoint-registration.md",
+      "read 202606021300-endpoint-disabling-on-failures.md",
+      "read 202606031230-critical-vs-marketing.md",
+      "read 202604010900-api-and-conventions-map.md"
+    ],
+    "notes_read": [
+      "202604010900-api-and-conventions-map.md",
+      "202606010900-billing-map.md",
+      "202606010930-payment-failure-handling.md",
+      "202606020930-webhook-signing.md",
+      "202606021000-webhook-retry-backoff.md",
+      "202606021030-event-type-catalog.md",
+      "202606021100-endpoint-registration.md",
+      "202606021300-endpoint-disabling-on-failures.md",
+      "202606030930-email-template-mapping.md",
+      "202606031000-digest-mode-preferences.md",
+      "202606031230-critical-vs-marketing.md",
+      "202606040930-outbound-webhook-rate-limit.md"
+    ],
+    "gold_notes": [
+      "202606010930-payment-failure-handling.md",
+      "202606020930-webhook-signing.md",
+      "202606021000-webhook-retry-backoff.md",
+      "202606030930-email-template-mapping.md",
+      "202606031000-digest-mode-preferences.md",
+      "202606040930-outbound-webhook-rate-limit.md"
+    ],
+    "gold_hits": [
+      "202606010930-payment-failure-handling.md",
+      "202606020930-webhook-signing.md",
+      "202606021000-webhook-retry-backoff.md",
+      "202606030930-email-template-mapping.md",
+      "202606031000-digest-mode-preferences.md",
+      "202606040930-outbound-webhook-rate-limit.md"
+    ],
+    "gold_hit_rate": 1.0
+  },
+  "tokens": {
+    "prompt_tokens": 55892,
+    "completion_tokens": 1313
+  },
+  "duration_s": 124.5
+}
