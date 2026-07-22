@@ -280,15 +280,20 @@ praticamente idênticos). Sem essa lacuna de retrieval para justificar o
 empréstimo, o híbrido formal perde sentido — e A já vence B com folga e o
 dobro da consistência.
 
-**Recomendação atual: use o método A como padrão** — pastas semânticas +
-`INDEX.md` roteador + frontmatter + seção "Related" com links relativos ao
-fim de cada nota (o vault A já inclui isso; é o pedaço mais útil do
-mecanismo de grafo do Zettelkasten, sem precisar adotar IDs por timestamp
-nem abandonar a hierarquia de pastas). O Zettelkasten puro (B) permanece
-uma escolha defensável apenas num cenário específico que este benchmark
-**não testou**: uma KB grande o suficiente para que um índice mantido à mão
-deixe de ser prático e a navegação por links vire a única forma viável de
-achar a regra certa. Esse experimento foi construído e rodado — ver §4.5.
+**Recomendação (nesta escala, ~15 notas): use o método A como padrão** —
+pastas semânticas + `INDEX.md` roteador + frontmatter + seção "Related" com
+links relativos ao fim de cada nota (o vault A já inclui isso; é o pedaço
+mais útil do mecanismo de grafo do Zettelkasten, sem precisar adotar IDs por
+timestamp nem abandonar a hierarquia de pastas).
+
+Esta recomendação **não se generaliza para KB grande**: testamos o cenário
+de índice manual grande demais para escalar (§4.5, ~65 notas, confirmado com
+5 rodadas) e, ali, o Zettelkasten (B) venceu 5 de 5 rodadas — não por achar
+melhor a nota certa (retrieval empatou perfeito nos dois), mas por converter
+o conhecimento em código mais completo com mais confiabilidade. A
+recomendação prática passa a depender da escala: comece por tema (A); se a
+KB crescer muito e as tarefas passarem a exigir sintetizar várias áreas do
+domínio, vale reavaliar.
 
 ## 4.5. v8 — KB estendida (~65 notas) e tarefa multi-hop
 
@@ -313,75 +318,101 @@ resultados). Antes do fix, a vault-a fez 1/6 no t6 (queimou o orçamento
 inteiro adivinhando nomes de arquivo errados); depois do fix, subiu pra 4/6
 lendo as 6 notas certas.
 
-### Resultado (rodada única, qwen3-coder:30b)
+### Resultado — confirmado com 5 rodadas independentes (qwen3-coder:30b)
 
-| Tarefa | A — Vault estruturado | B — Zettelkasten | C — Sem KB |
-|---|---|---|---|
-| t1 | 1/6 | 3/6 | 1/6 |
-| t2 | **7/7** | **7/7** | 2/7 |
-| t3 | **5/5** | **5/5** | 0/5 |
-| t4 | **6/6** | **6/6** | 3/6 |
-| t5 | **7/7** | **7/7** | 2/7 |
-| t6 (novo, multi-hop) | 4/6 | 4/6 | 2/6 |
-| **Total** | **30/37 (81%)** | **32/37 (86%)** | **10/37 (27%)** |
+A rodada inicial (round-00) sugeria empate exato entre A e B no t6. Repetir
+a v8 mais 4 vezes (round-01 a round-04, dados brutos em
+`results-v8-runs/`) mostrou que essa leitura estava incompleta — o mesmo
+alerta que a confirmação de 11 rodadas da v7 já tinha dado.
 
-| Métrica | A | B | C |
+| Rodada | C — Sem KB | A — Estruturado | B — Zettelkasten |
 |---|---|---|---|
-| Notas lidas (média) | 5,83 | 9,83 | 0 |
-| **Acerto de notas-ouro** | **1,00** | **0,94** | — |
-| Tokens de prompt (média) | 33.627 | 72.628 | 1.023 |
-| Duração por tarefa (média) | 83 s | 407 s | 77 s |
+| round-00 | 10/37 | 30/37 | 32/37 |
+| round-01 | 10/37 | 23/37 | 29/37 |
+| round-02 | 8/37 | 28/37 | 30/37 |
+| round-03 | 10/37 | 29/37 | 36/37 |
+| round-04 | 9/37 | 30/37 | **37/37** |
+| **Média ± desvio** | **9,4 ± 0,8** | **28,0 ± 2,6** | **32,8 ± 3,2** |
+
+**B venceu as 5 de 5 rodadas** no total — nenhuma vitória de A, nenhum
+empate. Isso reverte a leitura da rodada única.
+
+O detalhe do t6 (a tarefa multi-hop, motivo do experimento) por rodada:
+
+| Rodada | A | B |
+|---|---|---|
+| round-00 | 4/6 | 4/6 |
+| round-01 | 4/6 | **6/6** |
+| round-02 | 4/6 | 4/6 |
+| round-03 | **0/6** | **6/6** |
+| round-04 | 4/6 | **6/6** |
+| Média | 3,2/6 | **5,2/6** |
+
+E o mais revelador: **o acerto de notas-ouro no t6 foi 1,00/1,00 — perfeito
+para os dois casos, em TODAS as 5 rodadas, sem exceção.** O retrieval nunca
+foi o problema, nem uma vez. A diferença de placar é 100% geração de código:
+A trava perto de 4/6 (falhando consistentemente 2 das 6 verificações) e
+chegou a zerar numa rodada; B bate o teto de 6/6 em 3 das 5 rodadas.
 
 ### O que isso responde sobre a hipótese do KB gigante
 
-**A resposta direta à pergunta que motivou este experimento — "o Zettelkasten
-ganha quando o índice manual não escala mais?" — é não, pelo menos não em
-~65 notas com este modelo.** No t6, a tarefa desenhada especificamente para
-estressar navegação multi-hop numa KB grande, **as duas condições acertaram
-100% e 94% de gold-hit e empataram exatamente em 4/6** — inclusive errando as
-duas MESMAS duas verificações (`sendsImmediateNotificationWithCorrectTemplateByDefault`,
-`queuesNotificationWhenTenantPrefersDailyDigest`). Investigando: os dois casos
-leram as 6 notas-ouro corretamente mas **nenhum dos dois criou o
-`NotificationLog`** — não é lacuna de conhecimento, é o modelo perdendo o 3º
-requisito da tarefa (notificar) depois de implementar os dois primeiros
-(assinar o webhook, aplicar o rate limit). Falha de execução idêntica nos
-dois casos, não de organização de KB.
+**A resposta à pergunta que motivou este experimento — "o Zettelkasten ganha
+quando o índice manual não escala mais?" — é: no retrieval, não (os dois
+acertam 100% das notas-ouro o tempo todo, mesmo em 65 notas); mas no placar
+final, sim — B venceu de forma consistente.** Como o gold-hit é idêntico e
+perfeito nos dois lados, a vantagem de B não vem de "achar melhor a nota
+certa" (a hipótese original), vem de **converter esse conhecimento em código
+mais completo** com mais confiabilidade. É o mesmo tipo de vantagem que a
+v7 (§3.5) tinha atribuído a A nas tarefas menores — aqui, na tarefa mais
+complexa e cross-cutting deste benchmark, quem navega por link parece
+produzir implementações mais completas, com menos chance de esquecer um dos
+três requisitos da tarefa (assinar webhook, respeitar rate limit, notificar).
+Isso é uma hipótese honesta, não uma certeza — não há uma explicação
+mecanística confirmada, só a correlação observada em 5 rodadas.
 
-Mais: o `INDEX.md` do vault A **continuou funcionando bem em 65 notas** —
-gold-hit de 1,00, o melhor de toda a série de rodadas. A previsão de que um
-índice mantido à mão "para de escalar" não se confirmou nesta escala; talvez
-precise de uma KB bem maior (200+ notas) para o efeito aparecer, ou talvez
-simplesmente não apareça com um `INDEX.md` bem escrito e seções "Related"
-por nota.
+O `INDEX.md` do vault A **continuou funcionando bem em 65 notas** — gold-hit
+perfeito em toda a série, então a previsão de que um índice manual "para de
+escalar" não se confirmou nesta escala (~65 notas). O que mudou foi a
+capacidade de A de transformar esse retrieval perfeito em código igualmente
+completo — e nisso ficou atrás de B.
 
-O padrão de custo se manteve e ficou mais extremo: B leu quase o dobro de
-notas (9,83 vs 5,83) e gastou **mais que o dobro de tokens** (72.628 vs
-33.627) para uma acurácia estatisticamente indistinguível da de A. Em um
-caso (vault-b, t1) o histórico acumulado da conversa chegou a **191 mil
-tokens cumulativos** ao longo de 13 ações + 1 reparo, e a tarefa levou 33
-minutos — 15–20× mais que o normal. Isso é efeito colateral direto de ter
-subido `MAX_ACTIONS`: mais orçamento de exploração ajuda a achar a nota
-certa, mas se o modelo usa o orçamento inteiro, o custo de latência dispara
-porque o protocolo reenvia o histórico completo a cada ação (crescimento
-~quadrático). Vale investigar formas de conter isso numa próxima rodada
-(resumir leituras antigas, ou separar exploração de geração).
+O padrão de custo se manteve nas 5 rodadas: B leu quase o dobro de notas e
+gastou quase o dobro de tokens em média (55.675 vs 31.936 tokens de prompt
+por tarefa) para uma acurácia que, no total, foi *melhor*, não pior — ou
+seja, o custo extra de B comprou algo real desta vez, ao contrário do padrão
+da v7 em KB pequena.
 
-> ⚠️ **Pendente de validação**: este pico de custo/latência foi observado em
-> uma única tarefa, numa única rodada. Não sabemos ainda se é um padrão
-> sistemático (ex.: toda vez que o modelo usa perto do orçamento máximo de
-> ações) ou um outlier isolado desta execução específica. **Antes de agir
-> sobre isso** (mexer em `MAX_ACTIONS`, mudar o protocolo de histórico
-> etc.), rodar a v8 mais algumas vezes — como se fez na confirmação de 11
-> rodadas da v7 (§3.5) — para confirmar se o problema se repete e com que
-> frequência. Tarefa de investigação já sinalizada separadamente
-> (`task_445c5d96`).
+**O pico de custo/latência (achado como "pendente de validação" na rodada
+única) foi confirmado como real, porém intermitente e localizado**: rodando
+mais 4 vezes e escaneando as 90 execuções de tarefa resultantes (5 rodadas ×
+3 casos × 6 tarefas), o pico severo (>80 mil tokens ou >300s) apareceu
+**exatamente 2 vezes (2,2% do total) — e as duas vezes na mesma combinação:
+`vault-b`, tarefa `t1`** (191 mil tokens/33min na rodada original; 165 mil
+tokens/23min numa repetição). Nas outras 3 rodadas, essa mesma tarefa rodou
+normal (47–60 mil tokens, 87–266s). Inspecionando as ações das 2 rodadas com
+pico: as duas têm exatamente **13 ações** — igual às rodadas normais — mas
+releram pelo menos uma nota já lida antes e vagaram por notas dos
+subdomínios novos (webhooks, billing) irrelevantes para essa tarefa (que é
+sobre convites). Ou seja: **não é "usar mais ações do orçamento"** — é
+variância de amostragem do modelo: às vezes ele explora com foco (13 ações
+sem redundância, ~50-60 mil tokens), às vezes se perde em duplicatas e
+desvios com o mesmo número de ações, e o custo cumulativo dispara porque o
+protocolo reenvia o histórico inteiro a cada ação. Provavelmente é mais
+fácil se perder assim na vault-b porque `ls .` retorna as 73 notas da pasta
+plana de uma vez, e as notas-ouro do t1 (do domínio original) agora estão
+misturadas com as 50 notas novas dos subdomínios — na vault-a elas continuam
+isoladas na pasta `domain/`, imune a essa distração. Vale investigar
+mitigação (resumir leituras antigas, ou separar exploração de geração) —
+tarefa já sinalizada (`task_9af30488`), agora com a hipótese mecanística
+acima para orientar o design.
 
-**Ressalva importante**: esta é uma rodada única — o t1 caiu para 1/6 na
-vault A apesar de gold-hit perfeito (a falha foi na geração de código, não
-no retrieval), o que é o tipo exato de ruído de amostragem que a confirmação
-de 11 rodadas da v7 mostrou ser normal para este modelo. Não dá para
-promover "A ≈ B mesmo em KB grande" a conclusão estatística sem repetir a
-v8 múltiplas vezes — fica como próximo passo natural.
+**A ressalva de rodada única não se aplica mais a este achado**: com 5
+rodadas, "B vence A com o KB gigante" deixou de ser leitura de amostra única
+e virou padrão consistente (5/5 rodadas). Isso não invalida a confirmação de
+11 rodadas da v7 sobre a KB pequena (§3.5, onde A vencia) — são experimentos
+diferentes, com KBs de tamanhos diferentes, e o resultado pode
+genuinamente inverter com a escala. Ainda assim, 5 rodadas é menos rigoroso
+que as 11 da v7; um n maior deixaria a média e o desvio mais confiáveis.
 
 ## 5. Respostas às perguntas originais
 
@@ -390,12 +421,18 @@ v8 múltiplas vezes — fica como próximo passo natural.
   (workspace/KB/toolchain por condição). Com 8 GB de VRAM não se roda 3 instâncias
   do modelo; compartilhar o modelo do host é também o desenho mais justo
   cientificamente.
-- **"Zettelkasten ou por tema?"** Com 11 rodadas confirmadas (§3.5), por tema
-  (A) vence com folga e o dobro da consistência. Testamos também a hipótese
-  de que o Zettelkasten viraria o jogo numa KB grande demais para um índice
-  manual (§4.5): não confirmou, pelo menos em ~65 notas — A e B empataram
-  exatamente na tarefa multi-hop, com A gastando menos da metade dos tokens.
-  Recomendação: use por tema (A) como padrão.
+- **"Zettelkasten ou por tema?"** Depende da escala. Com 11 rodadas
+  confirmadas numa KB pequena (~15 notas, §3.5), por tema (A) vence com
+  folga e o dobro da consistência. Numa KB 4× maior (~65 notas, §4.5,
+  confirmado com 5 rodadas), o retrieval empata perfeito nos dois métodos
+  (gold-hit 1,00/1,00 sempre), mas **o Zettelkasten (B) vence 5 de 5
+  rodadas no placar final** — a vantagem não é achar a nota certa, é
+  converter isso em código mais completo com mais confiabilidade,
+  especialmente na tarefa cross-cutting mais complexa (t6: B média 5,2/6
+  vs A 3,2/6). Recomendação: comece por tema (A) — mais simples de manter
+  e vence em KB pequena — mas se a KB crescer muito e envolver tarefas que
+  exigem sintetizar várias áreas do domínio, vale medir se vale a pena
+  migrar para (ou adotar) links densos ao estilo Zettelkasten.
 
 ## 6. Achados de engenharia no caminho
 

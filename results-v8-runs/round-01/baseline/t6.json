@@ -1,0 +1,62 @@
+{
+  "task": "t6",
+  "title": "Payment failure webhook + notification (multi-hop, large KB)",
+  "case": "baseline",
+  "model": "qwen3-coder:30b",
+  "score": 0.333,
+  "passed": 2,
+  "total": 6,
+  "compiled": true,
+  "repairs": 0,
+  "eval_mode": "devmcp",
+  "eval_times_s": [
+    10.6
+  ],
+  "dev_boot_wait_s": 2.6,
+  "error": null,
+  "tests": [
+    {
+      "name": "notImpactedByDeliveriesOutsideRollingWindow",
+      "passed": true
+    },
+    {
+      "name": "setsMaxAttemptsAndPendingStatusWhenUnderLimit",
+      "passed": true
+    },
+    {
+      "name": "createsSignedWebhookDelivery",
+      "passed": false,
+      "failure": "expected: <payment.failed> but was: <subscription.payment.failed>"
+    },
+    {
+      "name": "deferredWhenTenantOverRateLimit",
+      "passed": false,
+      "failure": "tenant already has 10 deliveries in the last 60 minutes; new one must be DEFERRED ==> expected: <DEFERRED> but was: <PENDING>"
+    },
+    {
+      "name": "sendsImmediateNotificationWithCorrectTemplateByDefault",
+      "passed": false,
+      "failure": "exactly one new NotificationLog should be created, found: 0 ==> expected: <1> but was: <0>"
+    },
+    {
+      "name": "queuesNotificationWhenTenantPrefersDailyDigest",
+      "passed": false,
+      "failure": "exactly one new NotificationLog should be created, found: 0 ==> expected: <1> but was: <0>"
+    }
+  ],
+  "files_written": [
+    "src/main/java/com/bench/api/BillingResource.java"
+  ],
+  "retrieval": {
+    "actions": [],
+    "notes_read": [],
+    "gold_notes": [],
+    "gold_hits": [],
+    "gold_hit_rate": null
+  },
+  "tokens": {
+    "prompt_tokens": 1339,
+    "completion_tokens": 1353
+  },
+  "duration_s": 100.9
+}

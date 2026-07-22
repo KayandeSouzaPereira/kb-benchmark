@@ -1,0 +1,81 @@
+{
+  "task": "t5",
+  "title": "Listagem com badges (Angular)",
+  "case": "vault-b",
+  "model": "qwen3-coder:30b",
+  "score": 1.0,
+  "passed": 7,
+  "total": 7,
+  "compiled": true,
+  "repairs": 0,
+  "eval_mode": "frontend",
+  "eval_times_s": [
+    0.8
+  ],
+  "dev_boot_wait_s": null,
+  "error": null,
+  "tests": [
+    {
+      "name": "arquivo src/app/user-list.component.ts existe",
+      "passed": true
+    },
+    {
+      "name": "type-check (tsc --noEmit) passa",
+      "passed": true
+    },
+    {
+      "name": "ACTIVE: classe badge-success + rotulo 'Ativo'",
+      "passed": true
+    },
+    {
+      "name": "INVITED: classe badge-warning + rotulo 'Convite pendente'",
+      "passed": true
+    },
+    {
+      "name": "SUSPENDED: classe badge-muted + rotulo 'Suspenso'",
+      "passed": true
+    },
+    {
+      "name": "DELETED: classe badge-danger + rotulo 'Excluído'",
+      "passed": true
+    },
+    {
+      "name": "DELETED: exibe purgeAt no formato dd/MM/yyyy",
+      "passed": true
+    }
+  ],
+  "files_written": [
+    "src/app/user-list.component.ts"
+  ],
+  "retrieval": {
+    "actions": [
+      "ls src/app/",
+      "ls src/",
+      "read user.model.ts",
+      "read src/app/user.model.ts",
+      "grep -r \"UserView\" .",
+      "grep -r \"status.*badge\" .",
+      "grep -r \"badge\" .",
+      "read 202604111600-frontend-status-badges.md",
+      "read 202603150900-soft-delete-30-days.md",
+      "read 202604010900-api-and-conventions-map.md"
+    ],
+    "notes_read": [
+      "202603150900-soft-delete-30-days.md",
+      "202604010900-api-and-conventions-map.md",
+      "202604111600-frontend-status-badges.md"
+    ],
+    "gold_notes": [
+      "202604111600-frontend-status-badges.md"
+    ],
+    "gold_hits": [
+      "202604111600-frontend-status-badges.md"
+    ],
+    "gold_hit_rate": 1.0
+  },
+  "tokens": {
+    "prompt_tokens": 8718,
+    "completion_tokens": 557
+  },
+  "duration_s": 40.5
+}

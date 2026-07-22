@@ -1,0 +1,63 @@
+{
+  "task": "t1",
+  "title": "Criar convite",
+  "case": "baseline",
+  "model": "qwen3-coder:30b",
+  "score": 0.167,
+  "passed": 1,
+  "total": 6,
+  "compiled": true,
+  "repairs": 0,
+  "eval_mode": "devmcp",
+  "eval_times_s": [
+    11.5
+  ],
+  "dev_boot_wait_s": 3.5,
+  "error": null,
+  "tests": [
+    {
+      "name": "adminCriaConvitePersistido",
+      "passed": true
+    },
+    {
+      "name": "memberNaoPodeConvidar",
+      "passed": false,
+      "failure": "1 expectation failed.\nExpected status code <403> but was <201>."
+    },
+    {
+      "name": "conviteExpiraEm72Horas",
+      "passed": false,
+      "failure": "expiresAt deve ser ~72h no futuro, foi: 2026-07-23T17:06:08.926205981Z ==> expected: <true> but was: <false>"
+    },
+    {
+      "name": "atorDeOutroTenantRecebe404",
+      "passed": false,
+      "failure": "1 expectation failed.\nExpected status code <404> but was <403>."
+    },
+    {
+      "name": "auditoriaRegistraUserInvited",
+      "passed": false,
+      "failure": "audit log deve conter USER_INVITED do ator u-admin ==> expected: <true> but was: <false>"
+    },
+    {
+      "name": "limiteDoPlanoFreeContaConvitesPendentes",
+      "passed": false,
+      "failure": "1 expectation failed.\nExpected status code <422> but was <201>."
+    }
+  ],
+  "files_written": [
+    "src/main/java/com/bench/api/InvitationResource.java"
+  ],
+  "retrieval": {
+    "actions": [],
+    "notes_read": [],
+    "gold_notes": [],
+    "gold_hits": [],
+    "gold_hit_rate": null
+  },
+  "tokens": {
+    "prompt_tokens": 1145,
+    "completion_tokens": 1012
+  },
+  "duration_s": 136.0
+}

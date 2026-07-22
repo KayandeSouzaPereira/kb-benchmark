@@ -1,0 +1,96 @@
+{
+  "task": "t6",
+  "title": "Payment failure webhook + notification (multi-hop, large KB)",
+  "case": "vault-a",
+  "model": "qwen3-coder:30b",
+  "score": 0.667,
+  "passed": 4,
+  "total": 6,
+  "compiled": true,
+  "repairs": 0,
+  "eval_mode": "devmcp",
+  "eval_times_s": [
+    10.7
+  ],
+  "dev_boot_wait_s": 2.6,
+  "error": null,
+  "tests": [
+    {
+      "name": "createsSignedWebhookDelivery",
+      "passed": true
+    },
+    {
+      "name": "deferredWhenTenantOverRateLimit",
+      "passed": true
+    },
+    {
+      "name": "notImpactedByDeliveriesOutsideRollingWindow",
+      "passed": true
+    },
+    {
+      "name": "setsMaxAttemptsAndPendingStatusWhenUnderLimit",
+      "passed": true
+    },
+    {
+      "name": "sendsImmediateNotificationWithCorrectTemplateByDefault",
+      "passed": false,
+      "failure": "exactly one new NotificationLog should be created, found: 0 ==> expected: <1> but was: <0>"
+    },
+    {
+      "name": "queuesNotificationWhenTenantPrefersDailyDigest",
+      "passed": false,
+      "failure": "exactly one new NotificationLog should be created, found: 0 ==> expected: <1> but was: <0>"
+    }
+  ],
+  "files_written": [
+    "src/main/java/com/bench/api/BillingPaymentFailureResource.java"
+  ],
+  "retrieval": {
+    "actions": [
+      "ls .",
+      "read webhooks/overview.md",
+      "read webhooks/",
+      "ls webhooks",
+      "read webhooks/webhook-signing.md",
+      "read billing/payment-retry-and-webhooks.md",
+      "read notifications/email-template-mapping.md",
+      "read rate-limiting/outbound-webhook-rate-limit.md",
+      "read notifications/digest-mode-preferences.md",
+      "read webhooks/retry-backoff-policy.md",
+      "read domain/tenants.md",
+      "grep -r \"billing contact\" .",
+      "grep -r \"tenant.*contact\" .",
+      "grep -r \"billing.*contact\" ."
+    ],
+    "notes_read": [
+      "billing/payment-retry-and-webhooks.md",
+      "notifications/digest-mode-preferences.md",
+      "notifications/email-template-mapping.md",
+      "rate-limiting/outbound-webhook-rate-limit.md",
+      "webhooks/retry-backoff-policy.md",
+      "webhooks/webhook-signing.md"
+    ],
+    "gold_notes": [
+      "billing/payment-retry-and-webhooks.md",
+      "notifications/digest-mode-preferences.md",
+      "notifications/email-template-mapping.md",
+      "rate-limiting/outbound-webhook-rate-limit.md",
+      "webhooks/retry-backoff-policy.md",
+      "webhooks/webhook-signing.md"
+    ],
+    "gold_hits": [
+      "billing/payment-retry-and-webhooks.md",
+      "notifications/digest-mode-preferences.md",
+      "notifications/email-template-mapping.md",
+      "rate-limiting/outbound-webhook-rate-limit.md",
+      "webhooks/retry-backoff-policy.md",
+      "webhooks/webhook-signing.md"
+    ],
+    "gold_hit_rate": 1.0
+  },
+  "tokens": {
+    "prompt_tokens": 36688,
+    "completion_tokens": 1153
+  },
+  "duration_s": 105.4
+}

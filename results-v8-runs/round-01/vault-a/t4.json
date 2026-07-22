@@ -1,0 +1,86 @@
+{
+  "task": "t4",
+  "title": "Alterar papel",
+  "case": "vault-a",
+  "model": "qwen3-coder:30b",
+  "score": 1.0,
+  "passed": 6,
+  "total": 6,
+  "compiled": true,
+  "repairs": 0,
+  "eval_mode": "devmcp",
+  "eval_times_s": [
+    10.6
+  ],
+  "dev_boot_wait_s": 2.5,
+  "error": null,
+  "tests": [
+    {
+      "name": "ultimoOwnerNaoPodeSerRebaixado",
+      "passed": true
+    },
+    {
+      "name": "adminNaoAlteraPapelDeOwner",
+      "passed": true
+    },
+    {
+      "name": "memberNaoAlteraPapeis",
+      "passed": true
+    },
+    {
+      "name": "adminPromoveMember",
+      "passed": true
+    },
+    {
+      "name": "ownerPodeRebaixarOutroOwner",
+      "passed": true
+    },
+    {
+      "name": "auditoriaRegistraMudancaDePapel",
+      "passed": true
+    }
+  ],
+  "files_written": [
+    "src/main/java/com/bench/api/UserRoleResource.java"
+  ],
+  "retrieval": {
+    "actions": [
+      "ls .",
+      "read domain/roles.md",
+      "grep -r \"role\" domain/",
+      "ls domain/",
+      "read domain/roles-and-permissions.md",
+      "read domain/audit-log.md",
+      "read domain/user-deletion.md",
+      "read code-standards/api-error-format.md",
+      "read domain/plan-limits.md",
+      "read domain/invitations.md",
+      "ls product/",
+      "read product/plans-and-pricing.md",
+      "ls src/main/java/com/bench/api/"
+    ],
+    "notes_read": [
+      "code-standards/api-error-format.md",
+      "domain/audit-log.md",
+      "domain/invitations.md",
+      "domain/plan-limits.md",
+      "domain/roles-and-permissions.md",
+      "domain/user-deletion.md",
+      "product/plans-and-pricing.md"
+    ],
+    "gold_notes": [
+      "code-standards/api-error-format.md",
+      "domain/roles-and-permissions.md"
+    ],
+    "gold_hits": [
+      "code-standards/api-error-format.md",
+      "domain/roles-and-permissions.md"
+    ],
+    "gold_hit_rate": 1.0
+  },
+  "tokens": {
+    "prompt_tokens": 35443,
+    "completion_tokens": 906
+  },
+  "duration_s": 87.3
+}

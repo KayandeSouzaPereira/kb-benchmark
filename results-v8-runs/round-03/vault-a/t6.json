@@ -1,0 +1,100 @@
+{
+  "task": "t6",
+  "title": "Payment failure webhook + notification (multi-hop, large KB)",
+  "case": "vault-a",
+  "model": "qwen3-coder:30b",
+  "score": 0.0,
+  "passed": 0,
+  "total": 6,
+  "compiled": true,
+  "repairs": 1,
+  "eval_mode": "devmcp",
+  "eval_times_s": [
+    120.4,
+    8.2
+  ],
+  "dev_boot_wait_s": 2.1,
+  "error": null,
+  "tests": [
+    {
+      "name": "createsSignedWebhookDelivery",
+      "passed": false,
+      "failure": "1 expectation failed.\nExpected status code <201> but was <500>."
+    },
+    {
+      "name": "deferredWhenTenantOverRateLimit",
+      "passed": false,
+      "failure": "1 expectation failed.\nExpected status code <201> but was <500>."
+    },
+    {
+      "name": "sendsImmediateNotificationWithCorrectTemplateByDefault",
+      "passed": false,
+      "failure": "1 expectation failed.\nExpected status code <201> but was <500>."
+    },
+    {
+      "name": "notImpactedByDeliveriesOutsideRollingWindow",
+      "passed": false,
+      "failure": "1 expectation failed.\nExpected status code <201> but was <500>."
+    },
+    {
+      "name": "queuesNotificationWhenTenantPrefersDailyDigest",
+      "passed": false,
+      "failure": "1 expectation failed.\nExpected status code <201> but was <500>."
+    },
+    {
+      "name": "setsMaxAttemptsAndPendingStatusWhenUnderLimit",
+      "passed": false,
+      "failure": "1 expectation failed.\nExpected status code <201> but was <500>."
+    }
+  ],
+  "files_written": [
+    "src/main/java/com/bench/api/BillingPaymentFailureResource.java"
+  ],
+  "retrieval": {
+    "actions": [
+      "ls .",
+      "read webhooks/overview.md",
+      "read webhooks/",
+      "grep -r \"WebhookDelivery\" .",
+      "read webhooks/webhook-signing.md",
+      "read webhooks/retry-backoff-policy.md",
+      "read rate-limiting/outbound-webhook-rate-limit.md",
+      "read billing/payment-retry-and-webhooks.md",
+      "read notifications/email-template-mapping.md",
+      "read notifications/digest-mode-preferences.md",
+      "read domain/tenant.md",
+      "grep -r \"billing contact\" .",
+      "grep -r \"tenant.*contact\" ."
+    ],
+    "notes_read": [
+      "billing/payment-retry-and-webhooks.md",
+      "notifications/digest-mode-preferences.md",
+      "notifications/email-template-mapping.md",
+      "rate-limiting/outbound-webhook-rate-limit.md",
+      "webhooks/retry-backoff-policy.md",
+      "webhooks/webhook-signing.md"
+    ],
+    "gold_notes": [
+      "billing/payment-retry-and-webhooks.md",
+      "notifications/digest-mode-preferences.md",
+      "notifications/email-template-mapping.md",
+      "rate-limiting/outbound-webhook-rate-limit.md",
+      "webhooks/retry-backoff-policy.md",
+      "webhooks/webhook-signing.md"
+    ],
+    "gold_hits": [
+      "billing/payment-retry-and-webhooks.md",
+      "notifications/digest-mode-preferences.md",
+      "notifications/email-template-mapping.md",
+      "rate-limiting/outbound-webhook-rate-limit.md",
+      "webhooks/retry-backoff-policy.md",
+      "webhooks/webhook-signing.md"
+    ],
+    "gold_hit_rate": 1.0
+  },
+  "tokens": {
+    "prompt_tokens": 39635,
+    "completion_tokens": 2202
+  },
+  "duration_s": 266.1
+}

@@ -1,0 +1,88 @@
+{
+  "task": "t2",
+  "title": "Excluir usuário (soft-delete)",
+  "case": "vault-a",
+  "model": "qwen3-coder:30b",
+  "score": 1.0,
+  "passed": 7,
+  "total": 7,
+  "compiled": true,
+  "repairs": 0,
+  "eval_mode": "devmcp",
+  "eval_times_s": [
+    10.5
+  ],
+  "dev_boot_wait_s": 2.4,
+  "error": null,
+  "tests": [
+    {
+      "name": "adminFazSoftDelete",
+      "passed": true
+    },
+    {
+      "name": "atorDeOutroTenantRecebe404",
+      "passed": true
+    },
+    {
+      "name": "ninguemDeletaASiMesmo",
+      "passed": true
+    },
+    {
+      "name": "memberNaoPodeDeletar",
+      "passed": true
+    },
+    {
+      "name": "purgeAtEm30Dias",
+      "passed": true
+    },
+    {
+      "name": "adminNaoPodeDeletarOwner",
+      "passed": true
+    },
+    {
+      "name": "auditoriaRegistraSoftDelete",
+      "passed": true
+    }
+  ],
+  "files_written": [
+    "src/main/java/com/bench/api/UserResource.java"
+  ],
+  "retrieval": {
+    "actions": [
+      "ls .",
+      "read INDEX.md",
+      "read domain/user-deletion.md",
+      "read domain/roles-and-permissions.md",
+      "read domain/audit-log.md",
+      "read code-standards/api-error-format.md",
+      "read domain/plan-limits.md",
+      "grep -r \"USER_SOFT_DELETED\" .",
+      "ls com/bench/api/",
+      "ls src/main/java/com/bench/api/"
+    ],
+    "notes_read": [
+      "INDEX.md",
+      "code-standards/api-error-format.md",
+      "domain/audit-log.md",
+      "domain/plan-limits.md",
+      "domain/roles-and-permissions.md",
+      "domain/user-deletion.md"
+    ],
+    "gold_notes": [
+      "code-standards/api-error-format.md",
+      "domain/roles-and-permissions.md",
+      "domain/user-deletion.md"
+    ],
+    "gold_hits": [
+      "code-standards/api-error-format.md",
+      "domain/roles-and-permissions.md",
+      "domain/user-deletion.md"
+    ],
+    "gold_hit_rate": 1.0
+  },
+  "tokens": {
+    "prompt_tokens": 42129,
+    "completion_tokens": 817
+  },
+  "duration_s": 80.8
+}

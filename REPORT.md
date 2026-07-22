@@ -289,15 +289,20 @@ essentially identical). Without that retrieval gap to justify borrowing, the
 formal hybrid loses its rationale — and A already beats B comfortably, with
 twice the consistency.
 
-**Current recommendation: use method A as the default** — semantic folders +
-a routing `INDEX.md` + frontmatter + a "Related" section with relative links
-at the end of each note (vault A already includes this; it's the most useful
-part of the Zettelkasten's graph mechanism, without needing timestamp IDs or
-abandoning the folder hierarchy). Pure Zettelkasten (B) remains a defensible
-choice only in a specific scenario this benchmark **did not test**: a KB
-large enough that a hand-maintained index stops being practical and
-link-following becomes the only viable way to find the right rule. That
-experiment was built and run — see §4.5.
+**Recommendation (at this scale, ~15 notes): use method A as the default** —
+semantic folders + a routing `INDEX.md` + frontmatter + a "Related" section
+with relative links at the end of each note (vault A already includes this;
+it's the most useful part of the Zettelkasten's graph mechanism, without
+needing timestamp IDs or abandoning the folder hierarchy).
+
+This recommendation **does not generalize to a large KB**: we tested the
+scenario of a hand-maintained index too large to scale (§4.5, ~65 notes,
+confirmed with 5 rounds) and there, the Zettelkasten (B) won 5 of 5 rounds —
+not by finding the right note better (retrieval tied perfectly on both), but
+by turning that knowledge into more complete code more reliably. The
+practical recommendation now depends on scale: start by-topic (A); if the KB
+grows a lot and tasks start requiring synthesis across several domain areas,
+it's worth re-evaluating.
 
 ## 4.5. v8 — Extended KB (~65 notes) and a multi-hop task
 
@@ -321,75 +326,104 @@ always returning zero results). Before the fix, vault-a scored 1/6 on t6
 (it burned its whole budget guessing wrong file names); after the fix, it
 rose to 4/6, correctly reading all 6 gold notes.
 
-### Result (single run, qwen3-coder:30b)
+### Result — confirmed with 5 independent rounds (qwen3-coder:30b)
 
-| Task | A — Structured vault | B — Zettelkasten | C — No KB |
-|---|---|---|---|
-| t1 | 1/6 | 3/6 | 1/6 |
-| t2 | **7/7** | **7/7** | 2/7 |
-| t3 | **5/5** | **5/5** | 0/5 |
-| t4 | **6/6** | **6/6** | 3/6 |
-| t5 | **7/7** | **7/7** | 2/7 |
-| t6 (new, multi-hop) | 4/6 | 4/6 | 2/6 |
-| **Total** | **30/37 (81%)** | **32/37 (86%)** | **10/37 (27%)** |
+The initial run (round-00) suggested an exact tie between A and B on t6.
+Repeating v8 4 more times (round-01 through round-04, raw data in
+`results-v8-runs/`) showed that reading was incomplete — the same warning
+the v7 11-round confirmation already gave.
 
-| Metric | A | B | C |
+| Round | C — No KB | A — Structured | B — Zettelkasten |
 |---|---|---|---|
-| Notes read (avg) | 5.83 | 9.83 | 0 |
-| **Gold-note hit rate** | **1.00** | **0.94** | — |
-| Prompt tokens (avg) | 33,627 | 72,628 | 1,023 |
-| Duration per task (avg) | 83 s | 407 s | 77 s |
+| round-00 | 10/37 | 30/37 | 32/37 |
+| round-01 | 10/37 | 23/37 | 29/37 |
+| round-02 | 8/37 | 28/37 | 30/37 |
+| round-03 | 10/37 | 29/37 | 36/37 |
+| round-04 | 9/37 | 30/37 | **37/37** |
+| **Mean ± stdev** | **9.4 ± 0.8** | **28.0 ± 2.6** | **32.8 ± 3.2** |
+
+**B won 5 of 5 rounds** on the total score — no win, no tie for A. This
+reverses the single-round reading.
+
+The t6 detail (the multi-hop task, the reason for the experiment) per
+round:
+
+| Round | A | B |
+|---|---|---|
+| round-00 | 4/6 | 4/6 |
+| round-01 | 4/6 | **6/6** |
+| round-02 | 4/6 | 4/6 |
+| round-03 | **0/6** | **6/6** |
+| round-04 | 4/6 | **6/6** |
+| Mean | 3.2/6 | **5.2/6** |
+
+And the most telling part: **gold-note hit rate on t6 was 1.00/1.00 —
+perfect for both cases, in ALL 5 rounds, no exceptions.** Retrieval was
+never the problem, not once. The score gap is 100% code generation: A gets
+stuck around 4/6 (consistently failing the same 2 checks) and hit zero in
+one round; B hits the 6/6 ceiling in 3 of the 5 rounds.
 
 ### What this says about the giant-KB hypothesis
 
-**The direct answer to the question that motivated this experiment —
-"does the Zettelkasten win once a hand-maintained index stops scaling?" —
-is no, at least not at ~65 notes with this model.** On t6, the task
-purpose-built to stress multi-hop navigation in a large KB, **both
-conditions hit 100% and 94% gold-hit and tied exactly at 4/6** — including
-failing the exact same two checks
-(`sendsImmediateNotificationWithCorrectTemplateByDefault`,
-`queuesNotificationWhenTenantPrefersDailyDigest`). Digging in: both cases
-read all 6 gold notes correctly but **neither created the
-`NotificationLog`** — not a knowledge gap, but the model dropping the task's
-3rd requirement (notify) after implementing the first two (sign the
-webhook, apply the rate limit). An identical execution failure in both
-conditions, not a KB-organization issue.
+**The answer to the question that motivated this experiment — "does the
+Zettelkasten win once a hand-maintained index stops scaling?" — is: on
+retrieval, no (both hit 100% gold-hit every time, even at 65 notes); but on
+the final score, yes — B won consistently.** Since gold-hit is identical and
+perfect on both sides, B's edge doesn't come from "finding the right note
+better" (the original hypothesis) — it comes from **converting that
+knowledge into more complete code** more reliably. It's the same kind of
+edge the v7 (§3.5) data attributed to A on the smaller tasks — here, on the
+most complex, cross-cutting task in the benchmark, following links seems to
+produce more complete implementations, with less chance of dropping one of
+the task's three requirements (sign the webhook, respect the rate limit,
+notify). This is an honest hypothesis, not a certainty — there's no
+confirmed mechanistic explanation, just the correlation observed across 5
+rounds.
 
-Further: vault A's `INDEX.md` **kept working well at 65 notes** —
-gold-hit of 1.00, the best of the entire series. The prediction that a
-hand-maintained index "stops scaling" did not hold at this size; it may
-take a much larger KB (200+ notes) for the effect to show, or it may simply
-not show up at all with a well-written `INDEX.md` plus a "Related" section
-per note.
+Vault A's `INDEX.md` **kept working well at 65 notes** — perfect gold-hit
+across the whole series, so the prediction that a hand-maintained index
+"stops scaling" did not hold at this size (~65 notes). What changed was A's
+ability to turn that perfect retrieval into equally complete code — and
+there it fell behind B.
 
-The cost pattern held and got more extreme: B read almost twice as many
-notes (9.83 vs 5.83) and spent **more than double the tokens** (72,628 vs
-33,627) for accuracy statistically indistinguishable from A's. In one case
-(vault-b, t1) the accumulated conversation history reached **191,000
-cumulative tokens** across 13 actions + 1 repair, and the task took 33
-minutes — 15–20× normal. This is a direct side effect of raising
-`MAX_ACTIONS`: more exploration budget helps find the right note, but if the
-model uses the whole budget, latency cost explodes because the protocol
-resends the full history on every action (~quadratic growth). Worth taming
-in a future round (summarizing old reads, or separating exploration from
-generation).
+The cost pattern held across the 5 rounds: B read almost twice as many notes
+and spent nearly double the tokens on average (55,675 vs 31,936 prompt
+tokens per task) for accuracy that, on the total, was *better*, not worse —
+i.e., B's extra cost bought something real this time, unlike the small-KB
+pattern from v7.
 
-> ⚠️ **Pending validation**: this cost/latency spike was observed in a single
-> task, in a single run. We don't yet know whether it's a systematic pattern
-> (e.g., it happens whenever the model uses close to the max action budget)
-> or a one-off outlier from this specific execution. **Before acting on it**
-> (touching `MAX_ACTIONS`, changing the history protocol, etc.), rerun v8 a
-> few more times — the same way the v7 11-round confirmation was done
-> (§3.5) — to confirm whether the problem recurs and how often. Investigation
-> already flagged as a separate task (`task_445c5d96`).
+**The cost/latency spike (flagged as "pending validation" in the single-run
+report) was confirmed as real but intermittent and localized**: running 4
+more times and scanning the resulting 90 task executions (5 rounds × 3
+cases × 6 tasks), the severe spike (>80k tokens or >300s) appeared
+**exactly twice (2.2% of the total) — both times in the same combination:
+`vault-b`, task `t1`** (191k tokens/33min in the original run; 165k
+tokens/23min in a repeat). In the other 3 rounds, that same task ran
+normally (47k–60k tokens, 87–266s). Inspecting the actions from the 2
+spiking rounds: both used exactly **13 actions** — same as the normal
+rounds — but re-read at least one already-read note and wandered into
+notes from the new, irrelevant sub-areas (webhooks, billing) for a task
+that's about invitations. In other words: **it's not "using more of the
+budget"** — it's model sampling variance: sometimes it explores with focus
+(13 actions, no redundancy, ~50–60k tokens), sometimes it gets lost in
+duplicates and detours with the same action count, and the cumulative cost
+explodes because the protocol resends the full history on every action.
+It's probably easier to get lost this way in vault-b because `ls .` returns
+all 73 notes in the flat folder at once, and t1's gold notes (from the
+original domain) are now mixed in with the 50 new sub-area notes — in
+vault-a they stay isolated in the `domain/` folder, immune to that
+distraction. Worth investigating mitigation (summarizing old reads, or
+separating exploration from generation) — already flagged as a task
+(`task_9af30488`), now with the mechanistic hypothesis above to guide the
+design.
 
-**Important caveat**: this is a single run — vault A's t1 dropped to 1/6
-despite perfect gold-hit (the failure was in code generation, not
-retrieval), exactly the kind of sampling noise the v7 11-round confirmation
-showed to be normal for this model. "A ≈ B even at large KB scale" cannot be
-promoted to a statistical conclusion without repeating v8 multiple times —
-a natural next step.
+**The single-run caveat no longer applies to this finding**: with 5 rounds,
+"B beats A at giant-KB scale" stopped being a single-sample reading and
+became a consistent pattern (5/5 rounds). This doesn't invalidate the
+11-round v7 confirmation on the small KB (§3.5, where A won) — these are
+different experiments, with different KB sizes, and the result can
+genuinely flip with scale. Still, 5 rounds is less rigorous than v7's 11; a
+larger n would make the mean and stdev more trustworthy.
 
 ## 5. Answers to the original questions
 
@@ -398,12 +432,18 @@ a natural next step.
   clients (workspace/KB/toolchain per condition). With 8 GB of VRAM you
   can't run 3 model instances; sharing the host's model is also the more
   scientifically fair design.
-- **"Zettelkasten or by-topic?"** With 11 confirmed rounds (§3.5), by-topic
-  (A) wins comfortably and twice as consistently. We also tested whether the
-  Zettelkasten would turn the tables once the KB gets too large for a
-  hand-maintained index (§4.5): it didn't, at least at ~65 notes — A and B
-  tied exactly on the multi-hop task, with A spending less than half the
-  tokens. Recommendation: use by-topic (A) as the default.
+- **"Zettelkasten or by-topic?"** Depends on scale. With 11 confirmed rounds
+  on a small KB (~15 notes, §3.5), by-topic (A) wins comfortably and twice
+  as consistently. On a KB 4× larger (~65 notes, §4.5, confirmed with 5
+  rounds), retrieval ties perfectly on both methods (gold-hit 1.00/1.00
+  every time), but **the Zettelkasten (B) wins 5 of 5 rounds** on the final
+  score — the edge isn't finding the right note, it's turning that into more
+  complete code more reliably, especially on the most complex cross-cutting
+  task (t6: B averages 5.2/6 vs A's 3.2/6). Recommendation: start with
+  by-topic (A) — simpler to maintain and wins at small scale — but if the KB
+  grows a lot and tasks start requiring synthesis across several domain
+  areas, it's worth measuring whether migrating toward (or adopting)
+  Zettelkasten-style dense linking pays off.
 
 ## 6. Engineering findings along the way
 

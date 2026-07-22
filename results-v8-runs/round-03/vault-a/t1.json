@@ -1,0 +1,86 @@
+{
+  "task": "t1",
+  "title": "Criar convite",
+  "case": "vault-a",
+  "model": "qwen3-coder:30b",
+  "score": 0.667,
+  "passed": 4,
+  "total": 6,
+  "compiled": true,
+  "repairs": 0,
+  "eval_mode": "devmcp",
+  "eval_times_s": [
+    10.6
+  ],
+  "dev_boot_wait_s": 2.6,
+  "error": null,
+  "tests": [
+    {
+      "name": "conviteExpiraEm72Horas",
+      "passed": true
+    },
+    {
+      "name": "adminCriaConvitePersistido",
+      "passed": true
+    },
+    {
+      "name": "atorDeOutroTenantRecebe404",
+      "passed": true
+    },
+    {
+      "name": "auditoriaRegistraUserInvited",
+      "passed": true
+    },
+    {
+      "name": "memberNaoPodeConvidar",
+      "passed": false,
+      "failure": "1 expectation failed.\nJSON path code doesn't match.\nExpected: FORBIDDEN_ROLE\n  Actual: null"
+    },
+    {
+      "name": "limiteDoPlanoFreeContaConvitesPendentes",
+      "passed": false,
+      "failure": "1 expectation failed.\nJSON path code doesn't match.\nExpected: PLAN_LIMIT_EXCEEDED\n  Actual: null"
+    }
+  ],
+  "files_written": [
+    "src/main/java/com/bench/api/InvitationResource.java"
+  ],
+  "retrieval": {
+    "actions": [
+      "read ./docs/invitation-business-rules.md",
+      "ls .",
+      "grep -r \"invitation\" ./domain/ --include=\"*.md\"",
+      "grep -r \"Invitation\" ./product/ --include=\"*.md\"",
+      "grep -r \"invitation\" ./product/ --include=\"*.md\"",
+      "ls ./product/",
+      "grep -r \"invitation\" ./billing/ --include=\"*.md\"",
+      "grep -r \"Invitation\" ./code-standards/ --include=\"*.md\"",
+      "grep -r \"invitation\" ./code-standards/ --include=\"*.md\"",
+      "read ./INDEX.md",
+      "read ./domain/invitations.md",
+      "read ./domain/roles-and-permissions.md",
+      "read ./domain/plan-limits.md"
+    ],
+    "notes_read": [
+      "INDEX.md",
+      "domain/invitations.md",
+      "domain/plan-limits.md",
+      "domain/roles-and-permissions.md"
+    ],
+    "gold_notes": [
+      "code-standards/api-error-format.md",
+      "domain/invitations.md",
+      "domain/plan-limits.md"
+    ],
+    "gold_hits": [
+      "domain/invitations.md",
+      "domain/plan-limits.md"
+    ],
+    "gold_hit_rate": 0.667
+  },
+  "tokens": {
+    "prompt_tokens": 27287,
+    "completion_tokens": 1194
+  },
+  "duration_s": 107.2
+}

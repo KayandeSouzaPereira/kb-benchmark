@@ -1,0 +1,79 @@
+{
+  "task": "t5",
+  "title": "Listagem com badges (Angular)",
+  "case": "vault-a",
+  "model": "qwen3-coder:30b",
+  "score": 0.286,
+  "passed": 2,
+  "total": 7,
+  "compiled": true,
+  "repairs": 0,
+  "eval_mode": "frontend",
+  "eval_times_s": [
+    0.7
+  ],
+  "dev_boot_wait_s": null,
+  "error": null,
+  "tests": [
+    {
+      "name": "arquivo src/app/user-list.component.ts existe",
+      "passed": true
+    },
+    {
+      "name": "type-check (tsc --noEmit) passa",
+      "passed": true
+    },
+    {
+      "name": "ACTIVE: classe badge-success + rotulo 'Ativo'",
+      "passed": false
+    },
+    {
+      "name": "INVITED: classe badge-warning + rotulo 'Convite pendente'",
+      "passed": false
+    },
+    {
+      "name": "SUSPENDED: classe badge-muted + rotulo 'Suspenso'",
+      "passed": false
+    },
+    {
+      "name": "DELETED: classe badge-danger + rotulo 'Excluído'",
+      "passed": false
+    },
+    {
+      "name": "DELETED: exibe purgeAt no formato dd/MM/yyyy",
+      "passed": false
+    }
+  ],
+  "files_written": [
+    "src/app/user.model.ts",
+    "src/app/user-list.component.ts"
+  ],
+  "retrieval": {
+    "actions": [
+      "ls src/app/",
+      "ls src/",
+      "read user.model.ts",
+      "grep -r \"UserView\" . --include=\"*.ts\"",
+      "grep -r \"status.*badge\" . --include=\"*.md\"",
+      "grep -r \"badge\" . --include=\"*.md\"",
+      "grep -r \"status\" . --include=\"*.md\"",
+      "ls .",
+      "grep -r \"status\" ./product --include=\"*.md\"",
+      "grep -r \"badge\" ./product --include=\"*.md\"",
+      "read ./product/README.md",
+      "ls ./product/",
+      "grep -r \"status\" ./domain --include=\"*.md\""
+    ],
+    "notes_read": [],
+    "gold_notes": [
+      "code-standards/frontend-status-badges.md"
+    ],
+    "gold_hits": [],
+    "gold_hit_rate": 0.0
+  },
+  "tokens": {
+    "prompt_tokens": 9708,
+    "completion_tokens": 741
+  },
+  "duration_s": 51.7
+}

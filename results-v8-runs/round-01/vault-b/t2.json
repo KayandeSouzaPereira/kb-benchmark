@@ -1,0 +1,97 @@
+{
+  "task": "t2",
+  "title": "Excluir usuário (soft-delete)",
+  "case": "vault-b",
+  "model": "qwen3-coder:30b",
+  "score": 1.0,
+  "passed": 7,
+  "total": 7,
+  "compiled": true,
+  "repairs": 0,
+  "eval_mode": "devmcp",
+  "eval_times_s": [
+    10.6
+  ],
+  "dev_boot_wait_s": 2.5,
+  "error": null,
+  "tests": [
+    {
+      "name": "adminFazSoftDelete",
+      "passed": true
+    },
+    {
+      "name": "atorDeOutroTenantRecebe404",
+      "passed": true
+    },
+    {
+      "name": "ninguemDeletaASiMesmo",
+      "passed": true
+    },
+    {
+      "name": "memberNaoPodeDeletar",
+      "passed": true
+    },
+    {
+      "name": "purgeAtEm30Dias",
+      "passed": true
+    },
+    {
+      "name": "adminNaoPodeDeletarOwner",
+      "passed": true
+    },
+    {
+      "name": "auditoriaRegistraSoftDelete",
+      "passed": true
+    }
+  ],
+  "files_written": [
+    "src/main/java/com/bench/api/UserResource.java"
+  ],
+  "retrieval": {
+    "actions": [
+      "ls .",
+      "read 202603150930-who-can-delete-users.md",
+      "read 202603150900-soft-delete-30-days.md",
+      "read 202602101415-owner-protection.md",
+      "read 202602101430-last-owner.md",
+      "read 202601201300-mutation-audit-log.md",
+      "read 202601051030-tenant-roles.md",
+      "read 202602151100-tenant-isolation-404.md",
+      "read 202601201330-api-error-codes.md",
+      "read 202603121015-pending-invites-limit-doubt.md",
+      "read 202605021430-pending-invitations-count.md",
+      "read 202601121000-plan-seat-limits.md",
+      "read 202604010900-api-and-conventions-map.md"
+    ],
+    "notes_read": [
+      "202601051030-tenant-roles.md",
+      "202601121000-plan-seat-limits.md",
+      "202601201300-mutation-audit-log.md",
+      "202601201330-api-error-codes.md",
+      "202602101415-owner-protection.md",
+      "202602101430-last-owner.md",
+      "202602151100-tenant-isolation-404.md",
+      "202603121015-pending-invites-limit-doubt.md",
+      "202603150900-soft-delete-30-days.md",
+      "202603150930-who-can-delete-users.md",
+      "202604010900-api-and-conventions-map.md",
+      "202605021430-pending-invitations-count.md"
+    ],
+    "gold_notes": [
+      "202601201330-api-error-codes.md",
+      "202603150900-soft-delete-30-days.md",
+      "202603150930-who-can-delete-users.md"
+    ],
+    "gold_hits": [
+      "202601201330-api-error-codes.md",
+      "202603150900-soft-delete-30-days.md",
+      "202603150930-who-can-delete-users.md"
+    ],
+    "gold_hit_rate": 1.0
+  },
+  "tokens": {
+    "prompt_tokens": 53356,
+    "completion_tokens": 1092
+  },
+  "duration_s": 101.3
+}

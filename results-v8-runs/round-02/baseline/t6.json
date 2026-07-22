@@ -1,0 +1,64 @@
+{
+  "task": "t6",
+  "title": "Payment failure webhook + notification (multi-hop, large KB)",
+  "case": "baseline",
+  "model": "qwen3-coder:30b",
+  "score": 0.0,
+  "passed": 0,
+  "total": 6,
+  "compiled": true,
+  "repairs": 0,
+  "eval_mode": "devmcp",
+  "eval_times_s": [
+    10.7
+  ],
+  "dev_boot_wait_s": 2.6,
+  "error": null,
+  "tests": [
+    {
+      "name": "createsSignedWebhookDelivery",
+      "passed": false,
+      "failure": "1 expectation failed.\nExpected status code <201> but was <500>."
+    },
+    {
+      "name": "deferredWhenTenantOverRateLimit",
+      "passed": false,
+      "failure": "1 expectation failed.\nExpected status code <201> but was <500>."
+    },
+    {
+      "name": "sendsImmediateNotificationWithCorrectTemplateByDefault",
+      "passed": false,
+      "failure": "1 expectation failed.\nExpected status code <201> but was <500>."
+    },
+    {
+      "name": "notImpactedByDeliveriesOutsideRollingWindow",
+      "passed": false,
+      "failure": "1 expectation failed.\nExpected status code <201> but was <500>."
+    },
+    {
+      "name": "queuesNotificationWhenTenantPrefersDailyDigest",
+      "passed": false,
+      "failure": "1 expectation failed.\nExpected status code <201> but was <500>."
+    },
+    {
+      "name": "setsMaxAttemptsAndPendingStatusWhenUnderLimit",
+      "passed": false,
+      "failure": "1 expectation failed.\nExpected status code <201> but was <500>."
+    }
+  ],
+  "files_written": [
+    "src/main/java/com/bench/api/BillingResource.java"
+  ],
+  "retrieval": {
+    "actions": [],
+    "notes_read": [],
+    "gold_notes": [],
+    "gold_hits": [],
+    "gold_hit_rate": null
+  },
+  "tokens": {
+    "prompt_tokens": 1339,
+    "completion_tokens": 1365
+  },
+  "duration_s": 99.2
+}

@@ -1,0 +1,91 @@
+{
+  "task": "t4",
+  "title": "Alterar papel",
+  "case": "vault-b",
+  "model": "qwen3-coder:30b",
+  "score": 1.0,
+  "passed": 6,
+  "total": 6,
+  "compiled": true,
+  "repairs": 0,
+  "eval_mode": "devmcp",
+  "eval_times_s": [
+    10.5
+  ],
+  "dev_boot_wait_s": 2.5,
+  "error": null,
+  "tests": [
+    {
+      "name": "ultimoOwnerNaoPodeSerRebaixado",
+      "passed": true
+    },
+    {
+      "name": "adminNaoAlteraPapelDeOwner",
+      "passed": true
+    },
+    {
+      "name": "memberNaoAlteraPapeis",
+      "passed": true
+    },
+    {
+      "name": "adminPromoveMember",
+      "passed": true
+    },
+    {
+      "name": "ownerPodeRebaixarOutroOwner",
+      "passed": true
+    },
+    {
+      "name": "auditoriaRegistraMudancaDePapel",
+      "passed": true
+    }
+  ],
+  "files_written": [
+    "src/main/java/com/bench/api/UserRoleChangeResource.java"
+  ],
+  "retrieval": {
+    "actions": [
+      "ls .",
+      "grep -r \"role\" 202601051030-tenant-roles.md",
+      "read 202601051030-tenant-roles.md",
+      "read 202602101415-owner-protection.md",
+      "read 202602101430-last-owner.md",
+      "read 202601201300-mutation-audit-log.md",
+      "read 202601201330-api-error-codes.md",
+      "read 202603150900-soft-delete-30-days.md",
+      "read 202603150930-who-can-delete-users.md",
+      "read 202604010900-api-and-conventions-map.md",
+      "read 202601050900-user-domain-map.md",
+      "grep -r \"USER_ROLE_CHANGED\" 202601201300-mutation-audit-log.md",
+      "read 202605021430-pending-invitations-count.md"
+    ],
+    "notes_read": [
+      "202601050900-user-domain-map.md",
+      "202601051030-tenant-roles.md",
+      "202601201300-mutation-audit-log.md",
+      "202601201330-api-error-codes.md",
+      "202602101415-owner-protection.md",
+      "202602101430-last-owner.md",
+      "202603150900-soft-delete-30-days.md",
+      "202603150930-who-can-delete-users.md",
+      "202604010900-api-and-conventions-map.md",
+      "202605021430-pending-invitations-count.md"
+    ],
+    "gold_notes": [
+      "202601201330-api-error-codes.md",
+      "202602101415-owner-protection.md",
+      "202602101430-last-owner.md"
+    ],
+    "gold_hits": [
+      "202601201330-api-error-codes.md",
+      "202602101415-owner-protection.md",
+      "202602101430-last-owner.md"
+    ],
+    "gold_hit_rate": 1.0
+  },
+  "tokens": {
+    "prompt_tokens": 52491,
+    "completion_tokens": 1159
+  },
+  "duration_s": 106.8
+}

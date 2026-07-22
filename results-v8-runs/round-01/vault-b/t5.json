@@ -1,0 +1,42 @@
+{
+  "task": "t5",
+  "title": "Listagem com badges (Angular)",
+  "case": "vault-b",
+  "model": "qwen3-coder:30b",
+  "score": 0.0,
+  "passed": 0,
+  "total": 7,
+  "compiled": false,
+  "repairs": 0,
+  "eval_mode": "frontend",
+  "eval_times_s": [],
+  "dev_boot_wait_s": null,
+  "error": "modelo não produziu arquivos",
+  "tests": [],
+  "files_written": [],
+  "retrieval": {
+    "actions": [
+      "read ./user.model.ts",
+      "ls .",
+      "read 202604111600-frontend-status-badges.md",
+      "ls src/app/",
+      "ls src/",
+      "ls .."
+    ],
+    "notes_read": [
+      "202604111600-frontend-status-badges.md"
+    ],
+    "gold_notes": [
+      "202604111600-frontend-status-badges.md"
+    ],
+    "gold_hits": [
+      "202604111600-frontend-status-badges.md"
+    ],
+    "gold_hit_rate": 1.0
+  },
+  "tokens": {
+    "prompt_tokens": 16381,
+    "completion_tokens": 186
+  },
+  "duration_s": 21.9
+}

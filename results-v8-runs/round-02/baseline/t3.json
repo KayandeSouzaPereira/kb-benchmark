@@ -1,0 +1,59 @@
+{
+  "task": "t3",
+  "title": "Reenviar convite",
+  "case": "baseline",
+  "model": "qwen3-coder:30b",
+  "score": 0.0,
+  "passed": 0,
+  "total": 5,
+  "compiled": true,
+  "repairs": 0,
+  "eval_mode": "devmcp",
+  "eval_times_s": [
+    10.6
+  ],
+  "dev_boot_wait_s": 2.5,
+  "error": null,
+  "tests": [
+    {
+      "name": "auditoriaRegistraReenvio",
+      "passed": false,
+      "failure": "audit log deve conter INVITATION_RESENT com target inv-ok ==> expected: <true> but was: <false>"
+    },
+    {
+      "name": "reenvioIncrementaContadorEResetaExpiracao",
+      "passed": false,
+      "failure": "expiracao deve ser resetada para ~72h no futuro, foi: 2026-07-23T17:32:46.936178381Z ==> expected: <true> but was: <false>"
+    },
+    {
+      "name": "reenvioReativaConviteExpirado",
+      "passed": false,
+      "failure": "1 expectation failed.\nExpected status code <200> but was <410>."
+    },
+    {
+      "name": "memberNaoPodeReenviar",
+      "passed": false,
+      "failure": "Expected response body to be verified as JSON, HTML or XML but content-type 'text/plain' is not supported out of the box.\nTry registering a custom parser using:\n   RestAssured.registerParser(\"text/plain\", <parser type>);\nContent was:\n{\"error\":\"Forbidden\"}"
+    },
+    {
+      "name": "maximoDe3Reenvios",
+      "passed": false,
+      "failure": "1 expectation failed.\nExpected status code <422> but was <200>."
+    }
+  ],
+  "files_written": [
+    "src/main/java/com/bench/api/InvitationResource.java"
+  ],
+  "retrieval": {
+    "actions": [],
+    "notes_read": [],
+    "gold_notes": [],
+    "gold_hits": [],
+    "gold_hit_rate": null
+  },
+  "tokens": {
+    "prompt_tokens": 1117,
+    "completion_tokens": 895
+  },
+  "duration_s": 70.2
+}
